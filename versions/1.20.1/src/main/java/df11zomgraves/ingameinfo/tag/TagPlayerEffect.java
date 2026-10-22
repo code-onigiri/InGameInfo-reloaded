@@ -13,7 +13,7 @@ import java.util.Collection;
 
 public abstract class TagPlayerEffect extends Tag {
 	// TODO: this shouldn't be hardcoded...
-	public static final int MAXIMUM_INDEX = 48 /* Potion.potionTypes.length */;
+	public static final int MAXIMUM_INDEX = 32 /* Potion.potionTypes.length */;
 
 	protected static MobEffectInstance[] potionEffects = null;
 	protected final int index;
@@ -41,7 +41,7 @@ public abstract class TagPlayerEffect extends Tag {
 
 	@Override
 	public boolean isIndexed() {
-		return true;
+		return this.index != -1;
 	}
 
 	@Override
@@ -82,8 +82,16 @@ public abstract class TagPlayerEffect extends Tag {
 				int amp = potionEffects[potionIndex].getAmplifier();
 				if (ConfigurationHandler.numericAmplifier)
 					return String.format("%s %d", str, amp + 1);
-				else
-					return str + StringConvertUtils.numToRoman(amp);
+				switch (amp) {
+				case 1:
+					return str + " II";
+				case 2:
+					return str + " III";
+				case 3:
+					return str + " IV";
+				default:
+					return str;
+				}
 			}
 			return "";
 		}
@@ -100,7 +108,7 @@ public abstract class TagPlayerEffect extends Tag {
 			if (potionEffects.length > this.index) {
 				int duration = potionEffects[this.index].getDuration();
 				if (duration == -1)
-					return "\u221e";
+					return "**:**";
 				return StringUtil.formatTickDuration(duration);
 
 			}

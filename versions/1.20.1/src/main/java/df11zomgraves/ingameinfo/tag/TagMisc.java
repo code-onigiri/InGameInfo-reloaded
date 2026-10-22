@@ -1,8 +1,11 @@
 package df11zomgraves.ingameinfo.tag;
 
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import df11zomgraves.ingameinfo.gui.overlay.InfoIcon;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -46,24 +49,40 @@ public abstract class TagMisc extends Tag {
 	public static class FPS extends TagMisc {
 		@Override
 		public String getValue() {
-			String fpsString = minecraft.fpsString;
-			return fpsString.split(" ")[0];
+			return String.valueOf(minecraft.getFps());
 		}
+	}
+
+	private static final Pattern ENTITY_STATISTICS = Pattern.compile("(\\d+)\\s*/\\s*(\\d+)");
+
+	private static String[] getEntityStatistics() {
+		final String statistics = minecraft.levelRenderer.getEntityStatistics();
+		final Matcher matcher = ENTITY_STATISTICS.matcher(statistics);
+		if (matcher.find()) {
+			return new String[] { matcher.group(1), matcher.group(2) };
+		}
+		return new String[] { "0", "0" };
 	}
 
 	public static class EntitiesRendered extends TagMisc {
 		@Override
 		public String getValue() {
-			String entitiesRendered = minecraft.levelRenderer.getEntityStatistics();
-			return entitiesRendered.split("/")[0].split(" ")[1];
+			return getEntityStatistics()[0];
 		}
 	}
 
 	public static class EntitiesTotal extends TagMisc {
 		@Override
 		public String getValue() {
-			String entitiesTotal = minecraft.levelRenderer.getEntityStatistics();
-			return entitiesTotal.split("/")[1].split(",")[0];
+			return getEntityStatistics()[1];
+		}
+	}
+
+	public static class LoadedChunks extends TagMisc {
+		@Override
+		public String getValue() {
+			// No longer exposed on the client in 1.20.1; the original returned -1 too.
+			return "-1";
 		}
 	}
 	
@@ -73,17 +92,19 @@ public abstract class TagMisc extends Tag {
 		@Override
 		public String getValue() {
 			final Collection<Pack> selectedPacks = resourcePackRepository.getSelectedPacks();
-			String result = "";
-			String packName;
-			for (Pack pack : selectedPacks) {
-				if (pack.getId() == "mod_resources")
+			final String defaultPackName = resourcePackRepository.getAvailablePacks().stream()
+					.filter(pack -> "vanilla".equals(pack.getId()))
+					.findFirst()
+					.map(pack -> pack.getTitle().getString())
+					.orElse("Default");
+			for (final Pack pack : selectedPacks) {
+				final String id = pack.getId();
+				if ("mod_resources".equals(id) || "vanilla".equals(id)) {
 					continue;
-				packName = pack.getTitle().getString();
-				if (!result.isEmpty())
-					result += ";";
-				result += packName;
+				}
+				return pack.getTitle().getString();
 			}
-			return result;
+			return defaultPackName;
 		}
 	}
 
@@ -183,7 +204,7 @@ public abstract class TagMisc extends Tag {
 	public static class MinecraftVersion extends TagMisc {
 		@Override
 		public String getValue() {
-			return net.minecraftforge.versions.mcp.MCPVersion.getMCPVersion();
+			return SharedConstants.getCurrentVersion().getName();
 		}
 	}
 
@@ -230,6 +251,7 @@ public abstract class TagMisc extends Tag {
 		TagRegistry.INSTANCE.register(new ForgeVersion().setName("forgeversion"));
 		TagRegistry.INSTANCE.register(new FPS().setName("fps"));
 		TagRegistry.INSTANCE.register(new JavaVersion().setName("javaversion"));
+		TagRegistry.INSTANCE.register(new LoadedChunks().setName("loadedchunks"));
 		TagRegistry.INSTANCE.register(new MCPVersion().setName("mcpversion"));
 		TagRegistry.INSTANCE.register(new MemoryFree().setName("memfree"));
 		TagRegistry.INSTANCE.register(new MemoryMaximum().setName("memmax"));

@@ -5,6 +5,8 @@ import java.nio.file.Paths;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import df11zomgraves.ingameinfo.api.PluginLoader;
+import df11zomgraves.ingameinfo.client.gui.config.GuiConfigScreen;
 import df11zomgraves.ingameinfo.command.arguments.InGameInfoArgumentTypes;
 import df11zomgraves.ingameinfo.handler.ConfigurationHandler;
 import df11zomgraves.ingameinfo.handler.Ticker;
@@ -12,8 +14,10 @@ import df11zomgraves.ingameinfo.network.PacketHandler;
 import df11zomgraves.ingameinfo.reference.Names;
 import df11zomgraves.ingameinfo.tag.TagRegistry;
 import df11zomgraves.ingameinfo.value.ValueRegistry;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -35,6 +39,8 @@ public class InGameInfoXML {
 		PacketHandler.init();
 		IEventBus modEventBus = context.getModEventBus();
 		context.registerConfig(ModConfig.Type.CLIENT, ConfigurationHandler.SPEC);
+		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
+				() -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parent) -> new GuiConfigScreen(parent)));
 		modEventBus.addListener(this::clientSetup);
 		InGameInfoArgumentTypes.COMMAND_ARGUMENT_TYPES.register(modEventBus);
 	}
@@ -48,6 +54,7 @@ public class InGameInfoXML {
 		bus.register(Ticker.INSTANCE);
 		ValueRegistry.INSTANCE.init();
 		TagRegistry.INSTANCE.init();
+		PluginLoader.load();
 		InGameInfoCore core = InGameInfoCore.INSTANCE;
 		Path configPath = FMLPaths.CONFIGDIR.get();
 		Path modConfigPath = Paths.get(configPath.toAbsolutePath().toString());

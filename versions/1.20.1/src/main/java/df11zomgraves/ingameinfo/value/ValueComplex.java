@@ -2,6 +2,9 @@ package df11zomgraves.ingameinfo.value;
 
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -101,7 +104,7 @@ public abstract class ValueComplex extends Value {
 	public static class ValueItemQuantity extends ValueComplex {
 		@Override
 		public boolean isValidSize() {
-			return this.values.size() > 0;
+			return this.values.size() == 1 || this.values.size() == 2;
 		}
 
 		@Override
@@ -234,8 +237,8 @@ public abstract class ValueComplex extends Value {
 	public static class ValueIcon extends ValueComplex {
 		@Override
 		public boolean isValidSize() {
-			return this.values.size() == 1 || this.values.size() == 5 || this.values.size() == 7
-					|| this.values.size() == 11;
+			return this.values.size() == 1 || this.values.size() == 2 || this.values.size() == 5
+					|| this.values.size() == 7 || this.values.size() == 11;
 		}
 
 		@Override
@@ -244,10 +247,18 @@ public abstract class ValueComplex extends Value {
 				final int size = this.values.size();
 				String value = getValue(0);
 				final ResourceLocation what = new ResourceLocation(value);
-				if (size == 1) {
+				if (size == 1 || size == 2) {
+					// The second argument was item metadata in 1.12.2. There is no
+					// equivalent item metadata in 1.20.1, so it is accepted and ignored.
 					Item item = ForgeRegistries.ITEMS.getValue(what);
-					if (item != null) {
-						ItemStack itemStack = item.getDefaultInstance();
+					Block block = ForgeRegistries.BLOCKS.getValue(what);
+					ItemStack itemStack = ItemStack.EMPTY;
+					if (item != null && item != Items.AIR) {
+						itemStack = item.getDefaultInstance();
+					} else if (block != null && block != Blocks.AIR) {
+						itemStack = new ItemStack(block);
+					}
+					if (!itemStack.isEmpty()) {
 						InfoItem infoItem = new InfoItem(itemStack);
 						info.add(infoItem);
 						return Tag.getIconTag(infoItem);

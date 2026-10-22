@@ -1,5 +1,6 @@
 package df11zomgraves.ingameinfo.handler;
 
+import df11zomgraves.ingameinfo.InGameInfoCore;
 import df11zomgraves.ingameinfo.InGameInfoXML;
 import df11zomgraves.ingameinfo.reference.Alignment;
 import df11zomgraves.ingameinfo.reference.Names;
@@ -18,6 +19,7 @@ public class ConfigurationHandler {
 	public static final ForgeConfigSpec.ConfigValue<Integer> FILE_INTERVAL_DEFAULT;
 	public static final ForgeConfigSpec.ConfigValue<Double> SCALE_DEFAULT;
 	public static final ForgeConfigSpec.ConfigValue<String> CONFIG_NAME_DEFAULT;
+	public static final ForgeConfigSpec.ConfigValue<Boolean> REPLACE_DEBUG_DEFAULT;
 	public static final ForgeConfigSpec.ConfigValue<Boolean> SHOW_IN_CHAT_DEFAULT;
 	public static final ForgeConfigSpec.ConfigValue<Boolean> SHOW_ON_PLAYER_LIST_DEFAULT;
 	public static final ForgeConfigSpec.ConfigValue<Boolean> SHOW_OVERLAY_POTIONS_DEFAULT;
@@ -64,7 +66,8 @@ public class ConfigurationHandler {
 
 	static {
 		BUILDER.push(Names.Config.Category.GENERAL);
-		CONFIG_NAME_DEFAULT = BUILDER.comment(Names.Config.FILENAME_DESC).define(Names.Config.FILENAME, "ingameinfo.xml");
+		CONFIG_NAME_DEFAULT = BUILDER.comment(Names.Config.FILENAME_DESC).define(Names.Config.FILENAME, Names.Files.FILE_XML);
+		REPLACE_DEBUG_DEFAULT = BUILDER.comment(Names.Config.REPLACE_DEBUG_DESC).define(Names.Config.REPLACE_DEBUG, false);
 		SHOW_IN_CHAT_DEFAULT = BUILDER.comment(Names.Config.SHOW_IN_CHAT_DESC).define(Names.Config.SHOW_IN_CHAT, true);
 		SHOW_ON_PLAYER_LIST_DEFAULT = BUILDER.comment(Names.Config.SHOW_ON_PLAYER_LIST_DESC).define(Names.Config.SHOW_ON_PLAYER_LIST, true);
 		SCALE_DEFAULT = BUILDER.comment(Names.Config.SCALE_DESC).defineInRange(Names.Config.SCALE, 1.0, 0.5, 2.0);
@@ -119,9 +122,10 @@ public class ConfigurationHandler {
 		Alignment.BOTTOMRIGHT.setXY(ALIGN_BOTTOM_RIGHT.get());
 		showOverlayItemIcons = SHOW_OVERLAY_ITEM_ICONS_DEFAULT.get();
 		showOverlayPotions = SHOW_OVERLAY_POTIONS_DEFAULT.get();
+		replaceDebug = REPLACE_DEBUG_DEFAULT.get();
 		fileInterval = FILE_INTERVAL_DEFAULT.get();
 		showOnPlayerList = SHOW_ON_PLAYER_LIST_DEFAULT.get();
-		scale = SCALE_DEFAULT.get();
+		scale = normalizeScale(SCALE_DEFAULT.get());
 		configName = CONFIG_NAME_DEFAULT.get();
 		showInChat = SHOW_IN_CHAT_DEFAULT.get();
 		numericAmplifier = NUMERIC_AMPLIFIER_DEFAULT.get();
@@ -140,11 +144,29 @@ public class ConfigurationHandler {
 			InGameInfoXML.logger.error(e.getMessage());
 		}
 		alignmentMiddleCenter = ALIGNMENT_MIDDLECENTER_DEFAULT.get();
+
+		if (event instanceof ModConfigEvent.Reloading && InGameInfoCore.INSTANCE.getConfigDirectory() != null) {
+			InGameInfoCore.INSTANCE.reloadConfig();
+		}
+	}
+
+	public static Double normalizeScale(final Double value) {
+		if (value == null) {
+			return 1.0D;
+		}
+		for (final double allowed : new double[] { 0.5D, 1.0D, 1.5D, 2.0D }) {
+			if (Math.abs(value - allowed) < 1.0E-6D) {
+				return allowed;
+			}
+		}
+		InGameInfoXML.logger.warn("Invalid scale '{}', using 1.0. Valid values: 0.5, 1.0, 1.5, 2.0", value);
+		return 1.0D;
 	}
 	
 	public static void applyConfiguration() {
 		SHOW_OVERLAY_ITEM_ICONS_DEFAULT.set(showOverlayItemIcons);
 		SHOW_OVERLAY_POTIONS_DEFAULT.set(showOverlayPotions);
+		REPLACE_DEBUG_DEFAULT.set(replaceDebug);
 		FILE_INTERVAL_DEFAULT.set(fileInterval);
 		SHOW_ON_PLAYER_LIST_DEFAULT.set(showOnPlayerList);
 		SCALE_DEFAULT.set(scale);
@@ -159,6 +181,7 @@ public class ConfigurationHandler {
 		HUNGER_DECIMAL_PLACE_DEFAULT.set(hungerDecimalPlace);
 		MSPT_DECIMAL_PLACE_DEFAULT.set(msptDecimalPlace);
 		TPS_DECIMAL_PLACE_DEFAULT.set(tpsDecimalPlace);
+		DISPLAY_INVISIBLE_PLAYER_DEFAULT.set(displayInvisiblePlayer);
 		ALIGN_TOP_LEFT.set(Alignment.TOPLEFT.getXY());
 		ALIGN_TOP_CENTER.set(Alignment.TOPCENTER.getXY());
 		ALIGN_TOP_RIGHT.set(Alignment.TOPRIGHT.getXY());
@@ -168,5 +191,6 @@ public class ConfigurationHandler {
 		ALIGN_BOTTOM_LEFT.set(Alignment.BOTTOMLEFT.getXY());
 		ALIGN_BOTTOM_CENTER.set(Alignment.BOTTOMCENTER.getXY());
 		ALIGN_BOTTOM_RIGHT.set(Alignment.BOTTOMRIGHT.getXY());
+		SPEC.save();
 	}
 }

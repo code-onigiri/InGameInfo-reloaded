@@ -2,6 +2,8 @@ package df11zomgraves.ingameinfo.util;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import df11zomgraves.ingameinfo.handler.ConfigurationHandler;
 import df11zomgraves.ingameinfo.reference.Names;
@@ -45,8 +47,9 @@ public class StringConvertUtils {
 			decimalPlace = 0;
 		else if (decimalPlace > 6)
 			decimalPlace = 6;
-		DecimalFormat df = new DecimalFormat(decimalPlace == 0 ? "0" : ("0." + "0".repeat(decimalPlace)));
-		df.setRoundingMode(RoundingMode.CEILING);
+		DecimalFormat df = new DecimalFormat(decimalPlace == 0 ? "0" : ("0." + "0".repeat(decimalPlace)),
+				DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+		df.setRoundingMode(RoundingMode.HALF_UP);
 		return df.format(value);
 	}
 }

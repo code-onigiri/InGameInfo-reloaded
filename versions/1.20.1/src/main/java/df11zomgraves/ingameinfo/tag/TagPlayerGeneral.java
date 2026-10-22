@@ -111,7 +111,7 @@ public abstract class TagPlayerGeneral extends Tag {
 	public static class GameMode extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return I18n.get("gameMode." + minecraft.gameMode.getPlayerMode().getName());
+			return I18n.get("selectWorld.gameMode." + minecraft.gameMode.getPlayerMode().getName());
 		}
 	}
 
@@ -194,7 +194,8 @@ public abstract class TagPlayerGeneral extends Tag {
 	public static class MaxAirTicks extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.getMaxAirSupply());
+			// The original mod always reported the vanilla value.
+			return String.valueOf(300);
 		}
 	}
 
@@ -310,6 +311,14 @@ public abstract class TagPlayerGeneral extends Tag {
 		}
 	}
 	
+	public static class Eating extends TagPlayerGeneral {
+		@Override
+		public String getValue() {
+			// 1.12.2 hardcoded this to false as well.
+			return "false";
+		}
+	}
+
 	public static class Freezing extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
@@ -353,5 +362,6 @@ public abstract class TagPlayerGeneral extends Tag {
 		TagRegistry.INSTANCE.register(new ArmorToughness().setName("armortoughness"));
 		TagRegistry.INSTANCE.register(new PlayerIcon().setName("playericon"));
 		TagRegistry.INSTANCE.register(new Freezing().setName("freezing"));
+		TagRegistry.INSTANCE.register(new Eating().setName("eating"));
 	}
 }

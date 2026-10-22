@@ -6,10 +6,12 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import df11zomgraves.ingameinfo.InGameInfoCore;
 import df11zomgraves.ingameinfo.InGameInfoXML;
+import df11zomgraves.ingameinfo.client.gui.tag.GuiTags;
 import df11zomgraves.ingameinfo.command.arguments.AlignArgument;
 import df11zomgraves.ingameinfo.command.arguments.FileArgument;
 import df11zomgraves.ingameinfo.handler.ConfigurationHandler;
@@ -32,7 +34,11 @@ public class InGameInfoCommand {
 		final String seed = "Seed";
 		final String filename = "filename";
 		final String value = "value";
-		LiteralArgumentBuilder<CommandSourceStack> igiCommand = Commands.literal(Names.Command.NAME);
+		LiteralArgumentBuilder<CommandSourceStack> igiCommand = Commands.literal(Names.Command.NAME)
+				.executes(source -> usage());
+		// igi reload
+		igiCommand.then(Commands.literal(Names.Command.RELOAD).executes(source -> reloadConfig()));
+
 		// igi alignment get TOPLEFT
 		igiCommand.then(Commands.literal(strAlign).then(Commands.literal(strGet).then(Commands.argument(strAlign, AlignArgument.GetAlignment())
 				.executes(source -> GetAlignment(AlignArgument.GetString(source, strAlign))))));
@@ -43,9 +49,21 @@ public class InGameInfoCommand {
 						.executes(source -> SetAlignment(AlignArgument.GetString(source, strAlign), IntegerArgumentType.getInteger(source, x),
 								IntegerArgumentType.getInteger(source, y))))))));
 		
-		// igi load ingameinfo.xml
-		igiCommand.then(Commands.literal("load").then(Commands.argument(filename, FileArgument.files())
+		// igi load InGameInfo.xml
+		igiCommand.then(Commands.literal(Names.Command.LOAD).then(Commands.argument(filename, FileArgument.files())
 				.executes(source -> loadFile(FileArgument.GetString(source, filename)))));
+
+		// igi save InGameInfo.xml
+		igiCommand.then(Commands.literal(Names.Command.SAVE)
+				.then(Commands.argument(filename, StringArgumentType.string())
+						.executes(source -> saveFile(StringArgumentType.getString(source, filename)))));
+
+		// igi enable / disable
+		igiCommand.then(Commands.literal(Names.Command.ENABLE).executes(source -> setEnabled(true)));
+		igiCommand.then(Commands.literal(Names.Command.DISABLE).executes(source -> setEnabled(false)));
+
+		// igi taglist
+		igiCommand.then(Commands.literal(Names.Command.TAGLIST).executes(source -> openTagList()));
 		
 		// igi setseed -2793514409027566328
 		igiCommand.then(Commands.literal("setseed").then(Commands.argument(seed, LongArgumentType.longArg())
@@ -117,6 +135,43 @@ public class InGameInfoCommand {
 		dispatcher.register(igiCommand);
 	}
 
+	private static int usage() {
+		Minecraft.getInstance().gui.getChat()
+				.addMessage(Component.translatable(Names.Command.Message.USAGE));
+		return 0;
+	}
+
+	public static int reloadConfig() {
+		Minecraft mc = Minecraft.getInstance();
+		mc.gui.getChat().addMessage(Component.translatable(Names.Command.Message.RELOAD));
+		final boolean success = InGameInfoCore.INSTANCE.reloadConfig();
+		mc.gui.getChat().addMessage(Component.translatable(
+				success ? Names.Command.Message.SUCCESS : Names.Command.Message.FAILURE));
+		return success ? 1 : -1;
+	}
+
+	public static int saveFile(String filename) {
+		Minecraft mc = Minecraft.getInstance();
+		mc.gui.getChat().addMessage(Component.translatable(Names.Command.Message.SAVE, filename));
+		final boolean success = InGameInfoCore.INSTANCE.saveConfig(filename);
+		mc.gui.getChat().addMessage(Component.translatable(
+				success ? Names.Command.Message.SUCCESS : Names.Command.Message.FAILURE));
+		return success ? 1 : -1;
+	}
+
+	public static int setEnabled(boolean enabled) {
+		Minecraft mc = Minecraft.getInstance();
+		df11zomgraves.ingameinfo.handler.Ticker.enabled = enabled;
+		mc.gui.getChat().addMessage(Component.translatable(
+				enabled ? Names.Command.Message.ENABLE : Names.Command.Message.DISABLE));
+		return 1;
+	}
+
+	public static int openTagList() {
+		Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new GuiTags()));
+		return 1;
+	}
+
 	public static int SetAlignment(String alignment, int x, int y) {
 		String alignValue = String.format("%s %s", x, y);
 		Alignment align = Alignment.parse(alignment);
@@ -185,14 +240,13 @@ public class InGameInfoCommand {
 		Path modConfigPath = Paths.get(configPath.toAbsolutePath().toString());
 
 		core.setConfigDirectory(modConfigPath.toFile());
-		core.setConfigFile(filename);
-		ConfigurationHandler.configName = filename;
-		ConfigurationHandler.applyConfiguration();
-		boolean b = core.reloadConfig();
-		if (!b) {
+		final boolean success = core.loadConfig(filename);
+		if (!success) {
 			mc.gui.getChat().addMessage(Component.translatable(Names.Command.Message.FAILURE));
 			return -1;
 		}
+		ConfigurationHandler.configName = filename;
+		ConfigurationHandler.applyConfiguration();
 		mc.gui.getChat().addMessage(Component.translatable(Names.Command.Message.SUCCESS));
 		return 1;
 	}
@@ -201,8 +255,8 @@ public class InGameInfoCommand {
 		Minecraft mc = Minecraft.getInstance();
 		if (config.equals(Names.Config.SHOW_IN_CHAT))
 			ConfigurationHandler.showInChat = value;
-		else if (config.equals(Names.Config.SHOW_IN_CHAT))
-			ConfigurationHandler.showInChat = value;
+		else if (config.equals(Names.Config.SHOW_ON_PLAYER_LIST))
+			ConfigurationHandler.showOnPlayerList = value;
 		else if (config.equals(Names.Config.SHOW_OVERLAY_POTIONS))
 			ConfigurationHandler.showOverlayPotions = value;
 		else if (config.equals(Names.Config.SHOW_OVERLAY_ITEM_ICONS))

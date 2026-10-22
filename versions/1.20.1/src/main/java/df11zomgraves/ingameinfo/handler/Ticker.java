@@ -30,25 +30,30 @@ public class Ticker {
 	private boolean inGame = false;
 	private long lastRemoteUpdate = 0;
 
-	private boolean isRunning() {
+	private boolean canRun() {
 		if (!enabled)
 			return false;
-		// a && b || !a && !b --> a == b
-		Options options = this.client.options;
-		if (options != null) {
-			if (!ConfigurationHandler.showOnPlayerList && options.keyPlayerList.isDown())
-				return false;
-			if (options.hideGui)
-				return false;
-			if (options.renderDebug || options.renderDebugCharts)
-				return false;
-			if (this.client.gui == null)
-				return true;
-			if (this.client.screen instanceof GameModeSwitcherScreen)
-				return true;
-			return client.screen == null || ConfigurationHandler.showInChat && client.screen instanceof ChatScreen;
-		}
-		return false;
+		final Options options = this.client.options;
+		if (options == null)
+			return false;
+		if (ConfigurationHandler.replaceDebug)
+			return true;
+		return !options.renderDebug && !options.renderDebugCharts;
+	}
+
+	private boolean isRunning() {
+		if (!canRun())
+			return false;
+		final Options options = this.client.options;
+		if (options == null)
+			return false;
+		if (!ConfigurationHandler.showOnPlayerList && options.keyPlayerList.isDown())
+			return false;
+		if (options.hideGui)
+			return false;
+		if (this.client.screen instanceof GameModeSwitcherScreen)
+			return true;
+		return client.screen == null || ConfigurationHandler.showInChat && client.screen instanceof ChatScreen;
 	}
 	
 	@SubscribeEvent
@@ -64,6 +69,10 @@ public class Ticker {
 		if (isSurvivalHUD && !ConfigurationHandler.showSurvivalHUD)
 			event.setCanceled(true);
 		else if (overlay == VanillaGuiOverlay.POTION_ICONS.type() && !ConfigurationHandler.showOverlayPotions)
+			event.setCanceled(true);
+		else if (canRun() && overlay == VanillaGuiOverlay.DEBUG_TEXT.type())
+			event.setCanceled(true);
+		else if (ConfigurationHandler.replaceDebug && overlay == VanillaGuiOverlay.FPS_GRAPH.type())
 			event.setCanceled(true);
 	}
 

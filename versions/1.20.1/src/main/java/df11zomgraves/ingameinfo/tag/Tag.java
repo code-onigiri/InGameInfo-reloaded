@@ -3,9 +3,11 @@ package df11zomgraves.ingameinfo.tag;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import java.util.List;
 
 import df11zomgraves.ingameinfo.gui.overlay.Info;
+import df11zomgraves.ingameinfo.reference.Names;
 import df11zomgraves.ingameinfo.util.MBlockPos;
 import df11zomgraves.ingameinfo.util.Vector3f;
 
@@ -52,6 +54,14 @@ public abstract class Tag {
 
 	public String getFormattedName() {
 		return this.name + (isIndexed() ? String.format("[0..%d]", getMaximumIndex()) : "");
+	}
+
+	public String getLocalizedCategory() {
+		return Component.translatable(Names.MODID + ".tag.category." + getCategory() + ".name").getString();
+	}
+
+	public String getLocalizedDescription() {
+		return Component.translatable(Names.MODID + ".tag." + getRawName() + ".desc").getString();
 	}
 
 	public abstract String getCategory();

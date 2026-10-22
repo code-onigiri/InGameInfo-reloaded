@@ -19,7 +19,8 @@ public class InfoText extends Info {
 
 	@Override
 	public void drawInfo(GuiGraphics guiGraphics) {
-		guiGraphics.drawString(fontRenderer, this.text, x, y, 0xFFFFFF, true);
+		// GuiGraphics#drawString expects ARGB; 0x00FFFFFF would be fully transparent.
+		guiGraphics.drawString(fontRenderer, this.text, getX(), getY(), 0xFFFFFFFF, true);
 		
 	}
 

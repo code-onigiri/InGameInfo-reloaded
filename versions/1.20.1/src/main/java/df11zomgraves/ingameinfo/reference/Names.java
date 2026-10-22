@@ -12,6 +12,10 @@ public final class Names {
             public static final String LOAD = "commands.ingameinfoxml.load";
 			public static final String SUCCESS = "commands.ingameinfoxml.success";
 			public static final String FAILURE = "commands.ingameinfoxml.failure";
+			public static final String SAVE = "commands.ingameinfoxml.save";
+			public static final String ENABLE = "commands.ingameinfoxml.enable";
+			public static final String DISABLE = "commands.ingameinfoxml.disable";
+			public static final String USAGE = "commands.ingameinfoxml.usage";
 			public static final String ALIGNMENT_GET_SUCCESS = "commands.ingameinfoxml.alignment.get.success";
 			public static final String ALIGNMENT_GET_FAILURE = "commands.ingameinfoxml.alignment.get.failure";
 			public static final String ALIGNMENT_SET_SUCCESS = "commands.ingameinfoxml.alignment.set.success";
@@ -29,6 +33,12 @@ public final class Names {
 		public static final String SET = "set";
 		public static final String GET = "get";
 		public static final String ALIENMENT = "alignment";
+		public static final String RELOAD = "reload";
+		public static final String LOAD = "load";
+		public static final String SAVE = "save";
+		public static final String ENABLE = "enable";
+		public static final String DISABLE = "disable";
+		public static final String TAGLIST = "taglist";
 		public static final String TOP_LEFT = "TOPLEFT";
 		public static final String TOP_CENTER = "TOPCENTER";
 		public static final String TOP_RIGHT = "TOPRIGHT";
@@ -41,6 +51,8 @@ public final class Names {
 	}
 
 	public static final class Config {
+		public static final String LANG_PREFIX = "ingameinfoxml.config";
+
 		public static final class Category {
 			public static final String GENERAL = "general";
 			public static final String ALIGNMENT = "alignment";
@@ -48,6 +60,8 @@ public final class Names {
 
 		public static final String FILENAME = "filename";
 		public static final String FILENAME_DESC = "The configuration that should be loaded on startup.";
+		public static final String REPLACE_DEBUG = "replaceDebug";
+		public static final String REPLACE_DEBUG_DESC = "Replace the vanilla debug screen (F3) with the overlay.";
 		public static final String SHOW_IN_CHAT = "showInChat";
 		public static final String SHOW_IN_CHAT_DESC = "Display the overlay in chat.";
 		public static final String SHOW_ON_PLAYER_LIST = "showOnPlayerList";

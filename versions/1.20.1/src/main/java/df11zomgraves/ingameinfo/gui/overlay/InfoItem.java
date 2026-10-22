@@ -44,21 +44,19 @@ public class InfoItem extends Info {
 	public void drawInfo(GuiGraphics guiGraphics) {
 		if (this.itemStack.isEmpty())
 			return;
-		PoseStack stack = RenderSystem.getModelViewStack();
-		stack.pushPose();
+		guiGraphics.pose().pushPose();
 		if (!large) {
-			stack.scale(0.5f, 0.5f, 0.5f);
-			stack.translate(getX() * 2, getY() * 2, 0);
-		} else
-			stack.translate(getX(), getY(), 0);
-		RenderSystem.applyModelViewMatrix();
+			guiGraphics.pose().scale(0.5f, 0.5f, 0.5f);
+			guiGraphics.pose().translate(getX() * 2.0f, getY() * 2.0f, 0.0f);
+		} else {
+			guiGraphics.pose().translate(getX(), getY(), 0);
+		}
 		guiGraphics.renderItem(itemStack, 0, 0);
 		if (forceRender)
 			guiGraphics.renderItemDecorations(MINECRAFT.font, itemStack, 0, 0);
 		else if (ConfigurationHandler.showOverlayItemIcons)
 			guiGraphics.renderItemDecorations(MINECRAFT.font, itemStack, 0, 0, "");
-		stack.popPose();
-		RenderSystem.applyModelViewMatrix();
+		guiGraphics.pose().popPose();
 	}
 
 	@Override

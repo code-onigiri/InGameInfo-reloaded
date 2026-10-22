@@ -57,7 +57,7 @@ public class InfoEffect extends Info {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		stack.translate(getX(), getY(), 0);
 		RenderSystem.setShaderTexture(0, sprite.atlasLocation());
-		guiGraphics.blit(0, this.y, 0, this.size, this.size, sprite);
+		guiGraphics.blit(0, 0, 0, this.size, this.size, sprite);
 		stack.popPose();
 	}
 
