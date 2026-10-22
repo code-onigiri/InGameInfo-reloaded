@@ -1,0 +1,18 @@
+# The original 1.12.2 reference checkout is a separate git repository.
+/InGame-Info-XML/
+
+# Gradle / build output
+.gradle/
+**/build/
+**/run/
+**/run-data/
+**/.gradle/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Local artifacts
+*.log
+/tmp/
