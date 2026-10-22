@@ -253,6 +253,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 | タグ一覧 GUI（検索・スクロール・画面内クランプ） | OK | [taglist-1.20.1.png](render/taglist-1.20.1.png) |
 | 設定 GUI 1/3〜3/3 のページ移動 | OK | [config-1.20.1.png](render/config-1.20.1.png) |
 | `/igi save` の XML / JSON / TXT 出力 | OK | ファイルサイズで確認 |
+| `/igi load` の XML / JSON / TXT 入力 | OK | チャットの `Done!` と HUD で確認 |
 | `/igi reload` | OK | チャットの `Reloading... / Done!` |
 
 画像の色を機械的に確認する例:
