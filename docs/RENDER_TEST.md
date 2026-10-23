@@ -2,7 +2,8 @@
 
 この文書は、GUI のない環境（SSH・CI・NixOS のヘッドレス機）で InGameInfoXML の HUD と
 GUI を実際に描画し、スクリーンショットで確認する手順をまとめたものです。1.20.1 で
-確立した手順を 1.21.1 でも使い、将来の 26.1.2 にも同じ形で適用できるようにしています。
+確立した手順を 1.21.1 / 26.1.2 でも使い、将来のバージョンにも同じ形で適用できる
+ようにしています。
 
 ## 対象
 
@@ -130,6 +131,8 @@ GRADLE_USER_HOME=/tmp/gradle-home \
   nix develop .#mc1201 --command scripts/render-test.sh 1.20.1 RenderTest
 GRADLE_USER_HOME=/tmp/gradle-home \
   nix develop .#mc1211 --command scripts/render-test.sh 1.21.1 RenderTest
+GRADLE_USER_HOME=/tmp/gradle-home \
+  nix develop .#mc2612 --command scripts/render-test.sh 26.1.2 RenderTest
 ```
 
 - 出力: `docs/render/hud-<version>.png`
@@ -137,7 +140,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 - 待ち時間: 既定 35 秒。`HUD_DELAY=60` のように延ばせる
 - 画面: 1280x720x24、GLX 有効、llvmpipe（ソフトウェア GL）
 
-1.21.1 は NeoForge / ModDevGradle なので、Gradle の `--args` ではなく
+1.21.1 / 26.1.2 は NeoForge / ModDevGradle なので、Gradle の `--args` ではなく
 `-PquickPlayWorld=RenderTest` でワールドを指定します。スクリプトは
 `META-INF/neoforge.mods.toml` の有無で自動的に切り替えます。手動で起動する場合:
 
@@ -145,10 +148,17 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 cd versions/1.21.1
 GRADLE_USER_HOME=/tmp/gradle-home ./gradlew --no-daemon runClient \
   -PquickPlayWorld=RenderTest
+
+cd versions/26.1.2
+GRADLE_USER_HOME=/tmp/gradle-home ./gradlew --no-daemon runClient \
+  -PquickPlayWorld=RenderTest
 ```
 
 初回の 1.21.1 起動ではアクセシビリティの案内画面が出ます。`Continue` を押すと
 ワールドに入り、次回以降は `options.txt` の `onboardAccessibility:false` で出ません。
+26.1.2 で 1.21.1 のワールドをコピーした場合は、`Create a backup before upgrading
+this world?` に `I know what I'm doing!`、続く `Upgrading World Completed` に `Yes`
+を押します。ワールドは 1 回アップグレードすると 1.21.1 では開けなくなります。
 アセットのダウンロードが止まる場合は、PrismLauncher などのキャッシュを
 `/tmp/gradle-home/caches/neoformruntime/assets/objects/` へコピーすると再開できます。
 
@@ -334,6 +344,33 @@ NeoForge 21.1.264 でも同じ HUD・GUI を確認しました。設定画面は
 重ねるとタイトルやラベルがぼやけます。`GuiTags` と `GuiConfigScreen` はウィジェットを
 描いたあとに文字を描くよう修正済みです。HUD エディタは背景描画を無効にしています。
 
+### 26.1.2（2026-10-23）
+
+NeoForge 26.1.2.122 でも同じ HUD・GUI を確認しました。設定画面は Esc → `Mods` →
+`InGame Info XML` → `Config` で開きます。
+
+| 項目 | 結果 | スクリーンショット |
+|---|---|---|
+| 既定 HUD（テキスト・アイテム・ポーション・防具） | OK | [hud-26.1.2.png](render/hud-26.1.2.png) |
+| タグ一覧 GUI（タイトル・検索・カテゴリ） | OK | [taglist-26.1.2.png](render/taglist-26.1.2.png) |
+| 設定 GUI 1/3〜3/3 のページ移動 | OK | [config-26.1.2.png](render/config-26.1.2.png) |
+| 設定 GUI の `Done` 後に再度開く | OK | 値も保持 |
+| HUD エディタ（背景がぼやけず HUD が読める） | OK | [editor-26.1.2.png](render/editor-26.1.2.png) |
+| `/igi save test2612.xml` | OK | チャットに `Done!` |
+| 初回参加時の既定 HUD 表示 | 修正済み | `ConfigReloadListener` で解決 |
+
+26.1.2 では `GuiGraphics` が `GuiGraphicsExtractor` になり、`Screen#render` は
+`extractRenderState`、選択リストの行は `extractContent` になります。テキスト色は
+アルファを見るため、6 桁の RGB 指定だと文字が透明になります。GUI の色はすべて
+`0xFFFFFFFF` などの ARGB に変更済みです。
+
+ウィンドウは 854x480、ルート上の位置は (213,120)、GUI スケールは 2 です。
+`import -window root` で 1280x720 の画像を撮ると、以前のバージョンと同じ構図に
+なります。`import -window <Minecraft のウィンドウ ID>` を使うと 854x480 で撮れます。
+Xvfb を再起動せずにクライアントだけ入れ替えると、前回の画面がルートに残って
+誤ったスクリーンショットになることがあります。撮る前に必ずウィンドウを確認して
+ください。
+
 画像の色を機械的に確認する例:
 
 ```bash
@@ -346,14 +383,15 @@ magick docs/render/hud-1.20.1.png -format %c histogram:info:- | sort -nr | head 
 残っていること、`Save` 後に `ingameinfoxml-client.toml` の `topleft` が
 `"5 7"` になっていることを確認します。
 
-## 1.21.1 / 26.1.2 へ展開するとき
+## 新しいバージョンへ展開するとき
 
 - バージョンごとに `versions/<version>/run/saves/RenderTest` を用意する
-  （ワールドはバージョン間で共有しない。データパックの形式も変わる）
+  （ワールドはバージョン間で共有しない。データパックの形式も変わる。コピーして
+  アップグレードする場合は元のワールドのバックアップを残す）
 - 1.21.1 以降はデータパックのディレクトリが `data/<ns>/function`（単数形）に変わる。
   そのバージョンの `pack_format` に合わせる
 - `scripts/render-test.sh` の第 1 引数にバージョンを渡す
-  （例: `scripts/render-test.sh 1.21.1 RenderTest`）
+  （例: `scripts/render-test.sh 26.1.2 RenderTest`）
 - 出力は `docs/render/hud-<version>.png` に分かれる
 - GUI の描画 API・Config Screen の実装が変わるため、GUI の確認はバージョンごとに
   やり直す

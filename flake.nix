@@ -75,7 +75,7 @@
               echo ""
               echo "  default / mc1201: 1.20.1, Forge 47.4.0, Java 17"
               echo "  mc1211:           1.21.1, NeoForge 21.1.x, Java 21"
-              echo "  mc2612:           26.1.2, NeoForge 26.1.2.x, Java 25"
+              echo "  mc2612:           26.1.2, NeoForge 26.1.2.122, Java 25"
               echo ""
               echo "  build:  cd versions/1.20.1 && ./gradlew build"
               echo "  client: cd versions/1.20.1 && ./gradlew runClient"

@@ -10,9 +10,9 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 |---|---|---|
 | 1.20.1 | Forge 47.4.0 / Java 17 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
 | 1.21.1 | NeoForge 21.1.264 / Java 21 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
-| 26.1.2 | NeoForge 26.1.2.x / Java 25 | 計画中（環境のみ用意） |
+| 26.1.2 | NeoForge 26.1.2.122 / Java 25 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
 
-1.20.1 / 1.21.1 版は次を移植済みです。
+1.20.1 / 1.21.1 / 26.1.2 版は次を移植済みです。
 
 - HUD 描画（テキスト、アイコン、アイテム、ポーション効果、9 アライメント、スケール）
 - 既定の `ingameinfo.xml`、XML / JSON / TXT パーサー
@@ -43,7 +43,8 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 ├── scripts/render-test.sh     # Xvfb + llvmpipe で HUD をスクリーンショット
 └── versions/
     ├── 1.20.1/                # Forge 1.20.1 の実装
-    └── 1.21.1/                # NeoForge 1.21.1 の実装
+    ├── 1.21.1/                # NeoForge 1.21.1 の実装
+    └── 26.1.2/                # NeoForge 26.1.2 の実装
 ```
 
 `InGame-Info-XML/` は比較用の 1.12.2 原本で、別 Git リポジトリです（このリポジトリでは
@@ -57,11 +58,11 @@ Nix 2.18 以降（flake 有効）を推奨します。JDK・Gradle 用 Java・GU
 ```bash
 nix develop .#mc1201     # 1.20.1: Forge / JDK 17
 nix develop .#mc1211     # 1.21.1: NeoForge / JDK 21
-# nix develop .#mc2612   # 26.1.2: JDK 25（将来）
+nix develop .#mc2612     # 26.1.2: NeoForge / JDK 25
 ```
 
-Nix を使わない場合は、1.20.1 は JDK 17、1.21.1 は JDK 21 と Gradle 8.8 を用意して
-ください。Gradle は同梱の wrapper を使います。
+Nix を使わない場合は、1.20.1 は JDK 17、1.21.1 は JDK 21、26.1.2 は JDK 25 を用意して
+ください。Gradle は同梱の wrapper（1.20.1 / 1.21.1 は 8.8、26.1.2 は 9.8.2）を使います。
 
 ## ビルド
 
@@ -71,17 +72,25 @@ nix develop .#mc1201 -c bash -c 'cd versions/1.20.1 && ./gradlew build'
 
 # 1.21.1 (NeoForge)
 nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew build'
+
+# 26.1.2 (NeoForge)
+nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew build'
 ```
 
 成果物は `versions/<version>/build/libs/ingameinfoxml-*.jar` です。1.20.1 は Forge
-47.4.0、1.21.1 は NeoForge 21.1.264 のクライアント・サーバーにそのまま入れられます。
+47.4.0、1.21.1 は NeoForge 21.1.264、26.1.2 は NeoForge 26.1.2.122 のクライアント・
+サーバーにそのまま入れられます。
 
 ## クライアント起動
 
 ```bash
 nix develop .#mc1201 -c bash -c 'cd versions/1.20.1 && ./gradlew runClient'
 nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew runClient'
+nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew runClient'
 ```
+
+1.21.1 以降（ModDevGradle）で特定のワールドを直接開く場合は
+`-PquickPlayWorld=RenderTest` を付けます。
 
 ## ヘッドレス描画テスト
 
@@ -93,6 +102,8 @@ GRADLE_USER_HOME=/tmp/gradle-home \
   nix develop .#mc1201 -c scripts/render-test.sh 1.20.1 RenderTest
 GRADLE_USER_HOME=/tmp/gradle-home \
   nix develop .#mc1211 -c scripts/render-test.sh 1.21.1 RenderTest
+GRADLE_USER_HOME=/tmp/gradle-home \
+  nix develop .#mc2612 -c scripts/render-test.sh 26.1.2 RenderTest
 ```
 
 出力は `docs/render/hud-<version>.png` と `docs/render/client-<version>.log`。テスト用
@@ -102,7 +113,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 ## 設定
 
 初回起動時にローダーの設定ファイル `config/ingameinfoxml-client.toml`（1.20.1 は
-Forge、1.21.1 は NeoForge）と、表示定義
+Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 `config/InGameInfo.xml` が生成されます（表示定義は 1.12.2 と同じファイル名・書式）。
 
 - `/igi reload` — 表示定義を再読み込み
@@ -143,7 +154,7 @@ Forge、1.21.1 は NeoForge）と、表示定義
 他 MOD はコンパイル時依存なしでタグ・値を作れます。詳しくは
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) を参照してください。
 
-1.20.1 / 1.21.1 では次の MOD を任意で検出し、入っている場合だけタグを登録します。
+1.20.1 / 1.21.1 / 26.1.2 では次の MOD を任意で検出し、入っている場合だけタグを登録します。
 
 | MOD | 主なタグ |
 |---|---|
@@ -160,5 +171,5 @@ Forge、1.21.1 は NeoForge）と、表示定義
 
 ## ライセンス
 
-MIT。元実装 Copyright 2014-2016 Jadran "Lunatrius" Kotnik、1.20.1 / 1.21.1 移植の土台は
+MIT。元実装 Copyright 2014-2016 Jadran "Lunatrius" Kotnik、1.20.1 / 1.21.1 / 26.1.2 移植の土台は
 Copyright 2025 DF11ZomGraves。`LICENSE` を参照してください。

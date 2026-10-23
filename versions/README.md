@@ -10,11 +10,11 @@ Gradle プラグイン・Mappings・Java・ローダー API が違うため、1 
 |---|---|---|---|---|
 | `1.20.1/` | 1.20.1 | Forge 47.4.0 | 17 | 実装・ビルド・描画テスト済み |
 | `1.21.1/` | 1.21.1 | NeoForge 21.1.264 | 21 | 実装・ビルド・描画テスト済み |
-| `26.1.2/` | 26.1.2 | NeoForge 26.1.2.x | 25 | 計画中（未作成） |
+| `26.1.2/` | 26.1.2 | NeoForge 26.1.2.122 | 25 | 実装・ビルド・描画テスト済み |
 
-1.20.1 と 1.21.1 はビルド・HUD / GUI / エディタの描画まで確認済みです。26.1.2 は
-1.21.1 の実装を土台に着手します。flake シェルは `mc1201`（JDK 17）、`mc1211`
-（JDK 21）、`mc2612`（JDK 25）の 3 つを用意しています。
+1.20.1 / 1.21.1 / 26.1.2 のすべてで、ビルドと HUD / GUI / エディタの描画まで確認済み
+です。flake シェルは `mc1201`（JDK 17）、`mc1211`（JDK 21）、`mc2612`（JDK 25）の
+3 つを用意しています。
 
 ## 各バージョンの構成
 
@@ -36,12 +36,13 @@ versions/<version>/
 │   ├── util/
 │   └── value/          # 値・演算
 └── src/main/resources/
-    ├── META-INF/mods.toml          # 1.21.1 は neoforge.mods.toml
+    ├── META-INF/mods.toml          # NeoForge 版は neoforge.mods.toml
     ├── META-INF/services/
     └── assets/ingameinfo/lang/
 ```
 
-1.20.1 は `META-INF/mods.toml`、1.21.1 は `META-INF/neoforge.mods.toml` を使います。
+1.20.1 は `META-INF/mods.toml`、1.21.1 / 26.1.2 は `META-INF/neoforge.mods.toml` を
+使います。
 `run/` は開発用の作業ディレクトリで、Git 管理外です。テスト用ワールド・設定・
 スクリーンショットのログがここに出ます。
 
@@ -51,22 +52,25 @@ versions/<version>/
 # リポジトリのルートで
 nix develop .#mc1201 -c bash -c 'cd versions/1.20.1 && ./gradlew build'
 nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew build'
+nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew build'
 ```
 
 成果物は `versions/<version>/build/libs/ingameinfoxml-<version>.jar` です。1.20.1 は
-Forge 47.4.0、1.21.1 は NeoForge 21.1.264 のクライアント・サーバーにそのまま入れられ
-ます。開発用クライアントは次で起動します。
+Forge 47.4.0、1.21.1 は NeoForge 21.1.264、26.1.2 は NeoForge 26.1.2.122 の
+クライアント・サーバーにそのまま入れられます。開発用クライアントは次で起動します。
 
 ```bash
 nix develop .#mc1201 -c bash -c 'cd versions/1.20.1 && ./gradlew runClient'
 nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew runClient'
+nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew runClient'
 ```
 
-1.21.1 の ModDevGradle は Gradle の `--args` を受け付けません。ヘッドレスでワールドを
-指定する場合は `./gradlew runClient -PquickPlayWorld=RenderTest` を使います。
+1.21.1 / 26.1.2 の ModDevGradle は Gradle の `--args` を受け付けません。ヘッドレスで
+ワールドを指定する場合は `./gradlew runClient -PquickPlayWorld=RenderTest` を使います。
 
-Nix を使わない場合は JDK 17 と Gradle 8.8 を用意し、`GRADLE_USER_HOME` を書き込み
-可能な場所に向けてください。
+Nix を使わない場合は JDK 17 / 21 / 25 のいずれかと、1.20.1 / 1.21.1 は Gradle 8.8、
+26.1.2 は Gradle 9.8.2 を用意し、`GRADLE_USER_HOME` を書き込み可能な場所に向けて
+ください。
 
 ## 新しいバージョンを追加するとき
 
@@ -78,7 +82,7 @@ Nix を使わない場合は JDK 17 と Gradle 8.8 を用意し、`GRADLE_USER_H
 4. `docs/COMPATIBILITY.md` の表をコピーし、そのバージョンの差分を追記する。
 5. `scripts/render-test.sh` 用のワールドを `versions/<version>/run/saves/RenderTest`
    に用意し、HUD と GUI を確認する。
-6. 2 バージョンで同じコードが動く部分だけを `common/` へ移す。
+6. 複数バージョンで同じコードが動く部分だけを `common/` へ移す。
 
 バージョン間で共有するのは設計と SPI の完全修飾名だけです。`common/` の扱いは
 [common/README.md](../common/README.md) を参照してください。
@@ -94,7 +98,15 @@ Nix を使わない場合は JDK 17 と Gradle 8.8 を用意し、`GRADLE_USER_H
   `EditBox#moveCursorToEnd(boolean)` になるなどの API 差を吸収済み。
   データパックの関数ディレクトリは単数形（`function`）。
   設定の `defaultSeedInServer` だけ文字列で保存する（TOML の整数が 32bit のため）。
-- **26.1.2**: NeoForge 26.1.2.x、Java 25。GUI 描画・レジストリ API の変更を確認する。
+- **26.1.2**: NeoForge 26.1.2.122、ModDevGradle 2.0.148、Java 25、Gradle 9.8.2、
+  公式 Mappings。`ResourceLocation` が `Identifier`、`GuiGraphics` が
+  `GuiGraphicsExtractor` に改名。`Screen#render` は `extractRenderState` になり、
+  入力は `MouseButtonEvent` / `KeyEvent` のレコード、選択リストの行は
+  `extractContent`、チャットは `addClientSystemMessage`、キーカテゴリは
+  `KeyMapping.Category` を使う。テキスト色はアルファを含む ARGB で指定する
+  （6 桁指定は透明になる）。`pack.mcmeta` は `min_format` / `max_format` が必須。
+  既定設定はリソースパックが揃ってから `ConfigReloadListener` が読み込む。
+  foojay-resolver-convention は 1.0.0 を使う（0.8.0 は Gradle 9 で失敗）。
 
 ## テスト
 
@@ -106,6 +118,8 @@ GRADLE_USER_HOME=/tmp/gradle-home \
   nix develop .#mc1201 -c scripts/render-test.sh 1.20.1 RenderTest
 GRADLE_USER_HOME=/tmp/gradle-home \
   nix develop .#mc1211 -c scripts/render-test.sh 1.21.1 RenderTest
+GRADLE_USER_HOME=/tmp/gradle-home \
+  nix develop .#mc2612 -c scripts/render-test.sh 26.1.2 RenderTest
 ```
 
 ## 関連文書

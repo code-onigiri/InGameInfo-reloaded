@@ -5,7 +5,7 @@
 ```
 versions/1.20.1/   Forge 47.4.0 / Java 17
 versions/1.21.1/   NeoForge 21.1.264 / Java 21
-versions/26.1.2/   NeoForge 26.1.2.x / Java 25（計画）
+versions/26.1.2/   NeoForge 26.1.2.122 / Java 25
 ```
 
 Minecraft のバージョン間では Forge / NeoForge の API だけでなく、Mappings・Gradle
@@ -19,27 +19,29 @@ Minecraft のバージョン間では Forge / NeoForge の API だけでなく�
 - `Value` / `Operation` / タグ名の定数
 - MOD 連携 SPI のインターフェース
 
-現時点では 1.20.1 と 1.21.1 の実装はそれぞれの `versions/<version>/` 内にあり、`common/`
-は空です。抽出は、2 バージョンで実際に同じコードが動くと確認できた部分だけを対象に
-行います。無理に共有するとバージョン固有の `ResourceLocation` やレジストリ API の差で
+現時点では 1.20.1 / 1.21.1 / 26.1.2 の実装はそれぞれの `versions/<version>/` 内にあり、
+`common/` は空です。抽出は、複数バージョンで実際に同じコードが動くと確認できた部分
+だけを対象に行います。無理に共有するとバージョン固有の `ResourceLocation` やレジストリ API の差で
 複雑になるためです。
 
-## 処理の流れ（1.20.1 / 1.21.1）
+## 処理の流れ（1.20.1 / 1.21.1 / 26.1.2）
 
 1. `InGameInfoXML` コンストラクタ
    - ネットワークパケット登録
    - `ConfigurationHandler.SPEC` を CLIENT 設定として登録
    - Config Screen ファクトリ登録
 2. `FMLClientSetupEvent`
-   - `Ticker` をローダーのイベントバスへ登録（1.21.1 の `InGameInfoCore` は
+   - `Ticker` をローダーのイベントバスへ登録（1.21.1 / 26.1.2 の `InGameInfoCore` は
      `@SubscribeEvent` を持たないため登録しない。`Ticker` が直接呼ぶ）
    - `ValueRegistry.init()` → `TagRegistry.init()` → `PluginLoader.load()`
-   - `config/InGameInfo.xml` を読み込み
-3. 毎フレーム `RenderGuiEvent.Post`（1.21.1 も同名）
+   - `config/InGameInfo.xml` を読み込み（26.1.2 は MOD のリソースパックが揃うのを
+     待つため、`ConfigReloadListener` がリソース再読み込み時に実行）
+3. 毎フレーム `RenderGuiEvent.Post`（1.21.1 / 26.1.2 も同名）
    - `Ticker.isRunning()` を判定
    - `InGameInfoCore.onTickClient()` がタグを評価して `Info` ツリーを構築
-   - `InGameInfoCore.onTickRender(GuiGraphics)` が描画
-4. `RenderGuiOverlayEvent.Pre`（1.21.1 は `RenderGuiLayerEvent.Pre`）
+   - `InGameInfoCore.onTickRender(GuiGraphicsExtractor)` が描画（26.1.2）
+4. `RenderGuiOverlayEvent.Pre`（1.21.1 / 26.1.2 は `RenderGuiLayerEvent.Pre`。
+   26.1.2 のデバッグオーバーレイはレイヤー名がなく、`canRun` 側で判定）
    - バニラの体力・空腹・酸素・ポーションアイコン・デバッグ文字を必要に応じてキャンセル
 
 ## HUD エディタ
@@ -148,7 +150,7 @@ example.compat.ExamplePlugin
 - 他 MOD のクラスを直接参照すると、その MOD が入っていない環境で
   `NoClassDefFoundError` になります。連携プラグイン側の JAR を別にし、
   `META-INF/services` をその JAR にだけ入れるか、リフレクションで参照してください。
-- 1.21.1 / 26.1.2 でも同じ SPI 名を維持する予定です。バージョン固有の API は
+- 1.20.1 / 1.21.1 / 26.1.2 で同じ SPI 名を維持しています。バージョン固有の API は
   プラグイン側で吸収します。
 - 設定の再読み込み（`ModConfigEvent.Reloading`）では、ライブのアライメントを
   TOML の値で上書きしません。保存直後の再読み込みがエディタの変更を消すためです。
