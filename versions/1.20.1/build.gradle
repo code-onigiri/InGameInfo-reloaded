@@ -205,3 +205,13 @@ publishing {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
+// Optional third-party mods for local debugging. See ../docs/DEBUG_MODS.md
+// Flip entries to true and put the matching jars in libs/debug-mods/.
+ext.debugMods = [
+        tconstruct: false,
+        cobblemon: false,
+        mekanism: false,
+        ae2: false,
+]
+ext.igiForgeDeobf = true
+apply from: rootProject.file('../../gradle/debug-mods.gradle')

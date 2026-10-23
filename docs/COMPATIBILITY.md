@@ -169,8 +169,10 @@ Forge / NeoForge Energy 連携を含む）。
 - Forge / NeoForge Energy（常時）: `energy`, `fe`, `maxenergy`, `maxfe`,
   `energypercent`, `fepercent`
 
-1.21.1 の実クライアントで Mekanism と Cobblemon、1.20.1 の本番 Forge クライアントで
-Tinkers' Construct の HUD 表示を確認済みです。1.20.1 の Mekanism / Cobblemon と
+1.21.1 の実クライアントで Mekanism と Cobblemon、1.20.1 の ForgeGradle 開発クライアントで
+Tinkers' Construct の HUD 表示を確認済みです（Tinkers は `libs/debug-mods` の jar を
+`build.gradle` の `ext.debugMods` で `tconstruct: true` にして deobf 読み込み）。
+1.20.1 の Mekanism / Cobblemon と
 26.1.2 の 3 連携はビルド確認までです。
 
 Create のタグは対象ブロックがない場合も行を消さず、RPM・ストレス系は `0.0`、

@@ -1,0 +1,248 @@
+// Optional third-party mods for local debugging.
+//
+// Edit ext.debugMods in the version's build.gradle and flip entries to true,
+// for example:
+//   ext.debugMods = [tconstruct: true, cobblemon: false, mekanism: false, ae2: false]
+//
+// Put mod jars in <version>/libs/debug-mods/ (not committed), then run:
+//   ./gradlew runClient
+//   ./gradlew listDebugMods
+//   ./gradlew syncDebugMods
+//
+// Required dependencies and language providers are pulled in automatically
+// when their jars are present (for example tconstruct -> mantle,
+// cobblemon -> kotlinforforge, ae2 -> guideme).
+//
+// On Forge, the selected jars are deobfuscated with fg.deobf before being
+// copied to run/mods. NeoForge production jars already use official names.
+// Only files listed in run/mods/.igi-debug-mods are managed; other jars in
+// run/mods are left alone.
+
+import java.util.Locale
+import java.util.zip.ZipFile
+
+def debugModsDir = file('libs/debug-mods')
+def runModsDir = file('run/mods')
+def markerFile = new File(runModsDir, '.igi-debug-mods')
+def forgeDeobf = project.hasProperty('igiForgeDeobf') &&
+        project.property('igiForgeDeobf').toString() == 'true'
+
+def aliasOf = { File jar ->
+    def base = jar.name.replaceAll(/\.jar$/, '')
+    def first = base.split('-')[0]
+    return first.toLowerCase(Locale.ROOT).replaceAll(/[^a-z0-9_]/, '')
+}
+
+def readMeta = { File jar ->
+    def meta = [id: aliasOf(jar), loader: null, required: [] as Set<String>]
+    ZipFile zip = null
+    try {
+        zip = new ZipFile(jar)
+        def entry = zip.getEntry('META-INF/neoforge.mods.toml')
+        if (entry == null) {
+            entry = zip.getEntry('META-INF/mods.toml')
+        }
+        if (entry == null) {
+            return meta
+        }
+        def text = zip.getInputStream(entry).getText('UTF-8')
+
+        def loaderMatcher = text =~ /(?m)^\s*modLoader\s*=\s*"([^"]+)"/
+        if (loaderMatcher.find()) {
+            meta.loader = loaderMatcher.group(1)
+        }
+
+        def modsAt = text.indexOf('[[mods]]')
+        if (modsAt >= 0) {
+            def block = text.substring(modsAt + 8)
+            def next = block.indexOf('[[')
+            if (next >= 0) {
+                block = block.substring(0, next)
+            }
+            def idMatcher = block =~ /(?m)^\s*modId\s*=\s*"([^"]+)"/
+            if (idMatcher.find()) {
+                meta.id = idMatcher.group(1)
+            }
+        }
+
+        def depMatcher = text =~ /(?s)\[\[dependencies\.[^\]]+\]\](.*?)(?=\[\[|\z)/
+        while (depMatcher.find()) {
+            def section = depMatcher.group(1)
+            def idMatcher = section =~ /(?m)^\s*modId\s*=\s*"([^"]+)"/
+            if (!idMatcher.find()) {
+                continue
+            }
+            def required = (section =~ /(?m)^\s*mandatory\s*=\s*true/) ||
+                    (section =~ /(?m)^\s*type\s*=\s*"REQUIRED"/)
+            if (required) {
+                meta.required.add(idMatcher.group(1))
+            }
+        }
+    } catch (Exception e) {
+        logger.warn("[igi] Could not read metadata from ${jar.name}: ${e.message}")
+    } finally {
+        if (zip != null) {
+            zip.close()
+        }
+    }
+    return meta
+}
+
+def available = [:]
+if (debugModsDir.isDirectory()) {
+    debugModsDir.listFiles()
+            .findAll { it.isFile() && it.name.endsWith('.jar') && !it.name.contains('_mapped_official_') }
+            .sort { it.name }
+            .each { jar ->
+                def meta = readMeta(jar)
+                if (available.containsKey(meta.id)) {
+                    logger.warn("[igi] Duplicate debug mod id '${meta.id}': " +
+                            "using ${available[meta.id].file.name}, ignoring ${jar.name}")
+                } else {
+                    available[meta.id] = [file: jar, meta: meta]
+                }
+            }
+}
+
+def flagValues = project.findProperty('debugMods')
+if (flagValues == null) {
+    flagValues = [:]
+}
+if (!(flagValues instanceof Map)) {
+    throw new GradleException("ext.debugMods must be a Map of true/false values in build.gradle")
+}
+
+def requested = flagValues.findAll { key, value ->
+    value == true || (value != null && value.toString().equalsIgnoreCase('true'))
+}.keySet().collect { it.toString().trim().toLowerCase(Locale.ROOT) }
+        .findAll { !it.isEmpty() }
+        .sort()
+
+def selected = new LinkedHashSet<String>()
+requested.each { name ->
+    if (!available.containsKey(name)) {
+        throw new GradleException("Unknown debug mod '${name}' enabled in ext.debugMods. " +
+                "Available: ${available.keySet().sort().join(', ')}")
+    }
+    selected.add(name)
+}
+
+def expanded = new LinkedHashSet<String>()
+def visit
+visit = { String name ->
+    if (!expanded.add(name)) {
+        return
+    }
+    def info = available[name]
+    if (info == null) {
+        return
+    }
+    info.meta.required.each { dep ->
+        if (dep in ['minecraft', 'forge', 'neoforge', 'java']) {
+            return
+        }
+        if (available.containsKey(dep)) {
+            visit(dep)
+        } else {
+            logger.warn("[igi] ${name} requires '${dep}', but no matching jar is in libs/debug-mods")
+        }
+    }
+    def loader = info.meta.loader
+    if (loader != null && loader != 'javafml' && loader != 'lowcodefml' && available.containsKey(loader)) {
+        visit(loader)
+    }
+}
+selected.each { visit(it) }
+
+def selectedFiles = expanded.collect { available[it].file }
+def selectedNames = expanded.toList()
+
+if (forgeDeobf && !selectedFiles.isEmpty()) {
+    repositories {
+        flatDir {
+            dirs debugModsDir
+        }
+    }
+}
+
+def debugConfiguration = null
+if (forgeDeobf) {
+    debugConfiguration = configurations.findByName('igiDebugMods')
+    if (debugConfiguration == null) {
+        debugConfiguration = configurations.create('igiDebugMods') {
+            canBeConsumed = false
+            canBeResolved = true
+        }
+    }
+    debugConfiguration.dependencies.clear()
+    selectedFiles.each { jar ->
+        def base = jar.name.replaceAll(/\.jar$/, '')
+        def cut = base.lastIndexOf('-')
+        if (cut <= 0) {
+            throw new GradleException("Cannot derive a flatDir name/version from ${jar.name}")
+        }
+        def name = base.substring(0, cut)
+        def version = base.substring(cut + 1)
+        debugConfiguration.dependencies.add(
+                dependencies.create(project.fg.deobf("igiDebug:${name}:${version}")))
+    }
+}
+
+tasks.register('listDebugMods') {
+    group = 'ingameinfo'
+    description = 'Lists jars in libs/debug-mods and whether ext.debugMods enables them.'
+    doLast {
+        if (available.isEmpty()) {
+            println "No debug mods found in ${debugModsDir}."
+            return
+        }
+        def direct = requested as Set<String>
+        println "Debug mods in ${debugModsDir}:"
+        available.each { name, info ->
+            def state = expanded.contains(name) ? (direct.contains(name) ? 'ON  ' : 'AUTO') : 'off '
+            def suffix = info.meta.loader == null ? '' : " (modLoader=${info.meta.loader})"
+            println "  [${state}] ${name.padRight(20)} ${info.file.name}${suffix}"
+        }
+        println "Enabled: ${selectedNames.isEmpty() ? 'none' : selectedNames.join(', ')}"
+    }
+}
+
+tasks.register('syncDebugMods') {
+    group = 'ingameinfo'
+    description = 'Copies the ext.debugMods selection into run/mods and removes the previous selection.'
+    outputs.upToDateWhen { false }
+
+    doLast {
+        runModsDir.mkdirs()
+        if (markerFile.isFile()) {
+            markerFile.readLines().findAll { !it.trim().isEmpty() }.each { name ->
+                def old = new File(runModsDir, name)
+                if (old.isFile()) {
+                    old.delete()
+                }
+            }
+            markerFile.delete()
+        }
+
+        def sourceFiles = forgeDeobf ? debugConfiguration.files : selectedFiles
+        if (!sourceFiles.isEmpty()) {
+            copy {
+                from sourceFiles
+                into runModsDir
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            }
+        }
+
+        def copiedNames = sourceFiles.collect { it.name }
+        if (!copiedNames.isEmpty()) {
+            markerFile.text = copiedNames.join('\n') + '\n'
+        }
+        logger.lifecycle("[igi] Debug mods: ${selectedNames.isEmpty() ? 'none' : selectedNames.join(', ')}")
+    }
+}
+
+['runClient', 'runServer'].each { taskName ->
+    tasks.matching { it.name == taskName }.configureEach {
+        dependsOn tasks.named('syncDebugMods')
+    }
+}

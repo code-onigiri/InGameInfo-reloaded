@@ -20,3 +20,6 @@
 # Local production-client / deobfuscation scratch (not part of the mod)
 .prism-test/
 .deobf-libs/
+
+# Optional third-party mod jars for local debugging
+**/libs/debug-mods/*.jar

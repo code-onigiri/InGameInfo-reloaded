@@ -82,3 +82,12 @@ tasks.named('jar', Jar).configure {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+// Optional third-party mods for local debugging. See ../docs/DEBUG_MODS.md
+// Flip entries to true and put the matching jars in libs/debug-mods/.
+ext.debugMods = [
+        tconstruct: false,
+        cobblemon: false,
+        mekanism: false,
+        ae2: false,
+]
+apply from: rootProject.file('../../gradle/debug-mods.gradle')

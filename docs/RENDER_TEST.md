@@ -478,17 +478,31 @@ magick docs/render/hud-1.20.1.png -format %c histogram:info:- | sort -nr | head 
 
 ## MOD 連携（Mekanism / Cobblemon / Tinkers' Construct）
 
+ここで使う MOD の jar はリポジトリに含めません。`versions/<version>/libs/debug-mods/`
+に置き、`build.gradle` の `ext.debugMods` を true にして開発クライアントへ読み込みます。
+依存 MOD の自動解決や
+On/Off の仕組みは [DEBUG_MODS.md](DEBUG_MODS.md) を参照してください。
+
 ### 1.21.1（Mekanism + Cobblemon）
 
-`versions/1.21.1/run/mods/` に次の 3 つを置き、NeoForge の開発クライアントを
-起動しました。Cobblemon は Kotlin ランタイムを同梱しないため、Kotlin for Forge も
-必要です。
+`versions/1.21.1/libs/debug-mods/` に次の 3 つを置きます。Cobblemon は Kotlin
+ランタイムを同梱しないため、Kotlin for Forge も必要です（`cobblemon: true` なら
+自動で一緒に読み込まれます）。
 
 - `Mekanism-1.21.1-10.7.19.85.jar`
 - `Cobblemon-neoforge-1.8.2+1.21.1.jar`
 - `kotlinforforge-5.12.0-all.jar`
 
-ログは `Registered 659 tags.`。ワールド内で `/clearparty @s` のあと
+`build.gradle` の `ext.debugMods` を `cobblemon: true`, `mekanism: true` にしてから
+起動します。
+
+```bash
+cd versions/1.21.1
+./gradlew runClient
+```
+
+ログは `Registered 632 tags.`（Cobblemon + Mekanism + Kotlin for Forge の構成）。
+ワールド内で `/clearparty @s` のあと
 `/pokegive @s pikachu level=25` と `/pokegive @s charmander level=12` を実行すると、
 HUD は次の値を表示しました（Cobblemon の `/pokegive` はレベルをプロパティとして
 受け取るため、`/pokegive @s pikachu 25` ではレベル 1 になります）。
@@ -510,13 +524,26 @@ Cobblemon のパーティ選択オーバーレイが画面左端に、`Change Pa
 
 ### 1.20.1（Tinkers' Construct）
 
-Tinkers' Construct 3.12.1.231 と Mantle 1.11.117 は本番用の SRG / Mixin 入り jar で、
-ForgeGradle の開発実行では `ResourceLocation.m_135827_()` や `f_256747_` の
-解決に失敗します（AE2 と同じ制約）。そのため、Minecraft 1.20.1 + Forge 47.4.28 の
-本番クライアントで確認しました。`.prism-test/mcprod/mods/` に 2 つの jar と
-本 mod の jar を置き、`--quickPlaySingleplayer RenderTest` で起動しています。
+Tinkers' Construct 3.12.1.231 と Mantle 1.11.117 の本番用 jar は SRG 名で
+コンパイルされているため、そのまま `run/mods` に置くと `ResourceLocation.m_135827_()`
+や `f_256747_` の解決に失敗します（AE2 と同じ制約）。Tinkers / Mantle の jar には
+Mixin 設定も refmap も含まれていないため（`unzip -l` で確認）、追加の Mixin 設定
+ファイルは不要です。原因は Mixin ではなく SRG 名です。ForgeGradle の `fg.deobf`
+を通す `debug-mods.gradle` の経路で読み込みます。
 
-`/give @s tconstruct:pickaxe` でツールを手に持った状態の HUD:
+`build.gradle` の `ext.debugMods` を `tconstruct: true` にしてから起動します。
+
+```bash
+cp TConstruct-1.20.1-3.12.1.231.jar Mantle-1.20.1-1.11.117.jar \
+  versions/1.20.1/libs/debug-mods/
+cd versions/1.20.1
+./gradlew runClient --args="--quickPlaySingleplayer RenderTest"
+```
+
+`syncDebugMods` が `TConstruct-1.20.1-3.12.1.231_mapped_official_1.20.1.jar` と
+`Mantle-1.20.1-1.11.117_mapped_official_1.20.1.jar` を `run/mods` にコピーし、
+ログに `[igi] Debug mods: tconstruct, mantle` を出します。ゲーム内で
+`/give @s tconstruct:pickaxe` を持った状態の HUD:
 
 ```text
 tool: 1/1 (100.0%)
@@ -524,10 +551,11 @@ speed 1.00 atk 0.00 harvest 0
 mods 0 broken false
 ```
 
-8 タグすべてが描画され、耐久値・最大耐久値・割合・採掘速度・攻撃力・
-採掘レベル・修飾子数・破損状態が Tinkers の `ToolStack` から読めています。
-`/give` で作ったツールは素材データを持たないため数値は最小値です。素材入りの
-ツールでの値の確認は今後の課題です。確認画像:
+8 タグすべてが描画され、耐久値・最大耐久値・割合・採掘速度・攻撃力・採掘レベル・
+修飾子数・破損状態が Tinkers の `ToolStack` から読めています。`/give` で作った
+ツールは素材データを持たないため数値は最小値です。素材入りのツールでの値の確認は
+今後の課題です。本番用クライアント（`.prism-test/mcprod`）でも同じ表示を確認して
+います。確認画像:
 [integration-tinkers-1.20.1.png](render/integration-tinkers-1.20.1.png)。
 
 ## 新しいバージョンへ展開するとき

@@ -41,7 +41,9 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 ├── docs/
 │   ├── COMPATIBILITY.md       # 1.12.2 との差異と再現方法
 │   ├── ARCHITECTURE.md        # マルチバージョン構成と MOD 連携 SPI
-│   └── RENDER_TEST.md         # ヘッドレス描画テストの手順
+│   ├── RENDER_TEST.md         # ヘッドレス描画テストの手順
+│   └── DEBUG_MODS.md          # デバッグ用 MOD の On/Off 手順
+├── gradle/debug-mods.gradle   # libs/debug-mods の選択・deobf・run/mods への同期
 ├── scripts/render-test.sh     # Xvfb + llvmpipe で HUD をスクリーンショット
 └── versions/
     ├── 1.20.1/                # Forge 1.20.1 の実装
@@ -92,7 +94,34 @@ nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew runClient'
 ```
 
 1.21.1 以降（ModDevGradle）で特定のワールドを直接開く場合は
-`-PquickPlayWorld=RenderTest` を付けます。
+`-PquickPlayWorld=RenderTest` を付けます。1.20.1（ForgeGradle）は
+`--args="--quickPlaySingleplayer RenderTest"` を使います。
+
+### デバッグ用 MOD の On/Off
+
+任意の MOD を一時的に入れて開発クライアントを起動できます。jar はリポジトリに
+含めず、`versions/<version>/libs/debug-mods/` に置きます。有効化はバージョンごとの
+`build.gradle` にある `ext.debugMods` の true/false で切り替えます。
+
+```groovy
+// versions/1.20.1/build.gradle
+ext.debugMods = [
+        tconstruct: true,   // Mantle は自動で追加
+        cobblemon: false,
+        mekanism: false,
+        ae2: false,
+]
+```
+
+```bash
+cd versions/1.20.1
+./gradlew listDebugMods   # jar と ON/OFF の一覧
+./gradlew runClient       # true の MOD を同期して起動
+./gradlew syncDebugMods   # 同期だけ実行（すべて false で解除）
+```
+
+依存 MOD（例: Cobblemon → Kotlin for Forge、AE2 → GuideME）は、jar があれば
+自動で一緒に読み込まれます。詳細は [docs/DEBUG_MODS.md](docs/DEBUG_MODS.md)。
 
 ## ヘッドレス描画テスト
 
@@ -194,8 +223,9 @@ Applied Energistics 2 はクロスヘア先のブロックのネットワーク�
 ログで確認、HUD 行の定常表示は自動操作の制約で未撮影）。
 Mekanism と Cobblemon は 1.21.1 の実クライアントで、放射線量（個人・環境・最大・
 深刻度・有効・割合）とパーティ（種族・レベル・HP・状態・色違い・タイプ）の HUD 表示を
-確認済みです。Tinkers' Construct は 1.20.1 の本番 Forge クライアントで 8 タグの表示を
-確認しました（`/give` の素材未設定ツールのため数値は最小値）。
+確認済みです。Tinkers' Construct は 1.20.1 の ForgeGradle 開発クライアントで 8 タグの表示を
+確認しました（`libs/debug-mods` の jar を `build.gradle` の `ext.debugMods` で
+`tconstruct: true` にして deobf 読み込み。`/give` の素材未設定ツールのため数値は最小値）。
 1.20.1 の Mekanism / Cobblemon と 26.1.2 の 3 連携はビルド確認までです。
 MOD が入っていない場合や API が変わった場合はタグを登録しない／空文字を返すため、
 HUD の他の行には影響しません。
