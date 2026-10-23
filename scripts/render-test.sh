@@ -30,7 +30,7 @@ fi
 
 for tool in xvfb-run xdotool import; do
     if ! command -v "$tool" >/dev/null 2>&1; then
-        echo "error: '$tool' is not on PATH. Run this inside a Nix dev shell (default / mc1201 / mc1211)." >&2
+        echo "error: '$tool' is not on PATH. Run this inside a Nix dev shell (default / mc1201 / mc1211 / mc2612)." >&2
         exit 1
     fi
 done
@@ -84,7 +84,8 @@ xvfb-run -a -s "-screen 0 1280x720x24 +extension GLX +render -noreset" \
         kill "$GPID" 2>/dev/null || true
         sleep 3
         pkill -f "quickPlaySingleplayer $2" 2>/dev/null || true
-        pkill -f "net.neoforged.devlaunch.Main" 2>/dev/null || true
+        # The bracket keeps pkill from matching this wrapper shell itself.
+        pkill -f "net[.]neoforged[.]devlaunch[.]Main" 2>/dev/null || true
         exit 0
     ' _ "$GAME_DIR" "$WORLD" "$LOG" "$HUD_DELAY" "$SHOT" "$LOADER"
 

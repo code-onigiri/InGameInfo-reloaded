@@ -358,6 +358,7 @@ NeoForge 26.1.2.122 でも同じ HUD・GUI を確認しました。設定画面�
 | HUD エディタ（背景がぼやけず HUD が読める） | OK | [editor-26.1.2.png](render/editor-26.1.2.png) |
 | `/igi save test2612.xml` | OK | チャットに `Done!` |
 | 初回参加時の既定 HUD 表示 | 修正済み | `ConfigReloadListener` で解決 |
+| `scripts/render-test.sh 26.1.2 RenderTest` の自動撮影 | OK | [hud-26.1.2.png](render/hud-26.1.2.png) |
 
 26.1.2 では `GuiGraphics` が `GuiGraphicsExtractor` になり、`Screen#render` は
 `extractRenderState`、選択リストの行は `extractContent` になります。テキスト色は
