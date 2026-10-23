@@ -120,22 +120,25 @@ public final class Ae2Integration {
     }
 
     /**
-     * Server-side collection for a request. The block position is only used when no linked
-     * wireless terminal is found in the player's inventory.
+     * Server-side collection for a request. The block being looked at has priority, so two
+     * networks next to each other do not bleed into one another. A linked wireless terminal
+     * is only used when the crosshair is not on an AE2 node, and there is no "nearby"
+     * fallback: with neither source the tags report none/0 instead of an arbitrary neighbour.
      */
     public static NetworkInfo collect(final ServerPlayer player, final BlockPos requestedPos) {
-        Object grid = linkedGrid(player);
-        String source = "wireless";
-        if (grid == null && requestedPos != null && player.blockPosition().distSqr(requestedPos) <= 64.0D) {
+        Object grid = null;
+        String source = "none";
+        if (requestedPos != null && player.blockPosition().distSqr(requestedPos) <= 64.0D) {
             grid = blockGrid(player, requestedPos);
-            source = "block";
+            if (grid != null) {
+                source = "block";
+            }
         }
         if (grid == null) {
-            // Aiming at a specific block is awkward while watching the HUD, so fall back to
-            // the closest AE2 node around the player. This is what people usually mean by
-            // "my network" while standing in their base.
-            grid = nearbyGrid(player);
-            source = "nearby";
+            grid = linkedGrid(player);
+            if (grid != null) {
+                source = "wireless";
+            }
         }
         if (grid == null) {
             return NetworkInfo.NONE;
@@ -170,31 +173,6 @@ public final class Ae2Integration {
             }
             if (grid != null) {
                 return grid;
-            }
-        }
-        return null;
-    }
-
-    private static Object nearbyGrid(final ServerPlayer player) {
-        final net.minecraft.server.level.ServerLevel level = player.serverLevel();
-        final BlockPos center = player.blockPosition();
-        for (int radius = 1; radius <= 8; radius++) {
-            for (int dx = -radius; dx <= radius; dx++) {
-                for (int dz = -radius; dz <= radius; dz++) {
-                    if (Math.max(Math.abs(dx), Math.abs(dz)) != radius) {
-                        continue;
-                    }
-                    for (int dy = -4; dy <= 4; dy++) {
-                        final BlockPos pos = center.offset(dx, dy, dz);
-                        if (level.getBlockEntity(pos) == null) {
-                            continue;
-                        }
-                        final Object grid = blockGrid(player, pos);
-                        if (grid != null) {
-                            return grid;
-                        }
-                    }
-                }
             }
         }
         return null;

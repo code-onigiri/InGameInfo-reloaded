@@ -113,9 +113,10 @@ AE2 の `IInWorldGridNodeHost#getGridNode()` や `IGridNode#getGrid()` はイン
 
 AE2 のチャンネル数・グリッド電力などはサーバー側にしかないため、クライアントは
 `RequestAe2Packet` を 1 秒ごとに送り、サーバーが `ResponseAe2Packet` で返します。
-サーバー側はリンク済みワイヤレス端末 → クロスヘア先ブロック → 周辺ノードの順で
-`IGrid` を解決し、`NetworkStatus.fromGrid()` から値を取り出します。セル系は
-クライアント側でメインハンド／オフハンドの `StorageCell` を読むため、往復は不要です。
+サーバー側はクロスヘア先の AE2 ブロック → リンク済みワイヤレス端末の順で `IGrid` を
+解決し、`NetworkStatus.fromGrid()` から値を取り出します。どちらもない場合は
+`none` を返し、周辺ノードを勝手に選ぶことはありません。セル系はクライアント側で
+メインハンド／オフハンドの `StorageCell` を読むため、往復は不要です。
 
 ### 登録方法
 
