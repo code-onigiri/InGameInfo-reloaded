@@ -100,10 +100,22 @@ public interface InGameInfoPlugin {
 `CreateIntegration`、`CuriosIntegration`、`SereneSeasonsIntegration`、
 `ArsNouveauIntegration`、`IronsSpellbooksIntegration`、`ToughAsNailsIntegration`、
 `VampirismIntegration`、`ColdSweatIntegration`、`ThirstWasTakenIntegration`、
-`GoetyIntegration`、`ParaglidersIntegration`、`BotaniaIntegration` を登録します。
-`EnergyIntegration` は Forge / NeoForge 標準機能なので常に登録します。各連携は
-`Reflect` 経由で MOD のクラスを呼ぶため、コンパイル時依存も実行時のクラス
-ロードエラーもありません。
+`GoetyIntegration`、`ParaglidersIntegration`、`BotaniaIntegration`、
+`Ae2Integration` を登録します。`EnergyIntegration` は Forge / NeoForge 標準機能なので
+常に登録します。各連携は `Reflect` 経由で MOD のクラスを呼ぶため、コンパイル時依存も
+実行時のクラスロードエラーもありません。
+
+`Reflect` はクラス階層だけでなく実装インターフェースの default メソッドも探します。
+AE2 の `IInWorldGridNodeHost#getGridNode()` や `IGridNode#getGrid()` はインターフェース
+側にあり、クラス階層だけでは見つからないためです。また本番実行では MOD のパッケージが
+モジュールとして閉じられていることがあるため、`setAccessible(true)` を最初に呼ばず、
+通常の `Method#invoke` を先に試し、`IllegalAccessException` のときだけ強制アクセスします。
+
+AE2 のチャンネル数・グリッド電力などはサーバー側にしかないため、クライアントは
+`RequestAe2Packet` を 1 秒ごとに送り、サーバーが `ResponseAe2Packet` で返します。
+サーバー側はリンク済みワイヤレス端末 → クロスヘア先ブロック → 周辺ノードの順で
+`IGrid` を解決し、`NetworkStatus.fromGrid()` から値を取り出します。セル系は
+クライアント側でメインハンド／オフハンドの `StorageCell` を読むため、往復は不要です。
 
 ### 登録方法
 

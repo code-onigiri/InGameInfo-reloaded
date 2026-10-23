@@ -45,6 +45,9 @@ public final class IntegrationLoader {
         if (loaded("botania")) {
             BotaniaIntegration.register();
         }
+        if (loaded("ae2")) {
+            Ae2Integration.register();
+        }
         EnergyIntegration.register();
 
         InGameInfoXML.logger.info("Registered optional mod integration tags.");

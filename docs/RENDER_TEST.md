@@ -421,6 +421,40 @@ Mixin を含む本番 jar（例: Cold Sweat）は deobf しても refmap が SRG
 `@Shadow field f_91074_ was not located` になるため、開発実行では検証できません。
 その場合は本番環境（実際の Forge クライアント）で確認します。
 
+## MOD 連携（Applied Energistics 2、1.20.1 / 1.21.1）
+
+AE2 は Mixin を含む本番 jar のため、1.20.1 の ForgeGradle 開発実行では
+`ae2.mixins.json:GuiGraphicsMixin` の refmap 解決に失敗します
+（`m_280405_` が見つからない）。AE2 15.4.10 の Mixin は Forge 47.4.28 で追加された
+`GuiGraphics#renderItem(LivingEntity, Level, ItemStack, ...)` を参照するため、
+`versions/1.20.1/gradle.properties` も 47.4.28 に上げています。検証は
+Minecraft 1.20.1 + Forge 47.4.28 の本番クライアントで行いました。
+
+1.21.1 は NeoForge の開発実行に AE2 19.2.18 と GuideME 21.1.20 を
+`versions/1.21.1/run/mods/` へ置くだけで動きます（`Registered 566 tags.` =
+既定 547 + AE2 19）。
+
+HUD 設定例:
+
+```xml
+net: <var>ae2network</var> ch: <var>ae2channels</var> mode: <var>ae2channelmode</var>
+AE: <var>ae2gridpower</var>/<var>ae2gridmaxpower</var> use: <var>ae2gridpowerusage</var>
+cell: <var>ae2cellused</var>/<var>ae2celltotal</var> types <var>ae2celltypes</var> pct <var>ae2cellpercent</var>
+status: <var>ae2cellstatus</var>
+```
+
+1.21.1 の確認結果は [ae2-1.21.1.png](render/ae2-1.21.1.png)。チャンネル数 1、
+モード `default`、グリッド電力 922.3T/922.3T、使用量、セル 0/1024、`status: empty`
+まで描画されています。
+
+1.20.1 は本番クライアントで `/setblock` したクリエイティブエネルギーセル・コントローラー・
+ドライブをクロスヘアで見て、[ae2-1.20.1.png](render/ae2-1.20.1.png) の
+`net: block ch: 1 mode: default` / `AE: 922.3T/922.3T use: 5` を確認しました。
+セル値は `/give TestPlayer ae2:item_storage_cell_1k` 後にメインハンドへ切り替えて
+ログで `status=EMPTY used=0 total=1024` を確認していますが、自動操作ではセルが
+メインハンドに残るのが 1 フレームだけのため、セル行の定常スクリーンショットは
+撮れていません。手動でセルを持てば同じ値が HUD に出ます。
+
 画像の色を機械的に確認する例:
 
 ```bash

@@ -25,12 +25,17 @@ public final class Reflect {
         if (target == null) {
             return null;
         }
-        return invoke(target.getClass(), target, name, args);
+        final Object result = invoke(target.getClass(), target, name, args);
+        return result == NOT_FOUND ? null : result;
     }
 
     public static Object callStatic(final String className, final String name, final Object... args) {
         final Class<?> cls = cls(className);
-        return cls == null ? null : invoke(cls, null, name, args);
+        if (cls == null) {
+            return null;
+        }
+        final Object result = invoke(cls, null, name, args);
+        return result == NOT_FOUND ? null : result;
     }
 
     public static Object field(final Object target, final String name) {
@@ -64,24 +69,61 @@ public final class Reflect {
         }
     }
 
+    private static final Object NOT_FOUND = new Object();
+
     private static Object invoke(final Class<?> cls, final Object target, final String name, final Object... args) {
         for (Class<?> current = cls; current != null; current = current.getSuperclass()) {
-            for (final Method method : current.getDeclaredMethods()) {
-                if (!method.getName().equals(name) || method.getParameterCount() != args.length) {
-                    continue;
+            final Object result = invokeDeclared(current, target, name, args);
+            if (result != NOT_FOUND) {
+                return result;
+            }
+        }
+        return invokeInterfaces(cls, target, name, args);
+    }
+
+    private static Object invokeInterfaces(final Class<?> cls, final Object target, final String name,
+            final Object... args) {
+        for (Class<?> current = cls; current != null; current = current.getSuperclass()) {
+            for (final Class<?> iface : current.getInterfaces()) {
+                final Object result = invokeDeclared(iface, target, name, args);
+                if (result != NOT_FOUND) {
+                    return result;
                 }
-                if (!matches(method.getParameterTypes(), args)) {
-                    continue;
+                final Object nested = invokeInterfaces(iface, target, name, args);
+                if (nested != NOT_FOUND) {
+                    return nested;
                 }
+            }
+        }
+        return NOT_FOUND;
+    }
+
+    private static Object invokeDeclared(final Class<?> cls, final Object target, final String name,
+            final Object... args) {
+        for (final Method method : cls.getDeclaredMethods()) {
+            if (!method.getName().equals(name) || method.getParameterCount() != args.length) {
+                continue;
+            }
+            if (!matches(method.getParameterTypes(), args)) {
+                continue;
+            }
+            try {
+                // Production mods live in named modules whose packages are not opened to us.
+                // setAccessible(true) then throws InaccessibleObjectException even for public
+                // methods, so try the direct invocation first and only force access if needed.
+                return method.invoke(target, args);
+            } catch (final IllegalAccessException ignored) {
                 try {
                     method.setAccessible(true);
                     return method.invoke(target, args);
                 } catch (final Throwable t) {
                     return null;
                 }
+            } catch (final Throwable t) {
+                return null;
             }
         }
-        return null;
+        return NOT_FOUND;
     }
 
     private static boolean matches(final Class<?>[] types, final Object[] args) {

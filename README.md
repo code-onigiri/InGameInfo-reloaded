@@ -8,7 +8,7 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 
 | バージョン | ローダー | 状態 |
 |---|---|---|
-| 1.20.1 | Forge 47.4.0 / Java 17 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
+| 1.20.1 | Forge 47.4.28 / Java 17 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
 | 1.21.1 | NeoForge 21.1.264 / Java 21 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
 | 26.1.2 | NeoForge 26.1.2.122 / Java 25 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
 
@@ -23,8 +23,8 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
   9 アライメントの選択とオフセット調整、タグ一覧からクリックで挿入、ライブプレビュー
 - 主要 MOD の任意連携（Create / Curios / Serene Seasons / Ars Nouveau /
   Iron's Spells 'n Spellbooks / Tough As Nails / Vampirism / Cold Sweat /
-  Thirst Was Taken / Goety / Paragliders / Botania / Forge Energy）。MOD が入っていない
-  環境ではタグを登録せず、HUD にも影響しません
+  Thirst Was Taken / Goety / Paragliders / Botania / Applied Energistics 2 /
+  Forge Energy）。MOD が入っていない環境ではタグを登録せず、HUD にも影響しません
 - `/igi reload`、`load`、`save`、`enable`、`disable`
 - 9 言語（en_us, ja_jp, de_de, fr_fr, no_no, pl_pl, ru_ru, zh_cn, zh_tw）
 - 1.12.2 の全タグ名（値が再現できないものは互換値。詳細は
@@ -79,7 +79,7 @@ nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew build'
 ```
 
 成果物は `versions/<version>/build/libs/ingameinfoxml-*.jar` です。1.20.1 は Forge
-47.4.0、1.21.1 は NeoForge 21.1.264、26.1.2 は NeoForge 26.1.2.122 のクライアント・
+47.4.28、1.21.1 は NeoForge 21.1.264、26.1.2 は NeoForge 26.1.2.122 のクライアント・
 サーバーにそのまま入れられます。
 
 ## クライアント起動
@@ -171,9 +171,13 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 | Goety | `goetysouls`, `goetyactive` |
 | Paragliders | `stamina`, `maxstamina`, `staminapencent`, `staminadepleted` |
 | Botania（1.20.1 のみ） | `botaniamana`, `botaniamaxmana`, `botaniamanapercent` |
+| Applied Energistics 2 | `ae2network`, `ae2channels`, `ae2channelmode`, `ae2gridpower`, `ae2gridpowerusage`, `ae2cellused`, `ae2celltotal`, `ae2celltypes`, `ae2cellstatus` ほか |
 | Forge / NeoForge Energy（常時） | `energy`, `maxenergy`, `energypercent`, `fe` ほか |
 
 Paragliders は 1.20.1 / 1.21.1 の実クライアントで HUD 表示まで確認済みです。
+Applied Energistics 2 は 1.21.1 の実クライアントでチャンネル数・チャンネルモード・
+グリッド電力・使用量・セル容量／状態まで確認済み、1.20.1 は本番起動でネットワーク
+系タグを確認済みです（セル値はログで確認、HUD 行の定常表示は自動操作の制約で未撮影）。
 その他の連携はコンパイル確認までで、MOD が入っていない場合や API が変わった
 場合はタグを登録しない／空文字を返すため、HUD の他の行には影響しません。
 連携はリフレクションで実装しているため、MOD 側の API が変わると値が空になる

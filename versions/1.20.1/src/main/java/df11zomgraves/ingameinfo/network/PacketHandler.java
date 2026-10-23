@@ -27,5 +27,13 @@ public class PacketHandler {
 				RequestMSPTPacket::decode, RequestMSPTPacket::handleMessage);
 		INSTANCE.registerMessage(id++, ResponseMSPTPacket.class, ResponseMSPTPacket::encode, ResponseMSPTPacket::decode,
 				ResponseMSPTPacket::handleMessage);
+		INSTANCE.registerMessage(id++, RequestAe2Packet.class, RequestAe2Packet::encode, RequestAe2Packet::decode,
+				RequestAe2Packet::handleMessage);
+		INSTANCE.registerMessage(id++, ResponseAe2Packet.class, ResponseAe2Packet::encode, ResponseAe2Packet::decode,
+				ResponseAe2Packet::handleMessage);
+	}
+
+	public static void sendToServer(final Object payload) {
+		INSTANCE.sendToServer(payload);
 	}
 }

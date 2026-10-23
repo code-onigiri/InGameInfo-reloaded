@@ -2,6 +2,7 @@ package df11zomgraves.ingameinfo.handler;
 
 import df11zomgraves.ingameinfo.InGameInfoCore;
 import df11zomgraves.ingameinfo.InGameInfoXML;
+import df11zomgraves.ingameinfo.integration.Ae2Integration;
 import df11zomgraves.ingameinfo.client.gui.editor.GuiHudEditor;
 import df11zomgraves.ingameinfo.client.gui.tag.GuiTags;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -131,6 +132,7 @@ public class Ticker {
 			}
 		if (!enabled || this.client.options == null)
 			Tag.releaseResources();
+		Ae2Integration.clientTick();
 	}
 
 	private void showVerionInfo() {

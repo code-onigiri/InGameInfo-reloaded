@@ -145,6 +145,11 @@ Forge / NeoForge Energy 連携を含む）。
 - Goety: `goetysouls`, `goetyactive`
 - Paragliders: `stamina`, `maxstamina`, `staminapencent`, `staminadepleted`
 - Botania（1.20.1 のみ）: `botaniamana`, `botaniamaxmana`, `botaniamanapercent`
+- Applied Energistics 2: `ae2network`, `ae2channels`（別名 `ae2channel`）,
+  `ae2channelmode`, `ae2gridpower`, `ae2gridmaxpower`, `ae2gridpowerusage`,
+  `ae2gridpowerinjection`, `ae2channelpower`, `ae2cellused`, `ae2celltotal`,
+  `ae2celltypes`, `ae2cellmaxtypes`, `ae2cellcount`, `ae2cellpercent`,
+  `ae2cellstatus`, `ae2power`, `ae2maxpower`, `ae2powerpercent`
 - Forge / NeoForge Energy（常時）: `energy`, `fe`, `maxenergy`, `maxfe`,
   `energypercent`, `fepercent`
 
@@ -153,9 +158,29 @@ Forge / NeoForge Energy 連携を含む）。
 
 Paragliders は 1.20.1 / 1.21.1 の実クライアントで、スタミナ・最大値・割合・
 枯渇状態が HUD に出るところまで確認しました。他の連携はコンパイル確認までです。
+
+Applied Energistics 2 はサーバー権威の値（チャンネル数、グリッド電力、使用量）を
+HUD に出すため、クライアントから `RequestAe2Packet` を送り、サーバーが
+`ResponseAe2Packet` で返す 1 秒周期の往復で更新します。対象は次の順で探します。
+
+1. 手に持っているリンク済みワイヤレス端末
+2. クロスヘア先のブロック（8 ブロック以内）
+3. プレイヤー周辺のグリッドノード（半径 8、Y -4..+4）
+
+グリッドが見つからない場合は `ae2network` が `none` になり、電力系は 0 を返します。
+セル系はメインハンド／オフハンドのセルアイテムから読みます。
+
+1.21.1 の実クライアントでは、チャンネル数・チャンネルモード・グリッド電力・
+平均使用量・セル容量／状態まで HUD で確認済みです。1.20.1 は本番 Forge 47.4.28
+クライアントでネットワーク系タグを確認済みで、セル値もログで
+`status=EMPTY used=0 total=1024` を確認しましたが、自動操作中にセルがメインハンドに
+残る時間が短く、セル行の定常 HUD スクリーンショットは撮れていません。26.1.2 は
+コンパイル確認までです。
+
 1.20.1 Forge の開発実行に本番 jar をそのまま入れると SRG 名の Mixin や
-`ResourceLocation` のマッピング差で失敗するため、検証時は deobf jar を使います
-（手順は [RENDER_TEST.md](RENDER_TEST.md)）。
+`ResourceLocation` のマッピング差で失敗するため、検証時は本番クライアント
+（手動インストールした Forge 47.4.28）を使いました。手順は
+[RENDER_TEST.md](RENDER_TEST.md) にあります。
 
 ### HUD エディタ（1.20.1 / 1.21.1 / 26.1.2 で追加）
 

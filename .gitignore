@@ -16,3 +16,7 @@
 # Local artifacts
 *.log
 /tmp/
+
+# Local production-client / deobfuscation scratch (not part of the mod)
+.prism-test/
+.deobf-libs/
