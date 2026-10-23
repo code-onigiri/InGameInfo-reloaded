@@ -9,6 +9,8 @@ import df11zomgraves.ingameinfo.InGameInfoXML;
 public class ValueRegistry {
     public static final ValueRegistry INSTANCE = new ValueRegistry();
 
+    private static final ThreadLocal<Boolean> QUIET = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
     private Map<String, Value> stringValueMap = new HashMap<String, Value>();
     private Map<String, Class<? extends Value>> stringClassMap = new HashMap<String, Class<? extends Value>>();
     private Map<Class<? extends Value>, String> classStringMap = new HashMap<Class<? extends Value>, String>();
@@ -40,6 +42,19 @@ public class ValueRegistry {
         }
     }
 
+    /**
+     * Silences "unknown value" errors while a line is validated by the editor.
+     * Tag names are expected to miss the value registry, so logging them as errors
+     * would fill the client log every time the editor closes.
+     */
+    public static void setQuiet(final boolean quiet) {
+        QUIET.set(quiet);
+    }
+
+    private static boolean isQuiet() {
+        return QUIET.get();
+    }
+
     public Value forName(String name) {
         name = name.toLowerCase(Locale.ENGLISH);
         try {
@@ -51,11 +66,15 @@ public class ValueRegistry {
                 }
             }
         } catch (final Exception e) {
-        	InGameInfoXML.logger.error(String.format("Failed to create an instance for %s!", name), e);
+            if (!isQuiet()) {
+                InGameInfoXML.logger.error(String.format("Failed to create an instance for %s!", name), e);
+            }
             return new ValueSimple.ValueInvalid();
         }
 
-        InGameInfoXML.logger.error(String.format("Failed to create an instance for %s!", name));
+        if (!isQuiet()) {
+            InGameInfoXML.logger.error(String.format("Failed to create an instance for %s!", name));
+        }
         return new ValueSimple.ValueInvalid();
     }
 

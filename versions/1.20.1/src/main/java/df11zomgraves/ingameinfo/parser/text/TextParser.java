@@ -4,6 +4,7 @@ import df11zomgraves.ingameinfo.InGameInfoXML;
 import df11zomgraves.ingameinfo.parser.IParser;
 import df11zomgraves.ingameinfo.reference.Alignment;
 import df11zomgraves.ingameinfo.value.Value;
+import df11zomgraves.ingameinfo.value.ValueRegistry;
 
 import static df11zomgraves.ingameinfo.parser.text.Token.TokenType;
 
@@ -42,20 +43,27 @@ public class TextParser implements IParser {
 
         final TextParser parser = new TextParser();
         final String content = "<topleft>" + line + "\n";
-        if (!parser.load(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)))) {
-            return null;
-        }
+        // Tag names are not value elements, so the parser probes the value registry
+        // and fails for each one. Validation is expected to do that; keep it quiet.
+        ValueRegistry.setQuiet(true);
+        try {
+            if (!parser.load(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)))) {
+                return null;
+            }
 
-        final Map<Alignment, List<List<Value>>> format = new HashMap<Alignment, List<List<Value>>>();
-        if (!parser.parse(format)) {
-            return null;
-        }
+            final Map<Alignment, List<List<Value>>> format = new HashMap<Alignment, List<List<Value>>>();
+            if (!parser.parse(format)) {
+                return null;
+            }
 
-        final List<List<Value>> lines = format.get(Alignment.TOPLEFT);
-        if (lines == null || lines.size() != 1) {
-            return null;
+            final List<List<Value>> lines = format.get(Alignment.TOPLEFT);
+            if (lines == null || lines.size() != 1) {
+                return null;
+            }
+            return lines.get(0);
+        } finally {
+            ValueRegistry.setQuiet(false);
         }
-        return lines.get(0);
     }
 
     private Token nextToken() {
