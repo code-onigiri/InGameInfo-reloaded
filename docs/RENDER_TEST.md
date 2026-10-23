@@ -2,7 +2,7 @@
 
 この文書は、GUI のない環境（SSH・CI・NixOS のヘッドレス機）で InGameInfoXML の HUD と
 GUI を実際に描画し、スクリーンショットで確認する手順をまとめたものです。1.20.1 で
-確立した手順を、将来の 1.21.1 / 26.1.2 でも同じ形で使えるようにしています。
+確立した手順を 1.21.1 でも使い、将来の 26.1.2 にも同じ形で適用できるようにしています。
 
 ## 対象
 
@@ -128,12 +128,29 @@ item replace entity @a weapon.offhand with minecraft:shield
 cd /path/to/InGameInfo-reloaded
 GRADLE_USER_HOME=/tmp/gradle-home \
   nix develop .#mc1201 --command scripts/render-test.sh 1.20.1 RenderTest
+GRADLE_USER_HOME=/tmp/gradle-home \
+  nix develop .#mc1211 --command scripts/render-test.sh 1.21.1 RenderTest
 ```
 
-- 出力: `docs/render/hud-1.20.1.png`
-- ログ: `docs/render/client-1.20.1.log`
-- 待ち時間: 既定 20 秒。`HUD_DELAY=60` のように延ばせる
+- 出力: `docs/render/hud-<version>.png`
+- ログ: `docs/render/client-<version>.log`
+- 待ち時間: 既定 35 秒。`HUD_DELAY=60` のように延ばせる
 - 画面: 1280x720x24、GLX 有効、llvmpipe（ソフトウェア GL）
+
+1.21.1 は NeoForge / ModDevGradle なので、Gradle の `--args` ではなく
+`-PquickPlayWorld=RenderTest` でワールドを指定します。スクリプトは
+`META-INF/neoforge.mods.toml` の有無で自動的に切り替えます。手動で起動する場合:
+
+```bash
+cd versions/1.21.1
+GRADLE_USER_HOME=/tmp/gradle-home ./gradlew --no-daemon runClient \
+  -PquickPlayWorld=RenderTest
+```
+
+初回の 1.21.1 起動ではアクセシビリティの案内画面が出ます。`Continue` を押すと
+ワールドに入り、次回以降は `options.txt` の `onboardAccessibility:false` で出ません。
+アセットのダウンロードが止まる場合は、PrismLauncher などのキャッシュを
+`/tmp/gradle-home/caches/neoformruntime/assets/objects/` へコピーすると再開できます。
 
 スクリプトはクライアントを起動したあと `xdotool search --name "Minecraft"` で
 ウィンドウを探し、見つかったら待ってから `import -window root` で撮ります。GPU も
@@ -147,7 +164,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
   手動で試すときも必ず `--no-daemon` を付けてください。
 - **画面が真っ黒**: `LIBGL_ALWAYS_SOFTWARE=1`、`GALLIUM_DRIVER=llvmpipe`、
   `MESA_LOADER_DRIVER_OVERRIDE=llvmpipe` が dev shell で設定されているか確認します。
-- **ワールドが見つからない**: `versions/1.20.1/run/saves/RenderTest` があるか、
+- **ワールドが見つからない**: `versions/<version>/run/saves/RenderTest` があるか、
   名前が一致しているか確認します。quick play は名前の一致に厳密です。
 - **前回のプロセスが残っている**: `pgrep -af 'gradle|Minecraft'` を確認し、
   必要なら `pkill -f 'quickPlaySingleplayer RenderTest'` で止めます。
@@ -297,6 +314,25 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 | X=5 / Y=7 の保存と再起動後の保持 | OK | [editor-offset-1.20.1.png](render/editor-offset-1.20.1.png) |
 | `Done` で閉じて `F9` で再表示 | OK | 編集行が残ることを確認 |
 | 不正な行（閉じていない `<`）で保存中止 | OK | ステータスが赤いエラー表示になる |
+
+### 1.21.1（2026-10-23）
+
+NeoForge 21.1.264 でも同じ HUD・GUI を確認しました。設定画面は Esc → `Mods` →
+`InGame Info XML` → `Config` で開きます。
+
+| 項目 | 結果 | スクリーンショット |
+|---|---|---|
+| 既定 HUD（テキスト・アイテム・ポーション・防具） | OK | [hud-1.21.1.png](render/hud-1.21.1.png) |
+| タグ一覧 GUI（タイトル・検索・カテゴリ） | OK | [taglist-1.21.1.png](render/taglist-1.21.1.png) |
+| 設定 GUI 1/3〜3/3 のページ移動 | OK | [config-1.21.1.png](render/config-1.21.1.png) |
+| 設定 GUI の `Done` 後に再度開く | OK | 1/3 に戻り、値も保持 |
+| HUD エディタ（背景がぼやけず HUD が読める） | OK | [editor-1.21.1.png](render/editor-1.21.1.png) |
+| `/igi save quiet.xml` | OK | チャットに `Done!` |
+| `defaultSeedInServer` の補正ループ | 修正済み | TOML が `"0"` で安定、`.bak` なし |
+
+1.21.1 では `Screen#render` が自分で背景を描くため、画面側で `renderBackground` を
+重ねるとタイトルやラベルがぼやけます。`GuiTags` と `GuiConfigScreen` はウィジェットを
+描いたあとに文字を描くよう修正済みです。HUD エディタは背景描画を無効にしています。
 
 画像の色を機械的に確認する例:
 

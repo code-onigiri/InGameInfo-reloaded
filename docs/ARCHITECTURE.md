@@ -4,7 +4,7 @@
 
 ```
 versions/1.20.1/   Forge 47.4.0 / Java 17
-versions/1.21.1/   NeoForge 21.1.x / Java 21（計画）
+versions/1.21.1/   NeoForge 21.1.264 / Java 21
 versions/26.1.2/   NeoForge 26.1.2.x / Java 25（計画）
 ```
 
@@ -19,25 +19,27 @@ Minecraft のバージョン間では Forge / NeoForge の API だけでなく�
 - `Value` / `Operation` / タグ名の定数
 - MOD 連携 SPI のインターフェース
 
-ただし 1.20.1 の実装はまだ `versions/1.20.1` 内にあり、`common/` への抽出は
-1.21.1 移植時に、実際に 2 バージョンで共有できる部分だけを対象に行います。無理に
-共有するとバージョン固有の `ResourceLocation` やレジストリ API の差で複雑になるためです。
+現時点では 1.20.1 と 1.21.1 の実装はそれぞれの `versions/<version>/` 内にあり、`common/`
+は空です。抽出は、2 バージョンで実際に同じコードが動くと確認できた部分だけを対象に
+行います。無理に共有するとバージョン固有の `ResourceLocation` やレジストリ API の差で
+複雑になるためです。
 
-## 1.20.1 の処理の流れ
+## 処理の流れ（1.20.1 / 1.21.1）
 
 1. `InGameInfoXML` コンストラクタ
    - ネットワークパケット登録
    - `ConfigurationHandler.SPEC` を CLIENT 設定として登録
    - Config Screen ファクトリ登録
 2. `FMLClientSetupEvent`
-   - `InGameInfoCore` と `Ticker` を Forge イベントバスへ登録
+   - `Ticker` をローダーのイベントバスへ登録（1.21.1 の `InGameInfoCore` は
+     `@SubscribeEvent` を持たないため登録しない。`Ticker` が直接呼ぶ）
    - `ValueRegistry.init()` → `TagRegistry.init()` → `PluginLoader.load()`
    - `config/InGameInfo.xml` を読み込み
-3. 毎フレーム `RenderGuiEvent.Post`
+3. 毎フレーム `RenderGuiEvent.Post`（1.21.1 も同名）
    - `Ticker.isRunning()` を判定
    - `InGameInfoCore.onTickClient()` がタグを評価して `Info` ツリーを構築
    - `InGameInfoCore.onTickRender(GuiGraphics)` が描画
-4. `RenderGuiOverlayEvent.Pre`
+4. `RenderGuiOverlayEvent.Pre`（1.21.1 は `RenderGuiLayerEvent.Pre`）
    - バニラの体力・空腹・酸素・ポーションアイコン・デバッグ文字を必要に応じてキャンセル
 
 ## HUD エディタ

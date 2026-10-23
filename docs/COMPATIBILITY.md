@@ -1,7 +1,7 @@
 # 1.12.2 との互換性
 
 このプロジェクトは「1.12.2 版と同じ設定ファイルで、同じ HUD になる」ことを第一目標に
-しています。ただし 1.20.1 で削除された概念（数値 ID、ブロック metadata、クライアント
+しています。ただし 1.20.1 以降で削除された概念（数値 ID、ブロック metadata、クライアント
 側のワールドファイルサイズなど）は再現できないため、タグ名を維持したまま互換値を
 返します。
 
@@ -22,8 +22,9 @@
 
 ## 設定
 
-1.12.2 の `Configuration` は Forge の TOML（`config/ingameinfoxml-client.toml`）に
-なりました。キー名と既定値は可能な限り合わせています。
+1.12.2 の `Configuration` は Forge / NeoForge の TOML
+（`config/ingameinfoxml-client.toml`）になりました。キー名と既定値は可能な限り合わせて
+います。以下の表は 1.20.1 と 1.21.1 で共通です。
 
 | 1.12.2 | 1.20.1 | 備考 |
 |---|---|---|
@@ -46,6 +47,16 @@
 アライメントの値は HUD エディタからも変更できます。保存すると TOML に書き込まれ、
 次回起動時に読み込まれます。
 
+### 1.21.1 固有の設定差
+
+- 設定ファイルの場所・キー名・既定値は 1.20.1 と同じです。
+- `defaultSeedInServer` だけは、1.21.1 では文字列（`"0"`）として保存されます。
+  TOML の整数は 32bit で、NeoForge の設定検証が `Long` と一致せずファイルを毎回
+  書き換えてしまうためです。1.20.1 の TOML をそのまま 1.21.1 へコピーすると
+  このキーが補正されます（他のキーと HUD 表示には影響しません）。
+- Config Screen は NeoForge の `IConfigScreenFactory` 拡張ポイントで開きます。
+  Mods 画面の Config ボタンから同じ画面になります。
+
 1.12.2 の設定 GUI は Forge の Config Screen に置き換えました（Mods 画面 →
 InGame Info XML → Config）。GUI の項目名は `config/ingameinfoxml-client.toml` の
 コメントとゲーム内言語ファイルで確認できます。
@@ -53,7 +64,8 @@ InGame Info XML → Config）。GUI の項目名は `config/ingameinfoxml-client
 ## タグ
 
 1.12.2 のタグ名・エイリアスはすべて登録されています（存在しない値を除く）。
-1.20.1 の既定環境（連携 MOD なし）では 547 タグ（エイリアスと Forge Energy 連携を含む）。
+1.20.1 / 1.21.1 の既定環境（連携 MOD なし）では 547 タグ（エイリアスと Forge / NeoForge
+Energy 連携を含む）。
 連携 MOD を入れると、その MOD のタグが追加されます。
 
 ### 値が変わるタグ
@@ -99,7 +111,7 @@ InGame Info XML → Config）。GUI の項目名は `config/ingameinfoxml-client
 これらは DF11ZomGraves 版で追加されたものです。1.12.2 の定義ファイルに影響は
 ありません（未使用なら無視されます）。
 
-### MOD 連携タグ（1.20.1 で追加）
+### MOD 連携タグ（1.20.1 / 1.21.1 で追加）
 
 次のタグは、対応 MOD が入っている場合だけ登録されます。MOD がない環境では
 `{createrpm}` のような未知のタグとして扱われ、HUD にはそのまま残ります
@@ -120,7 +132,7 @@ InGame Info XML → Config）。GUI の項目名は `config/ingameinfoxml-client
 値の評価はすべてクライアント側で行い、連携 MOD の API が変わって例外になっても
 そのタグだけ空文字になります。HUD 全体は描画され続けます。
 
-### HUD エディタ（1.20.1 で追加）
+### HUD エディタ（1.20.1 / 1.21.1 で追加）
 
 1.12.2 にはない GUI です。`F9` または `/igi editor` で開きます。行は
 `config/InGameInfo.xml` に、アライメントの X / Y は
@@ -158,9 +170,9 @@ InGame Info XML → Config）。GUI の項目名は `config/ingameinfoxml-client
 - 1.12.2 時代の Blood Magic / Simply Jetpacks / TerraFirmaCraft / Thaumcraft 連携タグ。
   1.20.1 に対応する MOD がない、または API が大きく変わったためです。
   これらは [MOD 連携 SPI](ARCHITECTURE.md) で後から追加できます。
-- 上記の代わりに、1.20.1 で現役の Create / Curios / Serene Seasons / Ars Nouveau /
-  Iron's Spells 'n Spellbooks / Tough As Nails / Forge Energy を任意連携として
-  追加しました（MOD が入っている場合のみ有効）。
+- 上記の代わりに、1.20.1 / 1.21.1 で現役の Create / Curios / Serene Seasons /
+  Ars Nouveau / Iron's Spells 'n Spellbooks / Tough As Nails / Forge Energy を
+  任意連携として追加しました（MOD が入っている場合のみ有効）。
 - 1.12.2 の `mcmod.info`、Forge 1.12 の `Configuration` GUI。
 - 1.12.2 のアップデートチェック IMC（配布チャネルが異なるため）。
 

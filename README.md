@@ -9,15 +9,15 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 | バージョン | ローダー | 状態 |
 |---|---|---|
 | 1.20.1 | Forge 47.4.0 / Java 17 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
-| 1.21.1 | NeoForge 21.1.x / Java 21 | 計画中（環境のみ用意） |
+| 1.21.1 | NeoForge 21.1.264 / Java 21 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
 | 26.1.2 | NeoForge 26.1.2.x / Java 25 | 計画中（環境のみ用意） |
 
-1.20.1 版は次を移植済みです。
+1.20.1 / 1.21.1 版は次を移植済みです。
 
 - HUD 描画（テキスト、アイコン、アイテム、ポーション効果、9 アライメント、スケール）
 - 既定の `ingameinfo.xml`、XML / JSON / TXT パーサー
 - XML / JSON / TXT プリンター（`/igi save`）
-- 設定画面（Forge Config Screen）と `/igi config`
+- 設定画面（Forge / NeoForge の Config Screen）と `/igi config`
 - タグ一覧 GUI（`/igi taglist`）
 - HUD エディタ（`F9` または `/igi editor`）。行の追加・削除・並べ替え、
   9 アライメントの選択とオフセット調整、タグ一覧からクリックで挿入、ライブプレビュー
@@ -42,7 +42,8 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 │   └── RENDER_TEST.md         # ヘッドレス描画テストの手順
 ├── scripts/render-test.sh     # Xvfb + llvmpipe で HUD をスクリーンショット
 └── versions/
-    └── 1.20.1/                # Forge 1.20.1 の実装
+    ├── 1.20.1/                # Forge 1.20.1 の実装
+    └── 1.21.1/                # NeoForge 1.21.1 の実装
 ```
 
 `InGame-Info-XML/` は比較用の 1.12.2 原本で、別 Git リポジトリです（このリポジトリでは
@@ -54,27 +55,32 @@ Nix 2.18 以降（flake 有効）を推奨します。JDK・Gradle 用 Java・GU
 ネイティブライブラリ・Xvfb・Mesa は flake が用意します。
 
 ```bash
-nix develop .#mc1201     # 1.20.1: JDK 17
-# nix develop .#mc1211   # 1.21.1: JDK 21（将来）
+nix develop .#mc1201     # 1.20.1: Forge / JDK 17
+nix develop .#mc1211     # 1.21.1: NeoForge / JDK 21
 # nix develop .#mc2612   # 26.1.2: JDK 25（将来）
 ```
 
-Nix を使わない場合は JDK 17 と Gradle 8.8 を用意してください。Gradle は同梱の
-wrapper を使います。
+Nix を使わない場合は、1.20.1 は JDK 17、1.21.1 は JDK 21 と Gradle 8.8 を用意して
+ください。Gradle は同梱の wrapper を使います。
 
 ## ビルド
 
 ```bash
+# 1.20.1 (Forge)
 nix develop .#mc1201 -c bash -c 'cd versions/1.20.1 && ./gradlew build'
+
+# 1.21.1 (NeoForge)
+nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew build'
 ```
 
-成果物は `versions/1.20.1/build/libs/ingameinfoxml-*.jar` です。Forge 47.4.0 の
-クライアント・サーバーにそのまま入れられます。
+成果物は `versions/<version>/build/libs/ingameinfoxml-*.jar` です。1.20.1 は Forge
+47.4.0、1.21.1 は NeoForge 21.1.264 のクライアント・サーバーにそのまま入れられます。
 
 ## クライアント起動
 
 ```bash
 nix develop .#mc1201 -c bash -c 'cd versions/1.20.1 && ./gradlew runClient'
+nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew runClient'
 ```
 
 ## ヘッドレス描画テスト
@@ -83,16 +89,20 @@ Xvfb（仮想 X サーバー）と Mesa の llvmpipe（ソフトウェア GL）�
 HUD を PNG に保存します。GPU もログインも不要です。
 
 ```bash
-nix develop .#mc1201 -c scripts/render-test.sh 1.20.1 RenderTest
+GRADLE_USER_HOME=/tmp/gradle-home \
+  nix develop .#mc1201 -c scripts/render-test.sh 1.20.1 RenderTest
+GRADLE_USER_HOME=/tmp/gradle-home \
+  nix develop .#mc1211 -c scripts/render-test.sh 1.21.1 RenderTest
 ```
 
-出力は `docs/render/hud-1.20.1.png` と `docs/render/client-1.20.1.log`。テスト用
+出力は `docs/render/hud-<version>.png` と `docs/render/client-<version>.log`。テスト用
 ワールドの作り方は [docs/RENDER_TEST.md](docs/RENDER_TEST.md) を参照してください。
 `HUD_DELAY=60` のように待ち時間を延ばせます。
 
 ## 設定
 
-初回起動時に Forge の設定ファイル `config/ingameinfoxml-client.toml` と、表示定義
+初回起動時にローダーの設定ファイル `config/ingameinfoxml-client.toml`（1.20.1 は
+Forge、1.21.1 は NeoForge）と、表示定義
 `config/InGameInfo.xml` が生成されます（表示定義は 1.12.2 と同じファイル名・書式）。
 
 - `/igi reload` — 表示定義を再読み込み
@@ -107,7 +117,7 @@ nix develop .#mc1201 -c scripts/render-test.sh 1.20.1 RenderTest
 ## 1.12.2 との違い（要約）
 
 レガシーな数値 ID・ブロック metadata・クライアント側のワールドファイルサイズなど、
-1.20.1 に存在しない概念があります。タグ名と出力形式は維持し、再現できない値は
+1.20.1 以降に存在しない概念があります。タグ名と出力形式は維持し、再現できない値は
 「-1」「0」「?」などの互換値にしています。また、明確な描画バグ（HUD の二重描画、
 ポーションアイコンの Y 二重加算）は修正しています。全リストは
 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) を参照してください。
@@ -133,7 +143,7 @@ nix develop .#mc1201 -c scripts/render-test.sh 1.20.1 RenderTest
 他 MOD はコンパイル時依存なしでタグ・値を作れます。詳しくは
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) を参照してください。
 
-1.20.1 では次の MOD を任意で検出し、入っている場合だけタグを登録します。
+1.20.1 / 1.21.1 では次の MOD を任意で検出し、入っている場合だけタグを登録します。
 
 | MOD | 主なタグ |
 |---|---|
@@ -143,12 +153,12 @@ nix develop .#mc1201 -c scripts/render-test.sh 1.20.1 RenderTest
 | Ars Nouveau | `arsmana`, `arsmaxmana`, `arsmanapercent` |
 | Iron's Spells 'n Spellbooks | `ironsmana`, `ironsmaxmana`, `ironsmanapercent` |
 | Tough As Nails | `thirst`, `hydration`, `temperature`, `bodytemperature` |
-| Forge Energy（常時） | `energy`, `maxenergy`, `energypercent`, `fe` ほか |
+| Forge / NeoForge Energy（常時） | `energy`, `maxenergy`, `energypercent`, `fe` ほか |
 
 連携はリフレクションで実装しているため、MOD 側の API が変わると値が空になる
 ことがあります。その場合も HUD の他の行は表示され続けます。
 
 ## ライセンス
 
-MIT。元実装 Copyright 2014-2016 Jadran "Lunatrius" Kotnik、1.20.1 移植の土台は
+MIT。元実装 Copyright 2014-2016 Jadran "Lunatrius" Kotnik、1.20.1 / 1.21.1 移植の土台は
 Copyright 2025 DF11ZomGraves。`LICENSE` を参照してください。
