@@ -103,7 +103,9 @@ public interface InGameInfoPlugin {
 `GoetyIntegration`、`ParaglidersIntegration`、`BotaniaIntegration`、
 `Ae2Integration` を登録します。`EnergyIntegration` は Forge / NeoForge 標準機能なので
 常に登録します。各連携は `Reflect` 経由で MOD のクラスを呼ぶため、コンパイル時依存も
-実行時のクラスロードエラーもありません。
+実行時のクラスロードエラーもありません。クロスヘア先のブロックを優先して読むタグは
+末尾に `over` を付けます（`createrpmover`, `ae2networkover` など）。旧名は
+エイリアスとして残し、既存の表示定義を壊さないようにしています。
 
 `Reflect` はクラス階層だけでなく実装インターフェースの default メソッドも探します。
 AE2 の `IInWorldGridNodeHost#getGridNode()` や `IGridNode#getGrid()` はインターフェース

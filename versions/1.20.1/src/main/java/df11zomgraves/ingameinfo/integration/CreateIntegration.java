@@ -184,11 +184,11 @@ public final class CreateIntegration {
     }
 
     public static void register() {
-        TagRegistry.INSTANCE.register(new Rpm().setName("createrpm").setAliases("createspeed", "kineticrpm"));
-        TagRegistry.INSTANCE.register(new Kinetic().setName("createkinetic").setAliases("kinetic"));
-        TagRegistry.INSTANCE.register(new Stress().setName("createstress"));
-        TagRegistry.INSTANCE.register(new StressCapacity().setName("createstresscapacity"));
-        TagRegistry.INSTANCE.register(new StressPercent().setName("createstresspercent"));
-        TagRegistry.INSTANCE.register(new NetworkSize().setName("createnetworksize"));
+        TagRegistry.INSTANCE.register(new Rpm().setName("createrpmover").setAliases("createspeed", "kineticrpm", "createrpm"));
+        TagRegistry.INSTANCE.register(new Kinetic().setName("createkineticover").setAliases("kinetic", "createkinetic"));
+        TagRegistry.INSTANCE.register(new Stress().setName("createstressover").setAliases("createstress"));
+        TagRegistry.INSTANCE.register(new StressCapacity().setName("createstresscapacityover").setAliases("createstresscapacity"));
+        TagRegistry.INSTANCE.register(new StressPercent().setName("createstresspercentover").setAliases("createstresspercent"));
+        TagRegistry.INSTANCE.register(new NetworkSize().setName("createnetworksizeover").setAliases("createnetworksize"));
     }
 }

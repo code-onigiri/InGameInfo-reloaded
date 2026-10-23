@@ -437,15 +437,18 @@ Minecraft 1.20.1 + Forge 47.4.28 の本番クライアントで行いました�
 HUD 設定例:
 
 ```xml
-net: <var>ae2network</var> ch: <var>ae2channels</var> mode: <var>ae2channelmode</var>
-AE: <var>ae2gridpower</var>/<var>ae2gridmaxpower</var> use: <var>ae2gridpowerusage</var>
+net: <var>ae2networkover</var> ch: <var>ae2channelsover</var> mode: <var>ae2channelmodeover</var>
+AE: <var>ae2gridpowerover</var>/<var>ae2gridmaxpowerover</var> use: <var>ae2gridpowerusageover</var>
 cell: <var>ae2cellused</var>/<var>ae2celltotal</var> types <var>ae2celltypes</var> pct <var>ae2cellpercent</var>
 status: <var>ae2cellstatus</var>
 ```
 
 1.21.1 の確認結果は [ae2-1.21.1.png](render/ae2-1.21.1.png)。チャンネル数 1、
 モード `default`、グリッド電力 922.3T/922.3T、使用量、セル 0/1024、`status: empty`
-まで描画されています。
+まで描画されています。タグ名を `over` 付きに変えたあとも、
+[ae2-over-1.21.1.png](render/ae2-over-1.21.1.png) で新名
+（`ae2networkover`, `ae2channelsover`, `ae2gridpowerover`）と旧名
+（`ae2network`, `ae2channels`）が同じ値で並ぶことを確認しました。
 
 複数ネットワークの切り分けは [ae2-targeting-1.21.1.png](render/ae2-targeting-1.21.1.png)。
 上から、ドライブを含むネットワークを見た状態（`net: block ch: 1`）、周囲に

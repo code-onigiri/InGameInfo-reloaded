@@ -159,7 +159,7 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 
 | MOD | 主なタグ |
 |---|---|
-| Create | `createrpm`, `createspeed`, `createkinetic`, `createstress`, `createstresscapacity`, `createstresspercent`, `createnetworksize` |
+| Create | `createrpmover`, `createkineticover`, `createstressover`, `createstresscapacityover`, `createstresspercentover`, `createnetworksizeover` |
 | Curios | `curioslots`, `curioslotcount`, `curioitems`, `curios` |
 | Serene Seasons | `season`, `subseason`, `tropicalseason`, `seasonday`, `seasonticks`, `seasonprogress`, `seasonpercent` |
 | Ars Nouveau | `arsmana`, `arsmaxmana`, `arsmanapercent` |
@@ -171,8 +171,16 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 | Goety | `goetysouls`, `goetyactive` |
 | Paragliders | `stamina`, `maxstamina`, `staminapencent`, `staminadepleted` |
 | Botania（1.20.1 のみ） | `botaniamana`, `botaniamaxmana`, `botaniamanapercent` |
-| Applied Energistics 2 | `ae2network`, `ae2channels`, `ae2channelmode`, `ae2gridpower`, `ae2gridpowerusage`, `ae2cellused`, `ae2celltotal`, `ae2celltypes`, `ae2cellstatus` ほか |
+| Applied Energistics 2 | `ae2networkover`, `ae2channelsover`, `ae2channelmodeover`, `ae2gridpowerover`, `ae2gridpowerusageover`, `ae2cellused`, `ae2celltotal`, `ae2celltypes`, `ae2cellstatus` ほか |
 | Forge / NeoForge Energy（常時） | `energy`, `maxenergy`, `energypercent`, `fe` ほか |
+
+クロスヘア先のブロックを優先して読むタグは末尾に `over` を付けます
+（`createrpmover`, `ae2networkover` など）。Create は搭乗中の装置、AE2 は
+リンク済みワイヤレス端末にもフォールバックしますが、名前は `over` に統一しています。
+旧名（`createrpm`, `ae2network` など）は別名として残しているため、既存の設定ファイルは
+そのまま動きます。Create のタグは対象ブロックがない場合も行を消さず、RPM・ストレス系は
+`0.0`、`createkineticover` は `false` を返します（搭乗中の Create 装置がある場合は
+そちらを読みます）。
 
 Paragliders は 1.20.1 / 1.21.1 の実クライアントで HUD 表示まで確認済みです。
 Applied Energistics 2 はクロスヘア先のブロックのネットワークを優先し、見ていない

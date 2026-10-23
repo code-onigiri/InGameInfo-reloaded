@@ -66,14 +66,14 @@ public final class Ae2Integration {
 
     public static void register() {
         active = true;
-        TagRegistry.INSTANCE.register(new NetworkSource().setName("ae2network"));
-        TagRegistry.INSTANCE.register(new Channels().setName("ae2channels").setAliases("ae2channel"));
-        TagRegistry.INSTANCE.register(new ChannelMode().setName("ae2channelmode"));
-        TagRegistry.INSTANCE.register(new GridPower().setName("ae2gridpower"));
-        TagRegistry.INSTANCE.register(new GridMaxPower().setName("ae2gridmaxpower"));
-        TagRegistry.INSTANCE.register(new GridPowerUsage().setName("ae2gridpowerusage"));
-        TagRegistry.INSTANCE.register(new GridPowerInjection().setName("ae2gridpowerinjection"));
-        TagRegistry.INSTANCE.register(new ChannelPower().setName("ae2channelpower"));
+        TagRegistry.INSTANCE.register(new NetworkSource().setName("ae2networkover").setAliases("ae2network"));
+        TagRegistry.INSTANCE.register(new Channels().setName("ae2channelsover").setAliases("ae2channel", "ae2channels"));
+        TagRegistry.INSTANCE.register(new ChannelMode().setName("ae2channelmodeover").setAliases("ae2channelmode"));
+        TagRegistry.INSTANCE.register(new GridPower().setName("ae2gridpowerover").setAliases("ae2gridpower"));
+        TagRegistry.INSTANCE.register(new GridMaxPower().setName("ae2gridmaxpowerover").setAliases("ae2gridmaxpower"));
+        TagRegistry.INSTANCE.register(new GridPowerUsage().setName("ae2gridpowerusageover").setAliases("ae2gridpowerusage"));
+        TagRegistry.INSTANCE.register(new GridPowerInjection().setName("ae2gridpowerinjectionover").setAliases("ae2gridpowerinjection"));
+        TagRegistry.INSTANCE.register(new ChannelPower().setName("ae2channelpowerover").setAliases("ae2channelpower"));
 
         TagRegistry.INSTANCE.register(new CellUsed().setName("ae2cellused"));
         TagRegistry.INSTANCE.register(new CellTotal().setName("ae2celltotal"));

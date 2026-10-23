@@ -125,11 +125,14 @@ Forge / NeoForge Energy 連携を含む）。
 ### MOD 連携タグ（1.20.1 / 1.21.1 / 26.1.2 で追加）
 
 次のタグは、対応 MOD が入っている場合だけ登録されます。MOD がない環境では
-`{createrpm}` のような未知のタグとして扱われ、HUD にはそのまま残ります
-（1.12.2 の未登録タグと同じ挙動）。
+`{createrpmover}` のような未知のタグとして扱われ、HUD にはそのまま残ります
+（1.12.2 の未登録タグと同じ挙動）。クロスヘア先のブロックを優先して読むタグは
+末尾に `over` を付けます。旧名は別名として残しているため、既存の設定はそのまま動きます。
 
-- Create: `createrpm`, `createspeed`, `kineticrpm`, `createkinetic`, `kinetic`,
-  `createstress`, `createstresscapacity`, `createstresspercent`, `createnetworksize`
+- Create: `createrpmover`, `createkineticover`, `createstressover`,
+  `createstresscapacityover`, `createstresspercentover`, `createnetworksizeover`
+  （旧名 `createrpm`, `createspeed`, `kineticrpm`, `createkinetic`, `kinetic`,
+  `createstress`, `createstresscapacity`, `createstresspercent`, `createnetworksize` は別名）
 - Curios: `curioslots`, `curioslotcount`, `curioitems`, `curios`
 - Serene Seasons: `season`, `subseason`, `seasonphase`, `tropicalseason`, `seasonday`,
   `seasonticks`, `seasonprogress`, `seasonpercent`
@@ -145,13 +148,19 @@ Forge / NeoForge Energy 連携を含む）。
 - Goety: `goetysouls`, `goetyactive`
 - Paragliders: `stamina`, `maxstamina`, `staminapencent`, `staminadepleted`
 - Botania（1.20.1 のみ）: `botaniamana`, `botaniamaxmana`, `botaniamanapercent`
-- Applied Energistics 2: `ae2network`, `ae2channels`（別名 `ae2channel`）,
-  `ae2channelmode`, `ae2gridpower`, `ae2gridmaxpower`, `ae2gridpowerusage`,
-  `ae2gridpowerinjection`, `ae2channelpower`, `ae2cellused`, `ae2celltotal`,
+- Applied Energistics 2: `ae2networkover`, `ae2channelsover`, `ae2channelmodeover`,
+  `ae2gridpowerover`, `ae2gridmaxpowerover`, `ae2gridpowerusageover`,
+  `ae2gridpowerinjectionover`, `ae2channelpowerover`, `ae2cellused`, `ae2celltotal`,
   `ae2celltypes`, `ae2cellmaxtypes`, `ae2cellcount`, `ae2cellpercent`,
   `ae2cellstatus`, `ae2power`, `ae2maxpower`, `ae2powerpercent`
+  （旧名 `ae2network`, `ae2channels`/`ae2channel`, `ae2channelmode`, `ae2gridpower`,
+  `ae2gridmaxpower`, `ae2gridpowerusage`, `ae2gridpowerinjection`, `ae2channelpower` は別名）
 - Forge / NeoForge Energy（常時）: `energy`, `fe`, `maxenergy`, `maxfe`,
   `energypercent`, `fepercent`
+
+Create のタグは対象ブロックがない場合も行を消さず、RPM・ストレス系は `0.0`、
+`createkineticover` は `false` を返します。搭乗中の Create 装置がある場合はその中の
+運動ブロックを読みます。
 
 値の評価はすべてクライアント側で行い、連携 MOD の API が変わって例外になっても
 そのタグだけ空文字になります。HUD 全体は描画され続けます。
@@ -165,7 +174,7 @@ HUD に出すため、クライアントから `RequestAe2Packet` を送り、�
 
 1. クロスヘア先の AE2 ブロック（8 ブロック以内）が属するグリッド
 2. クロスヘア先に AE2 グリッドがない場合、インベントリ内のリンク済みワイヤレス端末のグリッド
-3. どちらもない場合は `ae2network` が `none`、電力系は 0
+3. どちらもない場合は `ae2networkover` が `none`、電力系は 0
 
 複数のネットワークが近くにあっても、見ているブロックのグリッドだけを表示します。
 周辺のグリッドを勝手に選ぶフォールバックはありません。セル系はメインハンド／
