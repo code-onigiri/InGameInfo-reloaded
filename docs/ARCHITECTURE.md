@@ -98,8 +98,10 @@ public interface InGameInfoPlugin {
 本体に同梱している任意連携（`integration/`）も同じ考え方です。`IntegrationLoader`
 が `ModList.get().isLoaded(...)` で MOD の有無を確認し、入っているものだけ
 `CreateIntegration`、`CuriosIntegration`、`SereneSeasonsIntegration`、
-`ArsNouveauIntegration`、`IronsSpellbooksIntegration`、`ToughAsNailsIntegration` を
-登録します。`EnergyIntegration` は Forge 標準機能なので常に登録します。各連携は
+`ArsNouveauIntegration`、`IronsSpellbooksIntegration`、`ToughAsNailsIntegration`、
+`VampirismIntegration`、`ColdSweatIntegration`、`ThirstWasTakenIntegration`、
+`GoetyIntegration`、`ParaglidersIntegration`、`BotaniaIntegration` を登録します。
+`EnergyIntegration` は Forge / NeoForge 標準機能なので常に登録します。各連携は
 `Reflect` 経由で MOD のクラスを呼ぶため、コンパイル時依存も実行時のクラス
 ロードエラーもありません。
 

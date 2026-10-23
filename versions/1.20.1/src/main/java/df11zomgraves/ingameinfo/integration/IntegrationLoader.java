@@ -27,6 +27,24 @@ public final class IntegrationLoader {
         if (loaded("toughasnails")) {
             ToughAsNailsIntegration.register();
         }
+        if (loaded("vampirism")) {
+            VampirismIntegration.register();
+        }
+        if (loaded("cold_sweat")) {
+            ColdSweatIntegration.register();
+        }
+        if (loaded("thirst")) {
+            ThirstWasTakenIntegration.register();
+        }
+        if (loaded("goety")) {
+            GoetyIntegration.register();
+        }
+        if (loaded("paraglider")) {
+            ParaglidersIntegration.register();
+        }
+        if (loaded("botania")) {
+            BotaniaIntegration.register();
+        }
         EnergyIntegration.register();
 
         InGameInfoXML.logger.info("Registered optional mod integration tags.");

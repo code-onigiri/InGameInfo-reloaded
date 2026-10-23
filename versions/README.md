@@ -108,6 +108,32 @@ Nix を使わない場合は JDK 17 / 21 / 25 のいずれかと、1.20.1 / 1.21
   既定設定はリソースパックが揃ってから `ConfigReloadListener` が読み込む。
   foojay-resolver-convention は 1.0.0 を使う（0.8.0 は Gradle 9 で失敗）。
 
+## 任意 MOD 連携
+
+`integration/` の各クラスはリフレクションだけで実装し、Minecraft の `Player` /
+`ItemStack` 以外の型をコンパイル時に参照しません。`IntegrationLoader` が
+`ModList.isLoaded(modId)` で判定し、入っている MOD のタグだけ登録します。
+
+| MOD ID | タグ |
+|---|---|
+| `create` | `createrpm`, `createkinetic`, `createstress`, `createstresscapacity`, `createstresspercent`, `createnetworksize` |
+| `curios` | `curioslots`, `curioitems` |
+| `sereneseasons` | `season`, `subseason`, `tropicalseason`, `seasonday`, `seasonticks`, `seasonprogress` |
+| `ars_nouveau` | `arsmana`, `arsmaxmana`, `arsmanapercent` |
+| `irons_spellbooks` | `ironsmana`, `ironsmaxmana`, `ironsmanapercent` |
+| `toughasnails` | `thirst`, `hydration`, `temperature`, `temperaturelevel` |
+| `vampirism` | `blood`, `maxblood`, `bloodpercent`, `vampirelevel` |
+| `cold_sweat` | `coldsweat`, `coldsweatworld` |
+| `thirst` | `twtthirst`, `twtquenched`, `twtexhaustion` |
+| `goety` | `goetysouls`, `goetyactive` |
+| `paraglider` | `stamina`, `maxstamina`, `staminapencent`, `staminadepleted` |
+| `botania`（1.20.1 のみ） | `botaniamana`, `botaniamaxmana`, `botaniamanapercent` |
+| Energy（常時） | `energy`, `maxenergy`, `energypercent` |
+
+Paragliders は 1.20.1 / 1.21.1 の実クライアントで表示を確認済みです。1.20.1 の
+開発実行では本番 jar が SRG 名のため、deobf した jar を使います（手順は
+[docs/RENDER_TEST.md](../docs/RENDER_TEST.md)）。26.1.2 はコンパイル確認までです。
+
 ## テスト
 
 描画テストの手順は [docs/RENDER_TEST.md](../docs/RENDER_TEST.md) にあります。各

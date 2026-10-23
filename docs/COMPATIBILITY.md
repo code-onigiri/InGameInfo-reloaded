@@ -138,11 +138,24 @@ Forge / NeoForge Energy 連携を含む）。
   `ironsmanapercent`
 - Tough As Nails: `thirst`, `hydration`, `temperature`, `bodytemperature`,
   `temperaturelevel`
+- Vampirism: `blood`, `maxblood`, `bloodpercent`, `vampirelevel`
+- Cold Sweat: `coldsweat`（体温）, `coldsweatworld`（環境温度）
+- Thirst Was Taken: `twtthirst`, `twtquenched`, `twtexhaustion`
+  （Tough As Nails と衝突しないよう `twt` 接頭辞）
+- Goety: `goetysouls`, `goetyactive`
+- Paragliders: `stamina`, `maxstamina`, `staminapencent`, `staminadepleted`
+- Botania（1.20.1 のみ）: `botaniamana`, `botaniamaxmana`, `botaniamanapercent`
 - Forge / NeoForge Energy（常時）: `energy`, `fe`, `maxenergy`, `maxfe`,
   `energypercent`, `fepercent`
 
 値の評価はすべてクライアント側で行い、連携 MOD の API が変わって例外になっても
 そのタグだけ空文字になります。HUD 全体は描画され続けます。
+
+Paragliders は 1.20.1 / 1.21.1 の実クライアントで、スタミナ・最大値・割合・
+枯渇状態が HUD に出るところまで確認しました。他の連携はコンパイル確認までです。
+1.20.1 Forge の開発実行に本番 jar をそのまま入れると SRG 名の Mixin や
+`ResourceLocation` のマッピング差で失敗するため、検証時は deobf jar を使います
+（手順は [RENDER_TEST.md](RENDER_TEST.md)）。
 
 ### HUD エディタ（1.20.1 / 1.21.1 / 26.1.2 で追加）
 
@@ -185,6 +198,9 @@ Forge / NeoForge Energy 連携を含む）。
 - 上記の代わりに、1.20.1 / 1.21.1 / 26.1.2 で現役の Create / Curios / Serene Seasons /
   Ars Nouveau / Iron's Spells 'n Spellbooks / Tough As Nails / Forge Energy を
   任意連携として追加しました（MOD が入っている場合のみ有効）。
+- 人気度の高い MOD から、プレイヤー固有の資源を表示する連携を追加しました:
+  Vampirism（血）, Cold Sweat（体温）, Thirst Was Taken（渇き）,
+  Goety（ソウル）, Paragliders（スタミナ）, Botania（マナ、1.20.1 のみ）。
 - 1.12.2 の `mcmod.info`、Forge 1.12 の `Configuration` GUI。
 - 1.12.2 のアップデートチェック IMC（配布チャネルが異なるため）。
 

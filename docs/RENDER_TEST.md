@@ -18,7 +18,8 @@ GUI を実際に描画し、スクリーンショットで確認する手順を�
 - コマンド（`/igi save`、`/igi reload` など）の入出力
 
 MOD 連携タグそのものは、連携 MOD を入れた環境で別途確認します。SPI の読み込みだけなら
-ログの `PluginLoader` 出力で確認できます。
+ログの `PluginLoader` 出力で確認できます。実 MOD を入れた確認は
+下の「MOD 連携（Paragliders）」にまとめています。
 
 ## 前提
 
@@ -371,6 +372,54 @@ NeoForge 26.1.2.122 でも同じ HUD・GUI を確認しました。設定画面�
 Xvfb を再起動せずにクライアントだけ入れ替えると、前回の画面がルートに残って
 誤ったスクリーンショットになることがあります。撮る前に必ずウィンドウを確認して
 ください。
+
+## MOD 連携（Paragliders、1.20.1 / 1.21.1）
+
+連携の実例として Paragliders を入れ、スタミナの 4 タグを HUD に出して確認しました。
+
+- 1.21.1: `/tmp/mods1211/Paraglider-neoforge-21.1.5.jar` を `versions/1.21.1/run/mods/`
+  に置くだけで動きます。ログは `Registered 551 tags.`（既定 547 + Paraglider 4）。
+- 1.20.1: Forge の開発実行は公式 Mappings、本番 jar は SRG 名なので、そのまま入れると
+  `NoSuchMethodError: ResourceLocation.m_135827_()` などで落ちます。一時的な init script で
+deobf した jar を作ってから入れます。
+
+```groovy
+// /tmp/deobf-paraglider.init.gradle
+allprojects { p ->
+    p.afterEvaluate {
+        if (p.path == ':') {
+            p.repositories { flatDir { dirs '/tmp/mods1201' } }
+            def cfg = p.configurations.create('runtimeTestMod')
+            p.dependencies.add('runtimeTestMod', p.fg.deobf('test:Paraglider-forge:20.1.3'))
+            p.tasks.register('copyRuntimeTestMod', Copy) {
+                from cfg
+                into p.file('run/mods')
+            }
+        }
+    }
+}
+```
+
+```bash
+cd versions/1.20.1
+GRADLE_USER_HOME=/tmp/gradle-home nix develop <repo>#mc1201 \
+  --command ./gradlew copyRuntimeTestMod --init-script /tmp/deobf-paraglider.init.gradle --no-daemon
+# run/mods に残った元の Paraglider-forge-20.1.3.jar を消し、*_mapped_official_1.20.1.jar だけ残す
+```
+
+HUD 設定に次の行を足して確認します。
+
+```xml
+<var>stamina</var> / <var>maxstamina</var> (<var>staminapencent</var>) depleted=<var>staminadepleted</var>
+```
+
+結果は 1.20.1 / 1.21.1 とも `1000 / 1000 (100.0%) depleted=false` で、
+[integration-paraglider-1.20.1.png](render/integration-paraglider-1.20.1.png) と
+[integration-paraglider-1.21.1.png](render/integration-paraglider-1.21.1.png) に残しています。
+
+Mixin を含む本番 jar（例: Cold Sweat）は deobf しても refmap が SRG のままで
+`@Shadow field f_91074_ was not located` になるため、開発実行では検証できません。
+その場合は本番環境（実際の Forge クライアント）で確認します。
 
 画像の色を機械的に確認する例:
 

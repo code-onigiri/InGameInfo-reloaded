@@ -22,7 +22,8 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 - HUD エディタ（`F9` または `/igi editor`）。行の追加・削除・並べ替え、
   9 アライメントの選択とオフセット調整、タグ一覧からクリックで挿入、ライブプレビュー
 - 主要 MOD の任意連携（Create / Curios / Serene Seasons / Ars Nouveau /
-  Iron's Spells 'n Spellbooks / Tough As Nails / Forge Energy）。MOD が入っていない
+  Iron's Spells 'n Spellbooks / Tough As Nails / Vampirism / Cold Sweat /
+  Thirst Was Taken / Goety / Paragliders / Botania / Forge Energy）。MOD が入っていない
   環境ではタグを登録せず、HUD にも影響しません
 - `/igi reload`、`load`、`save`、`enable`、`disable`
 - 9 言語（en_us, ja_jp, de_de, fr_fr, no_no, pl_pl, ru_ru, zh_cn, zh_tw）
@@ -164,10 +165,19 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 | Ars Nouveau | `arsmana`, `arsmaxmana`, `arsmanapercent` |
 | Iron's Spells 'n Spellbooks | `ironsmana`, `ironsmaxmana`, `ironsmanapercent` |
 | Tough As Nails | `thirst`, `hydration`, `temperature`, `bodytemperature` |
+| Vampirism | `blood`, `maxblood`, `bloodpercent`, `vampirelevel` |
+| Cold Sweat | `coldsweat`, `coldsweatworld` |
+| Thirst Was Taken | `twtthirst`, `twtquenched`, `twtexhaustion` |
+| Goety | `goetysouls`, `goetyactive` |
+| Paragliders | `stamina`, `maxstamina`, `staminapencent`, `staminadepleted` |
+| Botania（1.20.1 のみ） | `botaniamana`, `botaniamaxmana`, `botaniamanapercent` |
 | Forge / NeoForge Energy（常時） | `energy`, `maxenergy`, `energypercent`, `fe` ほか |
 
+Paragliders は 1.20.1 / 1.21.1 の実クライアントで HUD 表示まで確認済みです。
+その他の連携はコンパイル確認までで、MOD が入っていない場合や API が変わった
+場合はタグを登録しない／空文字を返すため、HUD の他の行には影響しません。
 連携はリフレクションで実装しているため、MOD 側の API が変わると値が空になる
-ことがあります。その場合も HUD の他の行は表示され続けます。
+ことがあります。
 
 ## ライセンス
 
