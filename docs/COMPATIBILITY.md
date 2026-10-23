@@ -155,8 +155,23 @@ Forge / NeoForge Energy 連携を含む）。
   `ae2cellstatus`, `ae2power`, `ae2maxpower`, `ae2powerpercent`
   （旧名 `ae2network`, `ae2channels`/`ae2channel`, `ae2channelmode`, `ae2gridpower`,
   `ae2gridmaxpower`, `ae2gridpowerusage`, `ae2gridpowerinjection`, `ae2channelpower` は別名）
+- Mekanism: `mekanismradiation`, `mekanismradiationlevel`, `mekanismradiationmax`,
+  `mekanismradiationseverity`, `mekanismradiationenabled`, `mekanismradiationpercent`
+  （個人線量と環境線量。1.21.1 は Attachment、1.20.1 は Capability を自動で使い分け）
+- Cobblemon: `cobblemonpartysize`、`cobblemonparty1`〜`cobblemonparty6`
+  （コンパクト表示）、`cobblemonpartyNspecies`（別名 `...Nname`）、
+  `...Nnickname`, `...Nlevel`, `...Nhp`（別名 `...Nhealth`）,
+  `...Nmaxhp`（別名 `...Nmaxhealth`）, `...Nstatus`, `...Nshiny`, `...Ntype`。
+  コンパクト表示 `cobblemonpartyN` の別名は `...Nsummary`。
+- Tinkers' Construct（1.20.1 のみ）: `tinkersdurability`, `tinkersmaxdurability`,
+  `tinkersdurabilitypercent`, `tinkersminingspeed`, `tinkersattackdamage`,
+  `tinkersharvestlevel`, `tinkersmodifiers`, `tinkersbroken`
 - Forge / NeoForge Energy（常時）: `energy`, `fe`, `maxenergy`, `maxfe`,
   `energypercent`, `fepercent`
+
+1.21.1 の実クライアントで Mekanism と Cobblemon、1.20.1 の本番 Forge クライアントで
+Tinkers' Construct の HUD 表示を確認済みです。1.20.1 の Mekanism / Cobblemon と
+26.1.2 の 3 連携はビルド確認までです。
 
 Create のタグは対象ブロックがない場合も行を消さず、RPM・ストレス系は `0.0`、
 `createkineticover` は `false` を返します。搭乗中の Create 装置がある場合はその中の
@@ -231,8 +246,9 @@ HUD に出すため、クライアントから `RequestAe2Packet` を送り、�
   1.20.1 に対応する MOD がない、または API が大きく変わったためです。
   これらは [MOD 連携 SPI](ARCHITECTURE.md) で後から追加できます。
 - 上記の代わりに、1.20.1 / 1.21.1 / 26.1.2 で現役の Create / Curios / Serene Seasons /
-  Ars Nouveau / Iron's Spells 'n Spellbooks / Tough As Nails / Forge Energy を
-  任意連携として追加しました（MOD が入っている場合のみ有効）。
+  Ars Nouveau / Iron's Spells 'n Spellbooks / Tough As Nails / Mekanism / Cobblemon /
+  Tinkers' Construct（1.20.1 のみ）/ Forge Energy を任意連携として追加しました
+  （MOD が入っている場合のみ有効）。
 - 人気度の高い MOD から、プレイヤー固有の資源を表示する連携を追加しました:
   Vampirism（血）, Cold Sweat（体温）, Thirst Was Taken（渇き）,
   Goety（ソウル）, Paragliders（スタミナ）, Botania（マナ、1.20.1 のみ）。

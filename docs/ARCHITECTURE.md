@@ -101,8 +101,9 @@ public interface InGameInfoPlugin {
 `ArsNouveauIntegration`、`IronsSpellbooksIntegration`、`ToughAsNailsIntegration`、
 `VampirismIntegration`、`ColdSweatIntegration`、`ThirstWasTakenIntegration`、
 `GoetyIntegration`、`ParaglidersIntegration`、`BotaniaIntegration`、
-`Ae2Integration` を登録します。`EnergyIntegration` は Forge / NeoForge 標準機能なので
-常に登録します。各連携は `Reflect` 経由で MOD のクラスを呼ぶため、コンパイル時依存も
+`Ae2Integration`、`MekanismIntegration`、`CobblemonIntegration`、
+`TinkersIntegration` を登録します。Tinkers は 1.20.1 のみ対象です。
+`EnergyIntegration` は Forge / NeoForge 標準機能なので常に登録します。各連携は `Reflect` 経由で MOD のクラスを呼ぶため、コンパイル時依存も
 実行時のクラスロードエラーもありません。クロスヘア先のブロックを優先して読むタグは
 末尾に `over` を付けます（`createrpmover`, `ae2networkover` など）。旧名は
 エイリアスとして残し、既存の表示定義を壊さないようにしています。

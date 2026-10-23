@@ -323,5 +323,8 @@
   "ingameinfoxml.tag.targetmaxhealth.desc": "Maximum health of the targeted entity.",
   "ingameinfoxml.tag.tps.desc": "Server ticks per second.",
   "ingameinfoxml.tag.mspt.desc": "Server milliseconds per tick.",
-  "gui.ingameinfoxml.search": "搜尋"
+  "gui.ingameinfoxml.search": "搜尋",
+  "ingameinfoxml.tag.category.mekanism.name": "通用機械",
+  "ingameinfoxml.tag.category.cobblemon.name": "方塊寶可夢",
+  "ingameinfoxml.tag.category.tinkers.name": "匠魂"
 }

@@ -476,6 +476,60 @@ magick docs/render/hud-1.20.1.png -format %c histogram:info:- | sort -nr | head 
 残っていること、`Save` 後に `ingameinfoxml-client.toml` の `topleft` が
 `"5 7"` になっていることを確認します。
 
+## MOD 連携（Mekanism / Cobblemon / Tinkers' Construct）
+
+### 1.21.1（Mekanism + Cobblemon）
+
+`versions/1.21.1/run/mods/` に次の 3 つを置き、NeoForge の開発クライアントを
+起動しました。Cobblemon は Kotlin ランタイムを同梱しないため、Kotlin for Forge も
+必要です。
+
+- `Mekanism-1.21.1-10.7.19.85.jar`
+- `Cobblemon-neoforge-1.8.2+1.21.1.jar`
+- `kotlinforforge-5.12.0-all.jar`
+
+ログは `Registered 659 tags.`。ワールド内で `/clearparty @s` のあと
+`/pokegive @s pikachu level=25` と `/pokegive @s charmander level=12` を実行すると、
+HUD は次の値を表示しました（Cobblemon の `/pokegive` はレベルをプロパティとして
+受け取るため、`/pokegive @s pikachu 25` ではレベル 1 になります）。
+
+```text
+mek: 1.00E-07 env 1.00E-07/1.00E-07 sev none on true pct 100.0
+party 2
+p1 Pikachu Lv.25 57/57
+p1s Pikachu lv 25 hp 57/57 st none sh false ty electric
+p1n Pikachu
+```
+
+Mekanism の個人線量・環境線量・最大値、深刻度、有効状態、割合と、Cobblemon の
+パーティ数・種族・レベル・HP・状態・色違い・タイプがすべて描画されています。
+Cobblemon のパーティ選択オーバーレイが画面左端に、`Change Party Selection` の
+ツールチップが右上に出るため、この撮影だけ GUI スケールを 2、HUD の `topleft` を
+`90 80` にずらしています。オーバーレイと重ならず、4 行すべて読み取れます。
+確認画像: [integration-mods-1.21.1.png](render/integration-mods-1.21.1.png)。
+
+### 1.20.1（Tinkers' Construct）
+
+Tinkers' Construct 3.12.1.231 と Mantle 1.11.117 は本番用の SRG / Mixin 入り jar で、
+ForgeGradle の開発実行では `ResourceLocation.m_135827_()` や `f_256747_` の
+解決に失敗します（AE2 と同じ制約）。そのため、Minecraft 1.20.1 + Forge 47.4.28 の
+本番クライアントで確認しました。`.prism-test/mcprod/mods/` に 2 つの jar と
+本 mod の jar を置き、`--quickPlaySingleplayer RenderTest` で起動しています。
+
+`/give @s tconstruct:pickaxe` でツールを手に持った状態の HUD:
+
+```text
+tool: 1/1 (100.0%)
+speed 1.00 atk 0.00 harvest 0
+mods 0 broken false
+```
+
+8 タグすべてが描画され、耐久値・最大耐久値・割合・採掘速度・攻撃力・
+採掘レベル・修飾子数・破損状態が Tinkers の `ToolStack` から読めています。
+`/give` で作ったツールは素材データを持たないため数値は最小値です。素材入りの
+ツールでの値の確認は今後の課題です。確認画像:
+[integration-tinkers-1.20.1.png](render/integration-tinkers-1.20.1.png)。
+
 ## 新しいバージョンへ展開するとき
 
 - バージョンごとに `versions/<version>/run/saves/RenderTest` を用意する

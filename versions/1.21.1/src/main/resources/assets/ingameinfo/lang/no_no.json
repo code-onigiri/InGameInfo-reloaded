@@ -322,5 +322,8 @@
   "ingameinfoxml.tag.targetmaxhealth.desc": "Maximum health of the targeted entity.",
   "ingameinfoxml.tag.tps.desc": "Server ticks per second.",
   "ingameinfoxml.tag.mspt.desc": "Server milliseconds per tick.",
-  "gui.ingameinfoxml.search": "Søk"
+  "gui.ingameinfoxml.search": "Søk",
+  "ingameinfoxml.tag.category.mekanism.name": "Mekanism",
+  "ingameinfoxml.tag.category.cobblemon.name": "Cobblemon",
+  "ingameinfoxml.tag.category.tinkers.name": "Tinkers' Construct"
 }

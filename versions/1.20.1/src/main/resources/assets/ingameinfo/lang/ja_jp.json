@@ -390,5 +390,8 @@
   "gui.ingameinfoxml.editor.invalid": "行が不正です",
   "gui.ingameinfoxml.editor.selectline": "先に行を選択してください",
   "gui.ingameinfoxml.editor.nolines": "行がありません",
-  "key.ingameinfoxml.editor": "HUDエディタを開く"
+  "key.ingameinfoxml.editor": "HUDエディタを開く",
+  "ingameinfoxml.tag.category.mekanism.name": "Mekanism",
+  "ingameinfoxml.tag.category.cobblemon.name": "Cobblemon",
+  "ingameinfoxml.tag.category.tinkers.name": "Tinkers' Construct"
 }

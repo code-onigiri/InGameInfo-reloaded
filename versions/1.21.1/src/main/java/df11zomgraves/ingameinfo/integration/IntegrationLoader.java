@@ -48,6 +48,15 @@ public final class IntegrationLoader {
         if (loaded("ae2")) {
             Ae2Integration.register();
         }
+        if (loaded("mekanism")) {
+            MekanismIntegration.register();
+        }
+        if (loaded("cobblemon")) {
+            CobblemonIntegration.register();
+        }
+        if (loaded("tconstruct")) {
+            TinkersIntegration.register();
+        }
         EnergyIntegration.register();
 
         InGameInfoXML.logger.info("Registered optional mod integration tags.");

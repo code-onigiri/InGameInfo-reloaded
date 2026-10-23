@@ -24,7 +24,8 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 - 主要 MOD の任意連携（Create / Curios / Serene Seasons / Ars Nouveau /
   Iron's Spells 'n Spellbooks / Tough As Nails / Vampirism / Cold Sweat /
   Thirst Was Taken / Goety / Paragliders / Botania / Applied Energistics 2 /
-  Forge Energy）。MOD が入っていない環境ではタグを登録せず、HUD にも影響しません
+  Mekanism / Cobblemon / Tinkers' Construct / Forge Energy）。MOD が入っていない
+  環境ではタグを登録せず、HUD にも影響しません
 - `/igi reload`、`load`、`save`、`enable`、`disable`
 - 9 言語（en_us, ja_jp, de_de, fr_fr, no_no, pl_pl, ru_ru, zh_cn, zh_tw）
 - 1.12.2 の全タグ名（値が再現できないものは互換値。詳細は
@@ -172,6 +173,9 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 | Paragliders | `stamina`, `maxstamina`, `staminapencent`, `staminadepleted` |
 | Botania（1.20.1 のみ） | `botaniamana`, `botaniamaxmana`, `botaniamanapercent` |
 | Applied Energistics 2 | `ae2networkover`, `ae2channelsover`, `ae2channelmodeover`, `ae2gridpowerover`, `ae2gridpowerusageover`, `ae2cellused`, `ae2celltotal`, `ae2celltypes`, `ae2cellstatus` ほか |
+| Mekanism | `mekanismradiation`, `mekanismradiationlevel`, `mekanismradiationmax`, `mekanismradiationseverity`, `mekanismradiationenabled`, `mekanismradiationpercent` |
+| Cobblemon | `cobblemonpartysize`, `cobblemonparty1`〜`cobblemonparty6`（種族・レベル・HP・状態・色違い・タイプ） |
+| Tinkers' Construct（1.20.1 のみ） | `tinkersdurability`, `tinkersmaxdurability`, `tinkersdurabilitypercent`, `tinkersminingspeed`, `tinkersattackdamage`, `tinkersharvestlevel`, `tinkersmodifiers`, `tinkersbroken` |
 | Forge / NeoForge Energy（常時） | `energy`, `maxenergy`, `energypercent`, `fe` ほか |
 
 クロスヘア先のブロックを優先して読むタグは末尾に `over` を付けます
@@ -188,8 +192,13 @@ Applied Energistics 2 はクロスヘア先のブロックのネットワーク�
 実クライアントでチャンネル数・チャンネルモード・グリッド電力・使用量・セル容量／
 状態まで確認済み、1.20.1 は本番起動でネットワーク系タグを確認済みです（セル値は
 ログで確認、HUD 行の定常表示は自動操作の制約で未撮影）。
-その他の連携はコンパイル確認までで、MOD が入っていない場合や API が変わった
-場合はタグを登録しない／空文字を返すため、HUD の他の行には影響しません。
+Mekanism と Cobblemon は 1.21.1 の実クライアントで、放射線量（個人・環境・最大・
+深刻度・有効・割合）とパーティ（種族・レベル・HP・状態・色違い・タイプ）の HUD 表示を
+確認済みです。Tinkers' Construct は 1.20.1 の本番 Forge クライアントで 8 タグの表示を
+確認しました（`/give` の素材未設定ツールのため数値は最小値）。
+1.20.1 の Mekanism / Cobblemon と 26.1.2 の 3 連携はビルド確認までです。
+MOD が入っていない場合や API が変わった場合はタグを登録しない／空文字を返すため、
+HUD の他の行には影響しません。
 連携はリフレクションで実装しているため、MOD 側の API が変わると値が空になる
 ことがあります。
 
