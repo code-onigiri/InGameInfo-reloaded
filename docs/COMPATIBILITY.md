@@ -43,6 +43,9 @@
 | （なし） | `displayInvisiblePlayer` | 追加。近傍プレイヤーに透明プレイヤーを含める |
 | `alignment.*` | `alignment.*` | `"X Y"` 形式。9 か所すべて |
 
+アライメントの値は HUD エディタからも変更できます。保存すると TOML に書き込まれ、
+次回起動時に読み込まれます。
+
 1.12.2 の設定 GUI は Forge の Config Screen に置き換えました（Mods 画面 →
 InGame Info XML → Config）。GUI の項目名は `config/ingameinfoxml-client.toml` の
 コメントとゲーム内言語ファイルで確認できます。
@@ -50,7 +53,8 @@ InGame Info XML → Config）。GUI の項目名は `config/ingameinfoxml-client
 ## タグ
 
 1.12.2 のタグ名・エイリアスはすべて登録されています（存在しない値を除く）。
-登録数は 541（エイリアス含む）。
+1.20.1 の既定環境（連携 MOD なし）では 547 タグ（エイリアスと Forge Energy 連携を含む）。
+連携 MOD を入れると、その MOD のタグが追加されます。
 
 ### 値が変わるタグ
 
@@ -95,6 +99,36 @@ InGame Info XML → Config）。GUI の項目名は `config/ingameinfoxml-client
 これらは DF11ZomGraves 版で追加されたものです。1.12.2 の定義ファイルに影響は
 ありません（未使用なら無視されます）。
 
+### MOD 連携タグ（1.20.1 で追加）
+
+次のタグは、対応 MOD が入っている場合だけ登録されます。MOD がない環境では
+`{createrpm}` のような未知のタグとして扱われ、HUD にはそのまま残ります
+（1.12.2 の未登録タグと同じ挙動）。
+
+- Create: `createrpm`, `createspeed`, `kineticrpm`, `createkinetic`, `kinetic`,
+  `createstress`, `createstresscapacity`, `createstresspercent`, `createnetworksize`
+- Curios: `curioslots`, `curioslotcount`, `curioitems`, `curios`
+- Serene Seasons: `season`, `subseason`, `seasonphase`, `tropicalseason`, `seasonday`,
+  `seasonticks`, `seasonprogress`, `seasonpercent`
+- Ars Nouveau: `arsmana`, `arsmaxmana`, `arsmanapercent`
+- Iron's Spells 'n Spellbooks: `ironsmana`, `ironsspellman`, `ironsmaxmana`,
+  `ironsmanapercent`
+- Tough As Nails: `thirst`, `hydration`, `temperature`, `bodytemperature`,
+  `temperaturelevel`
+- Forge Energy（常時）: `energy`, `fe`, `maxenergy`, `maxfe`, `energypercent`, `fepercent`
+
+値の評価はすべてクライアント側で行い、連携 MOD の API が変わって例外になっても
+そのタグだけ空文字になります。HUD 全体は描画され続けます。
+
+### HUD エディタ（1.20.1 で追加）
+
+1.12.2 にはない GUI です。`F9` または `/igi editor` で開きます。行は
+`config/InGameInfo.xml` に、アライメントの X / Y は
+`config/ingameinfoxml-client.toml` に保存します。`Esc` は保存せずに閉じます。
+エディタで保存したオフセットは再起動後も保持されます。TOML を直接編集した場合は
+ゲームを再起動してください（実行中の `Reloading` はライブのアライメントを上書き
+しないため）。
+
 ### ポーション
 
 - インデックスは 0〜31（1.12.2 と同じ 32 個）。
@@ -121,9 +155,12 @@ InGame Info XML → Config）。GUI の項目名は `config/ingameinfoxml-client
 
 ## 未移植・対象外
 
-- Blood Magic / Simply Jetpacks / TerraFirmaCraft / Thaumcraft の連携タグ。
+- 1.12.2 時代の Blood Magic / Simply Jetpacks / TerraFirmaCraft / Thaumcraft 連携タグ。
   1.20.1 に対応する MOD がない、または API が大きく変わったためです。
   これらは [MOD 連携 SPI](ARCHITECTURE.md) で後から追加できます。
+- 上記の代わりに、1.20.1 で現役の Create / Curios / Serene Seasons / Ars Nouveau /
+  Iron's Spells 'n Spellbooks / Tough As Nails / Forge Energy を任意連携として
+  追加しました（MOD が入っている場合のみ有効）。
 - 1.12.2 の `mcmod.info`、Forge 1.12 の `Configuration` GUI。
 - 1.12.2 のアップデートチェック IMC（配布チャネルが異なるため）。
 

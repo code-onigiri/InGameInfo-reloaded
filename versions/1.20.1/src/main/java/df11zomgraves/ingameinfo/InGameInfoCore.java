@@ -10,6 +10,7 @@ import df11zomgraves.ingameinfo.parser.xml.XmlParser;
 import df11zomgraves.ingameinfo.printer.IPrinter;
 import df11zomgraves.ingameinfo.printer.json.JsonPrinter;
 import df11zomgraves.ingameinfo.printer.text.TextPrinter;
+import df11zomgraves.ingameinfo.printer.text.TextSerializer;
 import df11zomgraves.ingameinfo.printer.xml.XmlPrinter;
 import df11zomgraves.ingameinfo.reference.Alignment;
 import df11zomgraves.ingameinfo.reference.Names;
@@ -217,6 +218,55 @@ public class InGameInfoCore {
 		}
 
 		return printer != null && printer.print(file, this.format);
+	}
+
+	/** @return the file name currently loaded, or the configured default file name */
+	public String getConfigFileName() {
+		if (this.configFile != null) {
+			return this.configFile.getName();
+		}
+		return ConfigurationHandler.configName;
+	}
+
+	/** @return the editable raw lines for one alignment, in text configuration syntax */
+	public List<String> getLines(final Alignment alignment) {
+		final List<String> result = new ArrayList<String>();
+		final List<List<Value>> lines = this.format.get(alignment);
+		if (lines != null) {
+			for (final List<Value> line : lines) {
+				result.add(TextSerializer.serialize(line));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Replaces one alignment with raw text configuration lines.
+	 *
+	 * @return false when any line is invalid; the previous content is kept
+	 */
+	public boolean setLines(final Alignment alignment, final List<String> lines) {
+		final List<List<Value>> parsed = new ArrayList<List<Value>>();
+		for (final String line : lines) {
+			final List<Value> values = TextParser.parseLine(line);
+			if (values == null) {
+				InGameInfoXML.logger.warn("Invalid text line for {}: {}", alignment, line);
+				return false;
+			}
+			parsed.add(values);
+		}
+
+		this.format.put(alignment, parsed);
+		return true;
+	}
+
+	/** Saves the currently loaded format back to its source file. */
+	public boolean saveCurrentConfig() {
+		final String filename = getConfigFileName();
+		if (!this.saveConfig(filename)) {
+			return false;
+		}
+		return this.setConfigFile(filename);
 	}
 
 	private InputStream getInputStream() {

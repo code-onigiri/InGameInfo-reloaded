@@ -2,6 +2,8 @@ package df11zomgraves.ingameinfo.handler;
 
 import df11zomgraves.ingameinfo.InGameInfoCore;
 import df11zomgraves.ingameinfo.InGameInfoXML;
+import df11zomgraves.ingameinfo.client.gui.editor.GuiHudEditor;
+import df11zomgraves.ingameinfo.client.gui.tag.GuiTags;
 import df11zomgraves.ingameinfo.network.PacketHandler;
 import df11zomgraves.ingameinfo.network.RequestMSPTPacket;
 import df11zomgraves.ingameinfo.network.RequestSeedPacket;
@@ -52,6 +54,8 @@ public class Ticker {
 		if (options.hideGui)
 			return false;
 		if (this.client.screen instanceof GameModeSwitcherScreen)
+			return true;
+		if (this.client.screen instanceof GuiHudEditor || this.client.screen instanceof GuiTags)
 			return true;
 		return client.screen == null || ConfigurationHandler.showInChat && client.screen instanceof ChatScreen;
 	}

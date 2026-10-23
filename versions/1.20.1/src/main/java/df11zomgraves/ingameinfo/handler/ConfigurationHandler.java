@@ -111,15 +111,20 @@ public class ConfigurationHandler {
 
 	@SubscribeEvent
 	static void onLoad(final ModConfigEvent event) {
-		Alignment.TOPLEFT.setXY(ALIGN_TOP_LEFT.get());
-		Alignment.TOPCENTER.setXY(ALIGN_TOP_CENTER.get());
-		Alignment.TOPRIGHT.setXY(ALIGN_TOP_RIGHT.get());
-		Alignment.MIDDLELEFT.setXY(ALIGN_MIDDLE_LEFT.get());
-		Alignment.MIDDLECENTER.setXY(ALIGN_CENTER.get());
-		Alignment.MIDDLERIGHT.setXY(ALIGN_MIDDLE_RIGHT.get());
-		Alignment.BOTTOMLEFT.setXY(ALIGN_BOTTOM_LEFT.get());
-		Alignment.BOTTOMCENTER.setXY(ALIGN_BOTTOM_CENTER.get());
-		Alignment.BOTTOMRIGHT.setXY(ALIGN_BOTTOM_RIGHT.get());
+		// Reloading also fires when the config is saved from the GUI. Resetting the
+		// live alignment there would discard edits made in the HUD editor, so only
+		// take the stored offsets on the initial load.
+		if (!(event instanceof ModConfigEvent.Reloading)) {
+			Alignment.TOPLEFT.setXY(ALIGN_TOP_LEFT.get());
+			Alignment.TOPCENTER.setXY(ALIGN_TOP_CENTER.get());
+			Alignment.TOPRIGHT.setXY(ALIGN_TOP_RIGHT.get());
+			Alignment.MIDDLELEFT.setXY(ALIGN_MIDDLE_LEFT.get());
+			Alignment.MIDDLECENTER.setXY(ALIGN_CENTER.get());
+			Alignment.MIDDLERIGHT.setXY(ALIGN_MIDDLE_RIGHT.get());
+			Alignment.BOTTOMLEFT.setXY(ALIGN_BOTTOM_LEFT.get());
+			Alignment.BOTTOMCENTER.setXY(ALIGN_BOTTOM_CENTER.get());
+			Alignment.BOTTOMRIGHT.setXY(ALIGN_BOTTOM_RIGHT.get());
+		}
 		showOverlayItemIcons = SHOW_OVERLAY_ITEM_ICONS_DEFAULT.get();
 		showOverlayPotions = SHOW_OVERLAY_POTIONS_DEFAULT.get();
 		replaceDebug = REPLACE_DEBUG_DEFAULT.get();

@@ -39,6 +39,7 @@ public final class Names {
 		public static final String ENABLE = "enable";
 		public static final String DISABLE = "disable";
 		public static final String TAGLIST = "taglist";
+		public static final String EDITOR = "editor";
 		public static final String TOP_LEFT = "TOPLEFT";
 		public static final String TOP_CENTER = "TOPCENTER";
 		public static final String TOP_RIGHT = "TOPRIGHT";
@@ -124,5 +125,6 @@ public final class Names {
 		public static final String CATEGORY = "key.ingameinfoxml.category";
 		public static final String TOGGLE = "key.ingameinfoxml.toggle";
 		public static final String RELOAD = "key.ingameinfoxml.reload";
+		public static final String EDITOR = "key.ingameinfoxml.editor";
 	}
 }

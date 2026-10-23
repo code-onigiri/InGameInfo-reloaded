@@ -13,6 +13,7 @@ GUI を実際に描画し、スクリーンショットで確認する手順を�
 - `<icon>`（画像）、`<item>`（アイテム）、`pingicon`
 - タグ一覧 GUI（`/igi taglist`）
 - 設定 GUI（Forge Config Screen）の全ページ
+- HUD エディタ（`F9` / `/igi editor`）。行編集、タグ挿入、保存、オフセットの再起動後の保持
 - コマンド（`/igi save`、`/igi reload` など）の入出力
 
 MOD 連携タグそのものは、連携 MOD を入れた環境で別途確認します。SPI の読み込みだけなら
@@ -220,6 +221,41 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 設定画面の入力欄はページ切り替え時に再生成されます。1.20.1 では、ページ移動時に
 古い `EditBox` を参照して `commit()` が NPE になる問題を修正済みです。
 
+### HUD エディタ
+
+1. ワールド内で `F9` を押す（またはチャットで `/igi editor`）。画面下にエディタが開き、
+   上の HUD は表示されたままになる。
+2. 行一覧で行を選び、テキスト欄を編集する。`Tag...` を押すとタグ一覧が開き、
+   タグをクリックするとカーソル位置に `<tag>` が挿入されてエディタへ戻る。
+3. 3x3 のアライメントボタンで表示位置を切り替え、`Offset` の X / Y を変えると
+   HUD がその場で移動する。
+4. `Save` で保存。ステータスが `Saved InGameInfo.xml` になり、
+   `run/config/InGameInfo.xml` と `run/config/ingameinfoxml-client.toml` が更新される。
+5. `Done` で閉じ、`F9` で開き直すと編集内容が残っている。
+6. クライアントを再起動し、オフセットが保持されていることを確認する。
+
+![HUD エディタ](render/editor-1.20.1.png)
+
+![エディタのタグピッカー](render/editor-picker-1.20.1.png)
+
+![オフセット変更後](render/editor-offset-1.20.1.png)
+
+#### xdotool で自動操作するとき
+
+- 1280x720 の Xvfb では、ゲームの描画領域は 854x480（GUI スケール 2）で、ルート
+  ウィンドウの `(213, 120)` から始まる。GUI 座標 `(gx, gy)` は
+  `(213 + gx * 2, 120 + gy * 2)` になる。
+- ワールドが読み込まれるまで時間がかかる。ウィンドウが見つかってから **35 秒待って**
+  から `F9` を送る（18 秒では早すぎてエディタが開かないことがある）。
+- `EditBox` を消すときは `ctrl+a` を使わない（この環境では `a` が入力される）。
+  フィールドをクリック → `End` → `BackSpace` を繰り返す。
+- エディタの主な座標（画面座標）: 行一覧 1 行目 `(253, 380)`、テキスト欄
+  `(533, 460)`、`Tag...` `(561, 500)`、`Save` `(567, 552)`、`Done` `(661, 552)`、
+  X `(693, 492)`、Y `(777, 492)`。
+- 設定変更後の保存では、TOML の再読み込みイベントが非同期に走る。保存直後に
+  アライメントが戻る場合は、`ConfigurationHandler.onLoad` が `Reloading` で
+  ライブ値を上書きしていないか確認する（1.20.1 では修正済み）。
+
 ## コマンドの確認
 
 ワールド内でチャットから実行します。
@@ -255,6 +291,12 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 | `/igi save` の XML / JSON / TXT 出力 | OK | ファイルサイズで確認 |
 | `/igi load` の XML / JSON / TXT 入力 | OK | チャットの `Done!` と HUD で確認 |
 | `/igi reload` | OK | チャットの `Reloading... / Done!` |
+| HUD エディタの表示・ライブ HUD | OK | [editor-1.20.1.png](render/editor-1.20.1.png) |
+| タグピッカーから `<energy>` を挿入 | OK | [editor-picker-1.20.1.png](render/editor-picker-1.20.1.png) |
+| エディタの `Save` で XML に 1 行保存 | OK | `InGameInfo.xml` の `<var>energy</var>` |
+| X=5 / Y=7 の保存と再起動後の保持 | OK | [editor-offset-1.20.1.png](render/editor-offset-1.20.1.png) |
+| `Done` で閉じて `F9` で再表示 | OK | 編集行が残ることを確認 |
+| 不正な行（閉じていない `<`）で保存中止 | OK | ステータスが赤いエラー表示になる |
 
 画像の色を機械的に確認する例:
 
@@ -263,6 +305,10 @@ magick docs/render/hud-1.20.1.png -format %c histogram:info:- | sort -nr | head 
 ```
 
 `#FCFC54` と `#FCFCFC` が上位に出れば、少なくとも黄色・白の文字が描画されています。
+
+エディタのスクリーンショットでは、下のパネルが画面外にはみ出さず、上に HUD が
+残っていること、`Save` 後に `ingameinfoxml-client.toml` の `topleft` が
+`"5 7"` になっていることを確認します。
 
 ## 1.21.1 / 26.1.2 へ展開するとき
 

@@ -11,6 +11,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import df11zomgraves.ingameinfo.InGameInfoCore;
 import df11zomgraves.ingameinfo.InGameInfoXML;
+import df11zomgraves.ingameinfo.client.gui.editor.GuiHudEditor;
 import df11zomgraves.ingameinfo.client.gui.tag.GuiTags;
 import df11zomgraves.ingameinfo.command.arguments.AlignArgument;
 import df11zomgraves.ingameinfo.command.arguments.FileArgument;
@@ -64,6 +65,9 @@ public class InGameInfoCommand {
 
 		// igi taglist
 		igiCommand.then(Commands.literal(Names.Command.TAGLIST).executes(source -> openTagList()));
+
+		// igi editor
+		igiCommand.then(Commands.literal(Names.Command.EDITOR).executes(source -> openEditor()));
 		
 		// igi setseed -2793514409027566328
 		igiCommand.then(Commands.literal("setseed").then(Commands.argument(seed, LongArgumentType.longArg())
@@ -169,6 +173,11 @@ public class InGameInfoCommand {
 
 	public static int openTagList() {
 		Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new GuiTags()));
+		return 1;
+	}
+
+	public static int openEditor() {
+		Minecraft.getInstance().execute(() -> Minecraft.getInstance().setScreen(new GuiHudEditor()));
 		return 1;
 	}
 

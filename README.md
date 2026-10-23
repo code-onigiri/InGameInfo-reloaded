@@ -8,7 +8,7 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 
 | バージョン | ローダー | 状態 |
 |---|---|---|
-| 1.20.1 | Forge 47.4.0 / Java 17 | 実装・ビルド・HUD 描画テスト済み |
+| 1.20.1 | Forge 47.4.0 / Java 17 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
 | 1.21.1 | NeoForge 21.1.x / Java 21 | 計画中（環境のみ用意） |
 | 26.1.2 | NeoForge 26.1.2.x / Java 25 | 計画中（環境のみ用意） |
 
@@ -19,6 +19,11 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 - XML / JSON / TXT プリンター（`/igi save`）
 - 設定画面（Forge Config Screen）と `/igi config`
 - タグ一覧 GUI（`/igi taglist`）
+- HUD エディタ（`F9` または `/igi editor`）。行の追加・削除・並べ替え、
+  9 アライメントの選択とオフセット調整、タグ一覧からクリックで挿入、ライブプレビュー
+- 主要 MOD の任意連携（Create / Curios / Serene Seasons / Ars Nouveau /
+  Iron's Spells 'n Spellbooks / Tough As Nails / Forge Energy）。MOD が入っていない
+  環境ではタグを登録せず、HUD にも影響しません
 - `/igi reload`、`load`、`save`、`enable`、`disable`
 - 9 言語（en_us, ja_jp, de_de, fr_fr, no_no, pl_pl, ru_ru, zh_cn, zh_tw）
 - 1.12.2 の全タグ名（値が再現できないものは互換値。詳細は
@@ -95,6 +100,7 @@ nix develop .#mc1201 -c scripts/render-test.sh 1.20.1 RenderTest
 - `/igi save <file.xml|file.json|file.txt>` — 現在の表示定義を保存
 - `/igi enable` / `/igi disable` — HUD の一時的な有効・無効
 - `/igi taglist` — 登録タグの一覧 GUI
+- `/igi editor` — HUD エディタを開く（既定キーは `F9`）
 - `/igi alignment get|set <ALIGN> [x y]` — アライメントのオフセット
 - `/igi config <key> <value>` — 設定の変更
 
@@ -106,10 +112,41 @@ nix develop .#mc1201 -c scripts/render-test.sh 1.20.1 RenderTest
 ポーションアイコンの Y 二重加算）は修正しています。全リストは
 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) を参照してください。
 
+## HUD エディタ
+
+`F9` または `/igi editor` で、画面下にエディタが開きます。HUD は上に残るので、
+編集結果をその場で確認できます。
+
+- 左側: 選択中アライメントの行一覧。`Add` / `Del` / `Up` / `Down` で編集
+- 右側: 9 アライメントの選択、行テキスト、タグ一覧（`Tag...`）、X / Y オフセット
+- `Save`: `config/InGameInfo.xml` とアライメント設定を保存
+- `Done`: 保存して閉じる。`Esc` は保存せずに閉じる（編集内容は破棄）
+
+行テキストは TXT パーサーと同じ書式です。`<username>` のようなタグを直接入力するか、
+`Tag...` から選ぶとカーソル位置に挿入されます。不正な行がある場合は保存を中止し、
+ステータスにエラーを表示します。
+
+![HUD エディタ](docs/render/editor-1.20.1.png)
+
 ## MOD 連携
 
 他 MOD はコンパイル時依存なしでタグ・値を作れます。詳しくは
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) を参照してください。
+
+1.20.1 では次の MOD を任意で検出し、入っている場合だけタグを登録します。
+
+| MOD | 主なタグ |
+|---|---|
+| Create | `createrpm`, `createspeed`, `createkinetic`, `createstress`, `createstresscapacity`, `createstresspercent`, `createnetworksize` |
+| Curios | `curioslots`, `curioslotcount`, `curioitems`, `curios` |
+| Serene Seasons | `season`, `subseason`, `tropicalseason`, `seasonday`, `seasonticks`, `seasonprogress`, `seasonpercent` |
+| Ars Nouveau | `arsmana`, `arsmaxmana`, `arsmanapercent` |
+| Iron's Spells 'n Spellbooks | `ironsmana`, `ironsmaxmana`, `ironsmanapercent` |
+| Tough As Nails | `thirst`, `hydration`, `temperature`, `bodytemperature` |
+| Forge Energy（常時） | `energy`, `maxenergy`, `energypercent`, `fe` ほか |
+
+連携はリフレクションで実装しているため、MOD 側の API が変わると値が空になる
+ことがあります。その場合も HUD の他の行は表示され続けます。
 
 ## ライセンス
 

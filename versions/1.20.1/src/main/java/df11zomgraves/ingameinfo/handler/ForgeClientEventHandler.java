@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import javax.annotation.Nonnull;
 
 import df11zomgraves.ingameinfo.InGameInfoCore;
+import df11zomgraves.ingameinfo.client.gui.editor.GuiHudEditor;
 import df11zomgraves.ingameinfo.command.InGameInfoCommand;
 import df11zomgraves.ingameinfo.reference.Names;
 import net.minecraft.client.Minecraft;
@@ -42,6 +43,12 @@ public class ForgeClientEventHandler {
 		}
 		while (KeyInputHandler.KEY_TOGGLE.consumeClick()) {
 			Ticker.enabled = !Ticker.enabled;
+		}
+		while (KeyInputHandler.KEY_EDITOR.consumeClick()) {
+			Minecraft mc = Minecraft.getInstance();
+			if (mc.screen == null) {
+				mc.setScreen(new GuiHudEditor());
+			}
 		}
 	}
 

@@ -8,9 +8,12 @@ import df11zomgraves.ingameinfo.value.Value;
 import static df11zomgraves.ingameinfo.parser.text.Token.TokenType;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +25,37 @@ public class TextParser implements IParser {
 
     public TextParser() {
         this.tokenizer = new Tokenizer();
+    }
+
+    /**
+     * Parses a single line of text configuration syntax, for the in-game editor.
+     *
+     * @return the parsed values, or {@code null} when the line is not valid
+     */
+    public static List<Value> parseLine(final String line) {
+        if (line == null) {
+            return null;
+        }
+        if (line.trim().isEmpty()) {
+            return new ArrayList<Value>();
+        }
+
+        final TextParser parser = new TextParser();
+        final String content = "<topleft>" + line + "\n";
+        if (!parser.load(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)))) {
+            return null;
+        }
+
+        final Map<Alignment, List<List<Value>>> format = new HashMap<Alignment, List<List<Value>>>();
+        if (!parser.parse(format)) {
+            return null;
+        }
+
+        final List<List<Value>> lines = format.get(Alignment.TOPLEFT);
+        if (lines == null || lines.size() != 1) {
+            return null;
+        }
+        return lines.get(0);
     }
 
     private Token nextToken() {

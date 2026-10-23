@@ -40,6 +40,22 @@ Minecraft のバージョン間では Forge / NeoForge の API だけでなく�
 4. `RenderGuiOverlayEvent.Pre`
    - バニラの体力・空腹・酸素・ポーションアイコン・デバッグ文字を必要に応じてキャンセル
 
+## HUD エディタ
+
+`client/gui/editor/GuiHudEditor` は画面下だけを使う「ボトムシート」です。上の HUD は
+`Ticker.isRunning()` がエディタ表示中も true を返すため、編集内容がそのまま見えます。
+
+- 行データは `InGameInfoCore#getLines(Alignment)` で TXT 書式へシリアライズして読み、
+  `setLines` で全行を `TextParser.parseLine` に通してから反映します。1 行でも不正なら
+  保存を中止します。
+- タグ一覧 `GuiTags` は `Consumer<String>` を受け取るコンストラクタを持ち、エディタから
+  開いた場合は「押したタグをカーソル位置へ挿入して戻る」ピッカーとして動きます。
+  通常の `/igi taglist` は親もコンシューマも `null` で、従来どおりの一覧です。
+- `Save` は XML を保存したあと `ConfigurationHandler.applyConfiguration()` で
+  アライメントの X / Y を TOML へ書き込みます。`F9` と `/igi editor` の両方から開けます。
+- 1.12.2 の設定ファイルにはエディタ用の保存先がないため、行は XML、オフセットは TOML に
+  分けて保存します。
+
 ## パーサーと値
 
 - `parser/xml`, `parser/json`, `parser/text` が `Map<Alignment, List<List<Value>>>`
@@ -74,6 +90,14 @@ public interface InGameInfoPlugin {
 `PluginLoader` が `ServiceLoader` で実装を検出し、`ValueRegistry.init()` と
 `TagRegistry.init()` の後、表示定義を読む前に呼びます。1 つのプラグインが例外を
 投げても他のプラグインと本体の読み込みは継続します。
+
+本体に同梱している任意連携（`integration/`）も同じ考え方です。`IntegrationLoader`
+が `ModList.get().isLoaded(...)` で MOD の有無を確認し、入っているものだけ
+`CreateIntegration`、`CuriosIntegration`、`SereneSeasonsIntegration`、
+`ArsNouveauIntegration`、`IronsSpellbooksIntegration`、`ToughAsNailsIntegration` を
+登録します。`EnergyIntegration` は Forge 標準機能なので常に登録します。各連携は
+`Reflect` 経由で MOD のクラスを呼ぶため、コンパイル時依存も実行時のクラス
+ロードエラーもありません。
 
 ### 登録方法
 
@@ -124,6 +148,10 @@ example.compat.ExamplePlugin
   `META-INF/services` をその JAR にだけ入れるか、リフレクションで参照してください。
 - 1.21.1 / 26.1.2 でも同じ SPI 名を維持する予定です。バージョン固有の API は
   プラグイン側で吸収します。
+- 設定の再読み込み（`ModConfigEvent.Reloading`）では、ライブのアライメントを
+  TOML の値で上書きしません。保存直後の再読み込みがエディタの変更を消すためです。
+  起動時の `Loading` では TOML の値を反映します。TOML を手で編集した場合は
+  再起動してください。
 
 ## マルチバージョン移植のチェックリスト
 

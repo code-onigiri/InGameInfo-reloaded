@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import df11zomgraves.ingameinfo.InGameInfoXML;
+import df11zomgraves.ingameinfo.integration.IntegrationLoader;
 
 public class TagRegistry {
 	public static final TagRegistry INSTANCE = new TagRegistry();
@@ -60,6 +61,7 @@ public class TagRegistry {
 		TagRiding.register();
 		TagTime.register();
 		TagWorld.register();
+		IntegrationLoader.load();
 
 		InGameInfoXML.logger.info("Registered " + this.stringTagMap.size() + " tags.");
 	}
