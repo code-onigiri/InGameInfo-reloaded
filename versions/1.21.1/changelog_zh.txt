@@ -1,3 +1,12 @@
+InGameInfo XML 2.9.2.103，Release，2026/10/24
+通用
+	1.HUD 编辑器增加 Panel 按钮，可在屏幕底部和顶部之间移动面板。
+	2.修复 TOML 解析器返回 Integer 时客户端配置种子值无法加载的问题。
+	3.更换项目图标。
+	4.开发用调试模组改为从 CurseForge Maven 获取。
+	5.开发环境使用宿主 GPU，仅在无头渲染测试中强制使用 llvmpipe。
+	6.停止 RenderTest 数据包每个 tick 覆盖装备。
+
 InGameInfo XML 2.9.2.102，Release，2026/10/24
 通用
 	1.更新模组作者、显示链接、问题追踪链接和致谢信息。

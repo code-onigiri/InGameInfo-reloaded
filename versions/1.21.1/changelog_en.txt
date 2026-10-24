@@ -1,3 +1,12 @@
+InGameInfo XML 2.9.2.103, Release, 2026/10/24
+Common
+	1.Add a Panel button to the HUD editor to move the panel between the bottom and top edges.
+	2.Fix the client configuration seed value failing to load when the TOML parser returns an Integer.
+	3.Replace the project logo.
+	4.Fetch development debug mods from CurseForge Maven.
+	5.Use the host GPU in development shells and force llvmpipe only in the headless render test.
+	6.Stop the RenderTest datapack from overwriting equipment every tick.
+
 InGameInfo XML 2.9.2.102, Release, 2026/10/24
 Common
 	1.Update the mod author, display URL, issue tracker URL and credits.

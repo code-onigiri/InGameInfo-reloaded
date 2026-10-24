@@ -38,7 +38,7 @@ nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew build'
 nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew build'
 ```
 
-The jar is written to `versions/<version>/build/libs/ingameinfoxml-2.9.2.102.jar`. Put it
+The jar is written to `versions/<version>/build/libs/ingameinfoxml-2.9.2.103.jar`. Put it
 in the `mods/` directory of the matching Minecraft version. Without Nix, install the JDK
 required by that version and use the bundled Gradle wrapper.
 

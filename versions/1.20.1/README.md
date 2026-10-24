@@ -11,7 +11,7 @@ Minecraft 1.20.1、Forge 47.4.28、Java 17 向けの実装です。HUD、設定 
 GRADLE_USER_HOME=/tmp/gradle-home ./gradlew build --no-daemon
 ```
 
-成果物は `build/libs/ingameinfoxml-2.9.2.102.jar` です。Nix を使う場合は、リポジトリの
+成果物は `build/libs/ingameinfoxml-2.9.2.103.jar` です。Nix を使う場合は、リポジトリの
 ルートで `nix develop .#mc1201` を実行すると JDK 17 と描画テスト用のツールが入ります。
 
 ## 開発
