@@ -161,24 +161,15 @@ alignment.
 | 1.21.1 | NeoForge 21.1.264 | 21 |
 | 26.1.2 | NeoForge 26.1.2.122 | 25 |
 
-## Installation
-
-1. Install Forge or NeoForge for your Minecraft version.
-2. Put the matching `ingameinforeloaded-*.jar` in the `mods` folder.
-3. Start the game once. The mod creates `config/InGameInfo.xml` and
-   `config/ingameinforeloaded-client.toml`.
-4. Press `F9` to open the editor, or edit `config/InGameInfo.xml` and run
-   `/igi reload`.
-
 ## Mod integration
 
-Optional tags for other mods. AE2 values update once per second.
+Optional tags for other mods.
 
 <div class="spoiler">
 
 | Mod | Data exposed as tags | Versions | Verification |
 |---|---|---|---|
-| Applied Energistics 2 | Network channels and mode, grid power, average usage, cell capacity and status | All | HUD checked |
+| Applied Energistics 2 | Network channels and mode, grid power, average usage, cell capacity and status. Values update once per second. | All | HUD checked |
 | Mekanism | Personal and environmental radiation, severity, enabled state, percentage | All | HUD checked |
 | Botania | Mana in the targeted pool, spreader or flower, including maximum and percentage | 1.20.1 | HUD checked |
 | Tinkers' Construct | Tool durability, mining speed, attack damage, harvest level, modifiers, broken state | 1.20.1 | HUD checked via the official API |
@@ -230,17 +221,6 @@ The interface and tag descriptions are available in:
 - Russian (`ru_ru`)
 - Simplified Chinese (`zh_cn`)
 - Traditional Chinese (`zh_tw`)
-
-## Known limitations
-
-Build-only integrations and 26.1.2 coverage.
-
-<div class="spoiler">
-
-- Some optional integrations are compiled but not value-verified in every version.
-- Some third-party mods do not publish a 26.1.2 build.
-
-</div>
 
 ## License
 
