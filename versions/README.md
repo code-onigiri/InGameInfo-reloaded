@@ -12,9 +12,9 @@ Gradle プラグイン・Mappings・Java・ローダー API が違うため、1 
 | `1.21.1/` | 1.21.1 | NeoForge 21.1.264 | 21 | 実装・ビルド・描画テスト済み |
 | `26.1.2/` | 26.1.2 | NeoForge 26.1.2.122 | 25 | 実装・ビルド・描画テスト済み |
 
-1.20.1 / 1.21.1 / 26.1.2 のすべてで、ビルドと HUD / GUI / エディタの描画まで確認済み
-です。flake シェルは `mc1201`（JDK 17）、`mc1211`（JDK 21）、`mc2612`（JDK 25）の
-3 つを用意しています。
+1.20.1 / 1.21.1 / 26.1.2 のすべてで、ビルドと HUD / GUI / エディタ / 計算式
+（`{{ ... }}`）の描画まで確認済みです。flake シェルは `mc1201`（JDK 17）、
+`mc1211`（JDK 21）、`mc2612`（JDK 25）の 3 つを用意しています。
 
 ## 各バージョンの構成
 
@@ -34,7 +34,7 @@ versions/<version>/
 │   ├── printer/        # XML / JSON / TXT 出力
 │   ├── tag/            # タグ実装
 │   ├── util/
-│   └── value/          # 値・演算
+│   └── value/          # 値・式・書式（Expression / Value）
 └── src/main/resources/
     ├── META-INF/mods.toml          # NeoForge 版は neoforge.mods.toml
     ├── META-INF/services/
@@ -45,6 +45,10 @@ versions/<version>/
 使います。
 `run/` は開発用の作業ディレクトリで、Git 管理外です。テスト用ワールド・設定・
 スクリーンショットのログがここに出ます。
+
+`value/Expression` は `{{ ... }}` の計算式を担当します。3 バージョンで同じソースを
+使っており、`Value#replaceVariables` が `{{ ... }}` を先に処理してから、従来の
+`{tag}` を置換します。書式は [docs/EXPRESSIONS.md](../docs/EXPRESSIONS.md) にあります。
 
 ## ビルド
 

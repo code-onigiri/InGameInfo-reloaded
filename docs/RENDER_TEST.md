@@ -309,6 +309,41 @@ GRADLE_USER_HOME=/tmp/gradle-home \
   アライメントが戻る場合は、`ConfigurationHandler.onLoad` が `Reloading` で
   ライブ値を上書きしていないか確認する（1.20.1 では修正済み）。
 
+## 計算式 `{{ ... }}` の確認
+
+1. ワールドを開く前に `run/config/InGameInfo.xml` をバックアップする。
+2. `<topleft>` に次のような行を入れて `/igi reload` する（XML なので `%<s` は
+   `%&lt;s` と書く）。
+
+   ```xml
+   <str>arith = {{ 1 + 2 * 3 }}</str>
+   <str>health+1 = {{ health + 1 }}</str>
+   <str>fmt = {{ format("%.2f", 10 / 3) }}</str>
+   <str>reuse = {{ format("%s %&lt;s", "A") }}</str>
+   <str>tag = {{ biome }}</str>
+   <str>fallback = {{ nope + 1 }}</str>
+   ```
+
+3. `arith = 7`、`health+1 = 21`（HP 20.00 のとき）、`fmt = 3.33`、
+   `reuse = A A`、`tag = Plains` のように表示されることを確認する。
+4. `fallback` の行は `{{ nope + 1 }}` のまま残る（式の失敗で行全体が消えない）。
+5. 1.20.1 では、さらに四則演算の優先順位・括弧・単項符号・`round` / `min` /
+   `max` / `abs` / `floor` / `ceil`・`format` の各変換子（`%05d`, `%,d`,
+   `%x`, `%c`, `%e`, `%tY`, `%%` など）・`0` 除算・不正な式を確認する。
+
+1.20.1 の 35 行の確認結果です。数値の既定書式（`10 / 4 = 2.5`、`10 / 3 = 3.333`）、
+`format` の固定桁、タグとの加算、失敗時のリテラル保持が読み取れます。
+
+![計算式 1.20.1](render/expressions-1.20.1.png)
+
+1.21.1 と 26.1.2 では、代表的な 6 行で同じ結果を確認しました。
+
+![計算式 1.21.1](render/expressions-1.21.1.png)
+
+![計算式 26.1.2](render/expressions-26.1.2.png)
+
+式の書式・関数・失敗時の仕様は [EXPRESSIONS.md](EXPRESSIONS.md) にまとめています。
+
 ## コマンドの確認
 
 ワールド内でチャットから実行します。
@@ -330,7 +365,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 
 ## 確認済みの結果（1.20.1）
 
-2026-10-23 時点のヘッドレス環境（Xvfb + llvmpipe、1280x720）で確認しました。
+2026-10-23〜24 時点のヘッドレス環境（Xvfb + llvmpipe、1280x720）で確認しました。
 
 | 項目 | 結果 | スクリーンショット |
 |---|---|---|
@@ -346,6 +381,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 | `/igi reload` | OK | チャットの `Reloading... / Done!` |
 | HUD エディタの表示・ライブ HUD | OK | [editor-1.20.1.png](render/editor-1.20.1.png) |
 | デバッグ要素インスペクター（F8、全タグ・検索・スクロール） | OK（2026-10-24） | [debug-1.20.1.png](render/debug-1.20.1.png) |
+| 計算式 `{{ ... }}`（35 行、全関数・`format`・失敗時） | OK（2026-10-24） | [expressions-1.20.1.png](render/expressions-1.20.1.png) |
 | タグピッカーから `<energy>` を挿入 | OK | [editor-picker-1.20.1.png](render/editor-picker-1.20.1.png) |
 | エディタの `Save` で XML に 1 行保存 | OK | `InGameInfo.xml` の `<var>energy</var>` |
 | X=5 / Y=7 の保存と再起動後の保持 | OK | [editor-offset-1.20.1.png](render/editor-offset-1.20.1.png) |
@@ -365,6 +401,7 @@ NeoForge 21.1.264 でも同じ HUD・GUI を確認しました。設定画面は
 | 設定 GUI の `Done` 後に再度開く | OK | 1/3 に戻り、値も保持 |
 | HUD エディタ（背景がぼやけず HUD が読める） | OK | [editor-1.21.1.png](render/editor-1.21.1.png) |
 | デバッグ要素インスペクター（`/igi debug`） | OK（2026-10-24） | [debug-1.21.1.png](render/debug-1.21.1.png) |
+| 計算式 `{{ ... }}`（代表 6 行） | OK（2026-10-24） | [expressions-1.21.1.png](render/expressions-1.21.1.png) |
 | `/igi save quiet.xml` | OK | チャットに `Done!` |
 | `defaultSeedInServer` の補正ループ | 修正済み | TOML が `"0"` で安定、`.bak` なし |
 
@@ -385,6 +422,7 @@ NeoForge 26.1.2.122 でも同じ HUD・GUI を確認しました。設定画面�
 | 設定 GUI の `Done` 後に再度開く | OK | 値も保持 |
 | HUD エディタ（背景がぼやけず HUD が読める） | OK | [editor-26.1.2.png](render/editor-26.1.2.png) |
 | デバッグ要素インスペクター（F8） | OK（2026-10-24） | [debug-26.1.2.png](render/debug-26.1.2.png) |
+| 計算式 `{{ ... }}`（代表 6 行） | OK（2026-10-24） | [expressions-26.1.2.png](render/expressions-26.1.2.png) |
 | `/igi save test2612.xml` | OK | チャットに `Done!` |
 | 初回参加時の既定 HUD 表示 | 修正済み | `ConfigReloadListener` で解決 |
 | `scripts/render-test.sh 26.1.2 RenderTest` の自動撮影 | OK | [hud-26.1.2.png](render/hud-26.1.2.png) |

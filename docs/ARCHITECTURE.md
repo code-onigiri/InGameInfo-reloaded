@@ -16,7 +16,7 @@ Minecraft のバージョン間では Forge / NeoForge の API だけでなく�
 `common/` には将来、次のようなバージョン非依存コードを置く想定です。
 
 - パーサー（XML / JSON / TXT）とプリンター
-- `Value` / `Operation` / タグ名の定数
+- `Value` / `Expression` / `Operation` / タグ名の定数
 - MOD 連携 SPI のインターフェース
 
 現時点では 1.20.1 / 1.21.1 / 26.1.2 の実装はそれぞれの `versions/<version>/` 内にあり、
@@ -86,6 +86,14 @@ Minecraft のバージョン間では Forge / NeoForge の API だけでなく�
   `Value` 実装を生成します。
 - `Value#getReplacedValue()` が `{tagname}` を `TagRegistry` で解決します。未知の
   タグは `{tagname}` のまま残ります（1.12.2 と同じ）。
+- `Value#replaceVariables()` は `{{ ... }}` を先に走査し、`Expression#evaluate()` に
+  渡します。式の中のタグは `TagRegistry#getValue()` で解決し、失敗した式は元の
+  `{{ ... }}` のまま残します。式の外側の `{tag}` は従来どおり `replaceTags()` で
+  置換します。
+- `Expression` は再帰下降パーサーです。数値・文字列・タグ名・四則演算・括弧・単項
+  符号・`round` / `min` / `max` / `abs` / `floor` / `ceil` / `format` を扱います。
+  パース結果だけを 512 件のアクセス順キャッシュに載せ、タグの値は評価のたびに
+  読み直します。3 バージョンで同一のソースです。
 - `Tag` は `Minecraft.getInstance()` のワールド・プレイヤーを参照します。評価は
   レンダースレッドのみで行ってください。
 

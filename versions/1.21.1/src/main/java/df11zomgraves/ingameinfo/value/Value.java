@@ -54,6 +54,40 @@ public abstract class Value {
     }
 
     protected String replaceVariables(String str) {
+        final int firstOpen = str.indexOf("{{");
+        if (firstOpen < 0) {
+            return replaceTags(str);
+        }
+
+        final StringBuilder builder = new StringBuilder(str.length());
+        int index = 0;
+        while (index < str.length()) {
+            final int open = str.indexOf("{{", index);
+            if (open < 0) {
+                builder.append(replaceTags(str.substring(index)));
+                break;
+            }
+
+            builder.append(replaceTags(str.substring(index, open)));
+            final int close = findExpressionEnd(str, open + 2);
+            if (close < 0) {
+                builder.append(replaceTags(str.substring(open)));
+                break;
+            }
+
+            final String expression = str.substring(open + 2, close);
+            try {
+                builder.append(Expression.evaluate(expression));
+            } catch (final RuntimeException e) {
+                // Keep the original text visible when an expression is invalid.
+                builder.append(str, open, close + 2);
+            }
+            index = close + 2;
+        }
+        return builder.toString();
+    }
+
+    private String replaceTags(String str) {
         MATCHER.reset(str);
 
         while (MATCHER.find()) {
@@ -61,6 +95,32 @@ public abstract class Value {
         }
 
         return str;
+    }
+
+    private static int findExpressionEnd(final String str, final int from) {
+        boolean inString = false;
+        boolean escaped = false;
+        char quote = 0;
+        for (int i = from; i < str.length() - 1; i++) {
+            final char c = str.charAt(i);
+            if (inString) {
+                if (escaped) {
+                    escaped = false;
+                } else if (c == '\\') {
+                    escaped = true;
+                } else if (c == quote) {
+                    inString = false;
+                }
+                continue;
+            }
+            if (c == '"' || c == '\'') {
+                inString = true;
+                quote = c;
+            } else if (c == '}' && str.charAt(i + 1) == '}') {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public abstract boolean isSimple();

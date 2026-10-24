@@ -8,14 +8,16 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 
 | バージョン | ローダー | 状態 |
 |---|---|---|
-| 1.20.1 | Forge 47.4.28 / Java 17 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
-| 1.21.1 | NeoForge 21.1.264 / Java 21 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
-| 26.1.2 | NeoForge 26.1.2.122 / Java 25 | 実装・ビルド・HUD / GUI / エディタ描画テスト済み |
+| 1.20.1 | Forge 47.4.28 / Java 17 | 実装・ビルド・HUD / GUI / エディタ / 計算式描画テスト済み |
+| 1.21.1 | NeoForge 21.1.264 / Java 21 | 実装・ビルド・HUD / GUI / エディタ / 計算式描画テスト済み |
+| 26.1.2 | NeoForge 26.1.2.122 / Java 25 | 実装・ビルド・HUD / GUI / エディタ / 計算式描画テスト済み |
 
 1.20.1 / 1.21.1 / 26.1.2 版は次を移植済みです。
 
 - HUD 描画（テキスト、アイコン、アイテム、ポーション効果、9 アライメント、スケール）
 - 既定の `ingameinfo.xml`、XML / JSON / TXT パーサー
+- 計算式 `{{ ... }}`（四則演算・括弧・`round` / `min` / `max` / `abs` / `floor` /
+  `ceil` / `format`）。従来の `{tag}` はそのまま
 - XML / JSON / TXT プリンター（`/igi save`）
 - 設定画面（Forge / NeoForge の Config Screen）と `/igi config`
 - タグ一覧 GUI（`/igi taglist`）
@@ -43,6 +45,7 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 ├── docs/
 │   ├── COMPATIBILITY.md       # 1.12.2 との差異と再現方法
 │   ├── ARCHITECTURE.md        # マルチバージョン構成と MOD 連携 SPI
+│   ├── EXPRESSIONS.md         # `{{ ... }}` 計算式の書式と関数
 │   ├── RENDER_TEST.md         # ヘッドレス描画テストの手順
 │   ├── DEBUG_SCREEN.md        # デバッグ要素インスペクターの使い方
 │   └── DEBUG_MODS.md          # デバッグ用 MOD の On/Off 手順
@@ -159,6 +162,32 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 - `/igi editor` — HUD エディタを開く（既定キーは `F9`）
 - `/igi alignment get|set <ALIGN> [x y]` — アライメントのオフセット
 - `/igi config <key> <value>` — 設定の変更
+
+## 計算式 `{{ ... }}`
+
+HUD のテキスト中で `{{ ... }}` と書くと、その中を計算式として評価します。1.12.2 の
+`{tag}` はそのまま使え、式の中ではタグ名を直接書けます。
+
+```xml
+<str>HP: {{ health }} / {{ maxhealth }}</str>
+<str>ダメージ: {{ attackdamage * 2 + 1 }}</str>
+<str>座標: {{ round(x, 1) }} / {{ round(z, 1) }}</str>
+<str>HP 割合: {{ format("%.1f", health / maxhealth * 100) }}%</str>
+```
+
+- 四則演算（`+` `-` `*` `/` `%`）、括弧、単項の `+` / `-`
+- `round(x[, digits])`、`min(...)`、`max(...)`、`abs(x)`、`floor(x)`、`ceil(x)`
+- `format("Java の書式", 値, ...)`。`String.format(Locale.ENGLISH, ...)` と同じ
+- 未知のタグ・文法エラー・書式エラーがあると、その `{{ ... }}` は元の文字列のまま
+  表示されます（式の一部だけが置換されることはありません）
+
+`${...}` は使いません。`$` は色コードの接頭辞なので、既存の定義と衝突しないように
+二重中括弧にしています。XML のテキストで `<` を使うときは `&lt;` にしてください。
+
+書式・関数・失敗時の挙動の詳細は [docs/EXPRESSIONS.md](docs/EXPRESSIONS.md) を参照して
+ください。
+
+![計算式](docs/render/expressions-1.20.1.png)
 
 ## 1.12.2 との違い（要約）
 
