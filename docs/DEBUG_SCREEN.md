@@ -23,7 +23,7 @@ HUD の XML を書く前に「このタグは今どんな値を返すのか」�
   ように実際のインデックス付きで表示
 
 開いた直後は検索欄にフォーカスがあります。そのまま文字を打つと絞り込めます。
-値は 20 tick（約 1 秒）ごとに取り直します。ワールドに入った直後や、チェストを開いた
+値の取り直しは 20 tick（約 1 秒）ごとです。ワールドに入った直後や、チェストを開いた
 直後など、値が変わる操作のあとに少し待つと反映されます。値の取得中に例外が出た
 タグは、値の欄に赤で `ERROR: ...` と表示されます。画面全体は止まりません
 （`isPauseScreen()` は false）。
@@ -47,15 +47,15 @@ Mekanism / Cobblemon / Tinkers' Construct などの任意連携は、MOD が入�
 
 ## スクリーンショット
 
-1.20.1（Forge、GUI scale 2）:
+1.20.1（Forge、GUI scale 2）の例。
 
 ![1.20.1 のデバッグ要素](render/debug-1.20.1.png)
 
-1.21.1（NeoForge、GUI scale 3）:
+1.21.1（NeoForge、GUI scale 3）の例。
 
 ![1.21.1 のデバッグ要素](render/debug-1.21.1.png)
 
-26.1.2（NeoForge、GUI scale 3）:
+26.1.2（NeoForge、GUI scale 3）の例。
 
 ![26.1.2 のデバッグ要素](render/debug-26.1.2.png)
 

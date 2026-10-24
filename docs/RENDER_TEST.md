@@ -3,7 +3,8 @@
 この文書は、GUI のない環境（SSH・CI・NixOS のヘッドレス機）で InGameInfoXML の HUD と
 GUI を実際に描画し、スクリーンショットで確認する手順をまとめたものです。1.20.1 で
 確立した手順を 1.21.1 / 26.1.2 でも使い、将来のバージョンにも同じ形で適用できる
-ようにしています。
+ようにしています。共通の準備、機能別の確認、バージョン別の結果、MOD 連携の順に
+進みます。
 
 ## 対象
 
@@ -25,7 +26,7 @@ MOD 連携タグそのものは、連携 MOD を入れた環境で別途確認�
 ## 前提
 
 - Nix（flake 有効）と、このリポジトリの `flake.nix`
-- Xvfb・xdotool・ImageMagick・Mesa（llvmpipe）— すべて `mc1201` シェルに入っています
+- Xvfb・xdotool・ImageMagick・Mesa（llvmpipe）は `mc1201` シェルに含まれます
 - 1.20.1 のテスト用ワールド（下記で作成）
 - 実クライアントを起動できる程度のメモリ（2 GB 以上を推奨）
 
@@ -144,7 +145,8 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 
 1.21.1 / 26.1.2 は NeoForge / ModDevGradle なので、Gradle の `--args` ではなく
 `-PquickPlayWorld=RenderTest` でワールドを指定します。スクリプトは
-`META-INF/neoforge.mods.toml` の有無で自動的に切り替えます。手動で起動する場合:
+`META-INF/neoforge.mods.toml` の有無で自動的に切り替えます。手動で起動する場合は
+次のコマンドを実行します。
 
 ```bash
 cd versions/1.21.1
@@ -168,7 +170,7 @@ this world?` に `I know what I'm doing!`、続く `Upgrading World Completed` �
 ウィンドウを探し、見つかったら待ってから `import -window root` で撮ります。GPU も
 ログインも不要です。
 
-### うまくいかないとき
+### トラブルシューティング
 
 - **Minecraft ウィンドウが出ない**: ログの末尾を確認します。`glfwInit` や
   `Failed to create display` が出る場合は、Gradle デーモンが Xvfb の DISPLAY を
@@ -293,7 +295,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 `494 tags / 12 categories` でした。1.21.1 で Mekanism と Cobblemon を有効にすると
 `632 tags` になり、連携タグが一覧に増えます。
 
-#### xdotool で自動操作するとき
+#### xdotool による自動操作
 
 - 1280x720 の Xvfb では、ゲームの描画領域は 854x480（GUI スケール 2）で、ルート
   ウィンドウの `(213, 120)` から始まる。GUI 座標 `(gx, gy)` は
@@ -363,7 +365,9 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 `/igi reload` はチャットに `Reloading...` と `Done!` を出します。F12（既定の
 リロードキー）でも同じ処理が走ります。
 
-## 確認済みの結果（1.20.1）
+## バージョン別の結果
+
+### 1.20.1
 
 2026-10-23〜24 時点のヘッドレス環境（Xvfb + llvmpipe、1280x720）で確認しました。
 
@@ -439,7 +443,12 @@ Xvfb を再起動せずにクライアントだけ入れ替えると、前回の
 誤ったスクリーンショットになることがあります。撮る前に必ずウィンドウを確認して
 ください。
 
-## MOD 連携（Paragliders、1.20.1 / 1.21.1）
+## MOD 連携
+
+任意連携タグを実 MOD で確認した手順と結果を、MOD ごとにまとめます。開発クライアント
+への MOD の入れ方は [DEBUG_MODS.md](DEBUG_MODS.md) を参照してください。
+
+### Paragliders（1.20.1 / 1.21.1）
 
 連携の実例として Paragliders を入れ、スタミナの 4 タグを HUD に出して確認しました。
 
@@ -488,7 +497,7 @@ Mixin を含む本番 jar（例: Cold Sweat）は deobf しても refmap が SRG
 開発実行で読み込めました（後述）。Cold Sweat のように別の Mixin 問題が残る場合は
 本番環境（実際の Forge クライアント）で確認します。
 
-## MOD 連携（Applied Energistics 2、1.20.1 / 1.21.1）
+### Applied Energistics 2（1.20.1 / 1.21.1）
 
 AE2 は Mixin を含む本番 jar のため、1.20.1 の ForgeGradle 開発実行では
 `ae2.mixins.json:GuiGraphicsMixin` の refmap 解決に失敗します
@@ -501,7 +510,7 @@ Minecraft 1.20.1 + Forge 47.4.28 の本番クライアントで行いました�
 `versions/1.21.1/run/mods/` へ置くだけで動きます（`Registered 566 tags.` =
 既定 547 + AE2 19）。
 
-HUD 設定例:
+HUD 設定の例を次に示します。
 
 ```xml
 net: <var>ae2networkover</var> ch: <var>ae2channelsover</var> mode: <var>ae2channelmodeover</var>
@@ -531,7 +540,7 @@ status: <var>ae2cellstatus</var>
 メインハンドに残るのが 1 フレームだけのため、セル行の定常スクリーンショットは
 撮れていません。手動でセルを持てば同じ値が HUD に出ます。
 
-画像の色を機械的に確認する例:
+画像の色を機械的に確認する例を次に示します。
 
 ```bash
 magick docs/render/hud-1.20.1.png -format %c histogram:info:- | sort -nr | head -20
@@ -543,14 +552,14 @@ magick docs/render/hud-1.20.1.png -format %c histogram:info:- | sort -nr | head 
 残っていること、`Save` 後に `ingameinfoxml-client.toml` の `topleft` が
 `"5 7"` になっていることを確認します。
 
-## MOD 連携（Mekanism / Cobblemon / Tinkers' Construct）
+### Mekanism / Cobblemon / Tinkers' Construct
 
 ここで使う MOD の jar はリポジトリに含めません。`versions/<version>/libs/debug-mods/`
 に置き、`build.gradle` の `ext.debugMods` を true にして開発クライアントへ読み込みます。
 依存 MOD の自動解決や
 On/Off の仕組みは [DEBUG_MODS.md](DEBUG_MODS.md) を参照してください。
 
-### 1.21.1（Mekanism + Cobblemon）
+#### 1.21.1（Mekanism + Cobblemon）
 
 `versions/1.21.1/libs/debug-mods/` に次の 3 つを置きます。Cobblemon は Kotlin
 ランタイムを同梱しないため、Kotlin for Forge も必要です（`cobblemon: true` なら
@@ -589,7 +598,7 @@ Cobblemon のパーティ選択オーバーレイが画面左端に、`Change Pa
 `90 80` にずらしています。オーバーレイと重ならず、4 行すべて読み取れます。
 確認画像: [integration-mods-1.21.1.png](render/integration-mods-1.21.1.png)。
 
-### 1.20.1（Tinkers' Construct）
+#### 1.20.1（Tinkers' Construct）
 
 Tinkers' Construct 3.12.1.231 と Mantle 1.11.117 の本番用 jar は SRG 名で
 コンパイルされているため、そのまま `run/mods` に置くと `ResourceLocation.m_135827_()`
@@ -610,7 +619,7 @@ cd versions/1.20.1
 `syncDebugMods` が `TConstruct-1.20.1-3.12.1.231_mapped_official_1.20.1.jar` と
 `Mantle-1.20.1-1.11.117_mapped_official_1.20.1.jar` を `run/mods` にコピーし、
 ログに `[igi] Debug mods: tconstruct, mantle` を出します。ゲーム内で
-`/give @s tconstruct:pickaxe` を持った状態の HUD:
+`/give @s tconstruct:pickaxe` を持った状態の HUD は次のとおりです。
 
 ```text
 tool: 1/1 (100.0%)
@@ -622,10 +631,10 @@ mods 0 broken false
 修飾子数・破損状態が Tinkers の `ToolStack` から読めています。`/give` で作った
 ツールは素材データを持たないため数値は最小値です。素材入りのツールでの値の確認は
 今後の課題です。本番用クライアント（`.prism-test/mcprod`）でも同じ表示を確認して
-います。確認画像:
+います。確認画像は次のとおりです。
 [integration-tinkers-1.20.1.png](render/integration-tinkers-1.20.1.png)。
 
-## MOD 連携（Botania、1.20.1）
+### Botania（1.20.1）
 
 Botania のクロスヘア先ブロックのマナを読む 9 タグを、1.20.1 の ForgeGradle 開発
 クライアントで確認しました。対象はマナプール、マナスプレッダー、生成花／機能花です。
@@ -657,7 +666,7 @@ cd versions/1.20.1
 `mixin.env.refMapRemappingFile` を設定済みで、`build/createSrgToMcp/output.srg` を
 使って公式名に読み替えます。jar を書き換える必要はありません。
 
-HUD 設定:
+HUD 設定は次のとおりです。
 
 ```xml
 pool: <var>botaniamanapoolover</var>/<var>botaniamanapoolmaxover</var> (<var>botaniamanapoolpercentover</var>%)
@@ -678,7 +687,7 @@ flower: <var>botaniaflowermanaover</var>/<var>botaniaflowermaxmanaover</var> (<v
 `0/0 (0.0%)` になります。スプレッダーと花も、十字カーソルがブロックに当たって
 いることを確認してください。
 
-確認結果:
+確認結果は次のとおりです。
 
 ```text
 pool: 500000/1000000 (50.0%)
@@ -686,12 +695,12 @@ spreader: 400/1000 (40.0%)
 flower: 100/300 (33.3%)
 ```
 
-3 つの画面を上下に並べた確認画像:
+3 つの画面を上下に並べた確認画像を次に示します。
 [botania-tags-1.20.1.png](render/botania-tags-1.20.1.png)。上からマナプール、
 マナスプレッダー、エンドフレイム。各画面とも対象ブロックにクロスヘアが当たり、
 対応する行だけが値を持ち、他の行は `0/0 (0.0%)` です。
 
-## 新しいバージョンへ展開するとき
+## 新しいバージョンへの展開
 
 - バージョンごとに `versions/<version>/run/saves/RenderTest` を用意する
   （ワールドはバージョン間で共有しない。データパックの形式も変わる。コピーして

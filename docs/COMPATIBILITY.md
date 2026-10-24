@@ -181,11 +181,25 @@ Forge / NeoForge Energy 連携を含む）。
 - Forge / NeoForge Energy（常時）: `energy`, `fe`, `maxenergy`, `maxfe`,
   `energypercent`, `fepercent`
 
-1.21.1 の実クライアントで Mekanism と Cobblemon、1.20.1 の ForgeGradle 開発クライアントで
-Tinkers' Construct の HUD 表示を確認済みです（Tinkers は `libs/debug-mods` の jar を
-`build.gradle` の `ext.debugMods` で `tconstruct: true` にして deobf 読み込み）。
-1.20.1 の Mekanism / Cobblemon と
-26.1.2 の 3 連携はビルド確認までです。
+### 動作確認状況
+
+連携タグの確認状況は次のとおりです。「ビルド確認」は、そのバージョンでビルドが通る
+ところまでを指します。「HUD 確認」は、ビルドに加えて実クライアントの HUD で値を
+確認したことを指します。
+
+| MOD | 1.20.1 | 1.21.1 | 26.1.2 | 確認内容 |
+|---|---|---|---|---|
+| Create / Curios / Serene Seasons / Ars Nouveau / Iron's Spells 'n Spellbooks / Tough As Nails / Vampirism / Cold Sweat / Thirst Was Taken / Goety | ビルド確認 | ビルド確認 | ビルド確認 | タグ登録とビルド |
+| Paragliders | HUD 確認 | HUD 確認 | ビルド確認 | スタミナ、最大値、割合、枯渇状態 |
+| Applied Energistics 2 | ネットワーク系を確認 | HUD 確認 | ビルド確認 | チャンネル数・モード、グリッド電力、平均使用量、セル容量・状態 |
+| Mekanism | ビルド確認 | HUD 確認 | ビルド確認 | 放射線量、深刻度、有効状態、割合 |
+| Cobblemon | ビルド確認 | HUD 確認 | ビルド確認 | パーティ数、種族、レベル、HP、状態、色違い、タイプ |
+| Tinkers' Construct | HUD 確認 | 対象外 | 対象外 | 8 タグ。素材未設定ツールのため最小値 |
+| Botania | HUD 確認 | 対象外 | 対象外 | マナプール、スプレッダー、花の 9 タグ |
+
+Tinkers' Construct の HUD 値は、`/give` で作った素材未設定ツールを読むため最小値です。
+素材入りのツールでの確認は今後の課題です。Botania は 1.20.1 で
+`500000/1000000`、`400/1000`、`100/300` を確認しました。
 
 Create のタグは対象ブロックがない場合も行を消さず、RPM・ストレス系は `0.0`、
 `createkineticover` は `false` を返します。搭乗中の Create 装置がある場合はその中の
@@ -193,9 +207,6 @@ Create のタグは対象ブロックがない場合も行を消さず、RPM・�
 
 値の評価はすべてクライアント側で行い、連携 MOD の API が変わって例外になっても
 そのタグだけ空文字になります。HUD 全体は描画され続けます。
-
-Paragliders は 1.20.1 / 1.21.1 の実クライアントで、スタミナ・最大値・割合・
-枯渇状態が HUD に出るところまで確認しました。他の連携はコンパイル確認までです。
 
 Applied Energistics 2 はサーバー権威の値（チャンネル数、グリッド電力、使用量）を
 HUD に出すため、クライアントから `RequestAe2Packet` を送り、サーバーが
@@ -209,12 +220,9 @@ HUD に出すため、クライアントから `RequestAe2Packet` を送り、�
 周辺のグリッドを勝手に選ぶフォールバックはありません。セル系はメインハンド／
 オフハンドのセルアイテムから読みます。
 
-1.21.1 の実クライアントでは、チャンネル数・チャンネルモード・グリッド電力・
-平均使用量・セル容量／状態まで HUD で確認済みです。1.20.1 は本番 Forge 47.4.28
-クライアントでネットワーク系タグを確認済みで、セル値もログで
-`status=EMPTY used=0 total=1024` を確認しましたが、自動操作中にセルがメインハンドに
-残る時間が短く、セル行の定常 HUD スクリーンショットは撮れていません。26.1.2 は
-コンパイル確認までです。
+1.20.1 の AE2 は本番 Forge 47.4.28 クライアントでネットワーク系タグを確認済みです。
+セル値もログで `status=EMPTY used=0 total=1024` を確認しましたが、自動操作中にセルが
+メインハンドに残る時間が短く、セル行の定常 HUD スクリーンショットは撮れていません。
 
 1.20.1 Forge の開発実行に本番 jar をそのまま入れると SRG 名の Mixin や
 `ResourceLocation` のマッピング差で失敗するため、検証時は本番クライアント
@@ -223,9 +231,9 @@ HUD に出すため、クライアントから `RequestAe2Packet` を送り、�
 
 ### HUD エディタ（1.20.1 / 1.21.1 / 26.1.2 で追加）
 
-1.12.2 にはない GUI です。`F9` または `/igi editor` で開きます。行は
+1.12.2 にはない GUI で、`F9` または `/igi editor` から開けます。行は
 `config/InGameInfo.xml` に、アライメントの X / Y は
-`config/ingameinfoxml-client.toml` に保存します。`Esc` は保存せずに閉じます。
+`config/ingameinfoxml-client.toml` に保存します。`Esc` は保存せずに閉じるだけです。
 エディタで保存したオフセットは再起動後も保持されます。TOML を直接編集した場合は
 ゲームを再起動してください（実行中の `Reloading` はライブのアライメントを上書き
 しないため）。
@@ -263,7 +271,7 @@ HUD に出すため、クライアントから `RequestAe2Packet` を送り、�
   Ars Nouveau / Iron's Spells 'n Spellbooks / Tough As Nails / Mekanism / Cobblemon /
   Tinkers' Construct（1.20.1 のみ）/ Forge Energy を任意連携として追加しました
   （MOD が入っている場合のみ有効）。
-- 人気度の高い MOD から、プレイヤー固有の資源を表示する連携を追加しました:
+- 人気度の高い MOD から、プレイヤー固有の資源を表示する連携も追加しました。
   Vampirism（血）, Cold Sweat（体温）, Thirst Was Taken（渇き）,
   Goety（ソウル）, Paragliders（スタミナ）, Botania（マナ、1.20.1 のみ）。
 - 1.12.2 の `mcmod.info`、Forge 1.12 の `Configuration` GUI。

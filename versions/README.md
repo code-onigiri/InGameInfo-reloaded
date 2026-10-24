@@ -8,7 +8,7 @@ Gradle プラグイン・Mappings・Java・ローダー API が違うため、1 
 
 | ディレクトリ | Minecraft | ローダー | Java | 状態 |
 |---|---|---|---|---|
-| `1.20.1/` | 1.20.1 | Forge 47.4.0 | 17 | 実装・ビルド・描画テスト済み |
+| `1.20.1/` | 1.20.1 | Forge 47.4.28 | 17 | 実装・ビルド・描画テスト済み |
 | `1.21.1/` | 1.21.1 | NeoForge 21.1.264 | 21 | 実装・ビルド・描画テスト済み |
 | `26.1.2/` | 26.1.2 | NeoForge 26.1.2.122 | 25 | 実装・ビルド・描画テスト済み |
 
@@ -59,8 +59,8 @@ nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew build'
 nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew build'
 ```
 
-成果物は `versions/<version>/build/libs/ingameinfoxml-<version>.jar` です。1.20.1 は
-Forge 47.4.0、1.21.1 は NeoForge 21.1.264、26.1.2 は NeoForge 26.1.2.122 の
+成果物は `versions/<version>/build/libs/ingameinfoxml-2.9.2.101.jar` です。1.20.1 は
+Forge 47.4.28、1.21.1 は NeoForge 21.1.264、26.1.2 は NeoForge 26.1.2.122 の
 クライアント・サーバーにそのまま入れられます。開発用クライアントは次で起動します。
 
 ```bash
@@ -76,7 +76,7 @@ Nix を使わない場合は JDK 17 / 21 / 25 のいずれかと、1.20.1 / 1.21
 26.1.2 は Gradle 9.8.2 を用意し、`GRADLE_USER_HOME` を書き込み可能な場所に向けて
 ください。
 
-## 新しいバージョンを追加するとき
+## 新しいバージョンの追加
 
 1. 対象バージョンの Forge / NeoForge MDK を取得し、`versions/<version>/` に
    `build.gradle`、`gradle.properties`、`settings.gradle`、wrapper を置く。
@@ -93,7 +93,7 @@ Nix を使わない場合は JDK 17 / 21 / 25 のいずれかと、1.20.1 / 1.21
 
 ## バージョン固有の注意
 
-- **1.20.1**: 公式 Mappings、Forge 47.4.0、Java 17。`ModLoadingContext.get()` は
+- **1.20.1**: 公式 Mappings、Forge 47.4.28、Java 17。`ModLoadingContext.get()` は
   非推奨だが動作する（ビルド時に警告）。Config Screen は Forge の
   `ConfigScreenHandler.ConfigScreenFactory`。
 - **1.21.1**: NeoForge 21.1.264、ModDevGradle 2.0.148、Java 21、公式 Mappings。
@@ -118,26 +118,10 @@ Nix を使わない場合は JDK 17 / 21 / 25 のいずれかと、1.20.1 / 1.21
 `ItemStack` 以外の型をコンパイル時に参照しません。`IntegrationLoader` が
 `ModList.isLoaded(modId)` で判定し、入っている MOD のタグだけ登録します。
 
-| MOD ID | タグ |
-|---|---|
-| `create` | `createrpm`, `createkinetic`, `createstress`, `createstresscapacity`, `createstresspercent`, `createnetworksize` |
-| `curios` | `curioslots`, `curioitems` |
-| `sereneseasons` | `season`, `subseason`, `tropicalseason`, `seasonday`, `seasonticks`, `seasonprogress` |
-| `ars_nouveau` | `arsmana`, `arsmaxmana`, `arsmanapercent` |
-| `irons_spellbooks` | `ironsmana`, `ironsmaxmana`, `ironsmanapercent` |
-| `toughasnails` | `thirst`, `hydration`, `temperature`, `temperaturelevel` |
-| `vampirism` | `blood`, `maxblood`, `bloodpercent`, `vampirelevel` |
-| `cold_sweat` | `coldsweat`, `coldsweatworld` |
-| `thirst` | `twtthirst`, `twtquenched`, `twtexhaustion` |
-| `goety` | `goetysouls`, `goetyactive` |
-| `paraglider` | `stamina`, `maxstamina`, `staminapencent`, `staminadepleted` |
-| `botania`（1.20.1 のみ） | `botaniamana`, `botaniamaxmana`, `botaniamanapercent`、`botaniamanapoolover` ほか対象ブロック 9 タグ |
-| Energy（常時） | `energy`, `maxenergy`, `energypercent` |
-
-Paragliders は 1.20.1 / 1.21.1 の実クライアントで表示を確認済みです。1.20.1 の
-開発実行では本番 jar が SRG 名のため、deobf した jar を使います（手順は
-[docs/RENDER_TEST.md](../docs/RENDER_TEST.md)）。Botania も 1.20.1 の開発クライアントで
-対象ブロック 9 タグの表示を確認済みです。26.1.2 はコンパイル確認までです。
+対応 MOD、タグ名、旧名の別名、値の確認状況は
+[docs/COMPATIBILITY.md](../docs/COMPATIBILITY.md) の「MOD 連携タグ」と
+「動作確認状況」にまとめています。開発クライアントへ MOD を入れる手順は
+[docs/DEBUG_MODS.md](../docs/DEBUG_MODS.md) を参照してください。
 
 ## テスト
 
@@ -156,6 +140,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 ## 関連文書
 
 - [リポジトリ README](../README.md)
+- [ドキュメント案内](../docs/README.md)
 - [アーキテクチャ](../docs/ARCHITECTURE.md)
 - [1.12.2 との互換性](../docs/COMPATIBILITY.md)
 - [描画テスト](../docs/RENDER_TEST.md)
