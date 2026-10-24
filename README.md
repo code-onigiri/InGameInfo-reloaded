@@ -69,6 +69,7 @@ name and format as 1.12.2.
   file name, scale, vanilla HUD visibility, alignments and other settings.
 - The HUD editor (`F9`) opens at the bottom of the screen. It adds, removes and reorders
   lines, inserts tags, selects one of the nine alignments and adjusts X / Y offsets.
+  The **Panel** button moves the editor to the top when the bottom HUD needs to be seen.
 - The debug element inspector (`F8`) lists every registered tag and its current value by
   category. Clicking a tag name copies `<tag>`.
 
@@ -160,7 +161,7 @@ summarizes what each document covers.
 ├── README_ja.md               # Japanese README
 ├── common/                    # Version-independent design notes
 ├── docs/                      # User and developer documentation
-├── gradle/debug-mods.gradle   # Development mod selection and deobfuscation
+├── gradle/debug-mods.gradle   # Development mod catalog, download and deobfuscation
 ├── scripts/render-test.sh     # Capture the HUD with Xvfb + llvmpipe
 └── versions/
     ├── 1.20.1/                # Forge 1.20.1
@@ -175,7 +176,7 @@ llvmpipe for reproducible headless captures.
 
 ### Development mods
 
-Place jars in `versions/<version>/libs/debug-mods/` and set the matching entry in
+Test mods are fetched from CurseForge Maven on the first run. Set the matching entry in
 `ext.debugMods` to true to launch with that mod installed.
 
 ```groovy
@@ -184,11 +185,13 @@ ext.debugMods = [
         cobblemon: false,
         mekanism: false,
         ae2: false,
+        botania: false,     // Patchouli and Curios are added automatically
 ]
 ```
 
-Run `./gradlew listDebugMods` to list the entries, or `./gradlew syncDebugMods` to only
-synchronize the selected jars. See [docs/DEBUG_MODS.md](docs/DEBUG_MODS.md) for details.
+Run `./gradlew listDebugMods` to list the catalog, `./gradlew downloadDebugMods` to fetch
+every pinned jar, or `./gradlew syncDebugMods` to only synchronize the selection. See
+[docs/DEBUG_MODS.md](docs/DEBUG_MODS.md) for the catalog and troubleshooting.
 
 ### Render tests
 

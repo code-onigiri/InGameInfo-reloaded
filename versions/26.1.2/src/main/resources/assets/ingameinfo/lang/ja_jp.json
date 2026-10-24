@@ -383,6 +383,7 @@
   "gui.ingameinfoxml.editor.insert": "タグ...",
   "gui.ingameinfoxml.editor.line": "行",
   "gui.ingameinfoxml.editor.offset": "オフセット",
+  "gui.ingameinfoxml.editor.panel": "パネルを移動",
   "gui.ingameinfoxml.editor.save": "保存",
   "gui.ingameinfoxml.editor.done": "完了",
   "gui.ingameinfoxml.editor.saved": "%s に保存しました",

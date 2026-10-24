@@ -231,7 +231,8 @@ HUD に出すため、クライアントから `RequestAe2Packet` を送り、�
 
 ### HUD エディタ（1.20.1 / 1.21.1 / 26.1.2 で追加）
 
-1.12.2 にはない GUI で、`F9` または `/igi editor` から開けます。行は
+1.12.2 にはない GUI で、`F9` または `/igi editor` から開けます。既定では
+画面下に開き、**Panel** ボタンで上端へ移せます。行は
 `config/InGameInfo.xml` に、アライメントの X / Y は
 `config/ingameinfoxml-client.toml` に保存します。`Esc` は保存せずに閉じるだけです。
 エディタで保存したオフセットは再起動後も保持されます。TOML を直接編集した場合は

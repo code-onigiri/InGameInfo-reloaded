@@ -64,7 +64,8 @@ Minecraft の `mods/` ディレクトリへ入れます。Nix を使わない場
 - 設定画面は Mods 画面の Config から開きます。表示定義のファイル名、スケール、
   バニラ HUD の表示、アライメントなどを変更できます
 - HUD エディタ（`F9`）は画面下に開き、行の追加・削除・並べ替え、タグの挿入、
-  9 アライメントの選択、X / Y オフセットの調整ができます
+  9 アライメントの選択、X / Y オフセットの調整ができます。**Panel** ボタンで
+  エディタを上へ移し、下側の HUD を確認できます
 - デバッグ要素インスペクター（`F8`）は、登録されている全タグと現在値をカテゴリ別に
   表示します。タグ名をクリックすると `<tag>` をコピーできます
 
@@ -150,7 +151,7 @@ XML の本文で `<` を書くときは `&lt;` にしてください。詳細は
 ├── README_ja.md               # 日本語版
 ├── common/                    # バージョン非依存の設計メモ
 ├── docs/                      # 利用者・開発者向けの文書
-├── gradle/debug-mods.gradle   # 開発用 MOD の選択と deobf
+├── gradle/debug-mods.gradle   # 開発用 MOD のカタログ・取得・deobf
 ├── scripts/render-test.sh     # Xvfb + llvmpipe で HUD を撮影
 └── versions/
     ├── 1.20.1/                # Forge 1.20.1
@@ -165,7 +166,7 @@ XML の本文で `<` を書くときは `&lt;` にしてください。詳細は
 
 ### 開発用 MOD
 
-`versions/<version>/libs/debug-mods/` に jar を置き、`build.gradle` の
+テスト用 MOD は初回に CurseForge Maven から取得します。`build.gradle` の
 `ext.debugMods` を true にすると、その MOD を入れた状態で起動できます。
 
 ```groovy
@@ -174,11 +175,13 @@ ext.debugMods = [
         cobblemon: false,
         mekanism: false,
         ae2: false,
+        botania: false,     // Patchouli と Curios は自動で追加
 ]
 ```
 
-一覧は `./gradlew listDebugMods`、同期だけなら `./gradlew syncDebugMods` です。
-詳しくは [docs/DEBUG_MODS.md](docs/DEBUG_MODS.md) を参照してください。
+一覧は `./gradlew listDebugMods`、全 jar の取得は `./gradlew downloadDebugMods`、
+同期だけなら `./gradlew syncDebugMods` です。カタログとトラブルシューティングは
+[docs/DEBUG_MODS.md](docs/DEBUG_MODS.md) を参照してください。
 
 ### 描画テスト
 

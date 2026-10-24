@@ -383,6 +383,7 @@
   "gui.ingameinfoxml.editor.insert": "Tag...",
   "gui.ingameinfoxml.editor.line": "Line",
   "gui.ingameinfoxml.editor.offset": "Offset",
+  "gui.ingameinfoxml.editor.panel": "Move panel",
   "gui.ingameinfoxml.editor.save": "Save",
   "gui.ingameinfoxml.editor.done": "Done",
   "gui.ingameinfoxml.editor.saved": "Saved %s",

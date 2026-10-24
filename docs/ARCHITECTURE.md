@@ -46,8 +46,10 @@ Minecraft のバージョン間では Forge / NeoForge の API だけでなく�
 
 ## HUD エディタ
 
-`client/gui/editor/GuiHudEditor` は画面下だけを使う「ボトムシート」です。上の HUD は
-`Ticker.isRunning()` がエディタ表示中も true を返すため、編集内容がそのまま見えます。
+`client/gui/editor/GuiHudEditor` は既定で画面下だけを使う「ボトムシート」です。
+**Panel** ボタンで上端へ移動でき、下側の HUD を隠さずに確認できます。もう一方の側の
+HUD は `Ticker.isRunning()` がエディタ表示中も true を返すため、編集内容がそのまま
+見えます。
 
 - 行データは `InGameInfoCore#getLines(Alignment)` で TXT 書式へシリアライズして読み、
   `setLines` で全行を `TextParser.parseLine` に通してから反映します。1 行でも不正なら

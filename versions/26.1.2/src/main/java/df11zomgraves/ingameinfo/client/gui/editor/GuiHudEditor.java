@@ -20,8 +20,9 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 /**
- * Bottom-sheet HUD editor. The upper part of the screen stays clear so the live
- * overlay remains visible while lines are edited.
+ * Edge-attached HUD editor. The panel sits at the bottom by default and can be
+ * moved to the top edge, leaving the lower part of the live overlay visible
+ * while lines are edited.
  */
 public class GuiHudEditor extends Screen {
 	private static final int LINE_HEIGHT = 11;
@@ -32,6 +33,7 @@ public class GuiHudEditor extends Screen {
 	private final Button[] alignmentButtons = new Button[Alignment.values().length];
 
 	private boolean initialized;
+	private boolean panelAtTop;
 	private Alignment selectedAlignment = Alignment.TOPLEFT;
 	private int selectedLine = -1;
 	private int firstLine;
@@ -107,6 +109,12 @@ public class GuiHudEditor extends Screen {
 			}
 		}));
 
+		final Button panelButton = Button.builder(Component.literal("Panel"), b -> this.togglePanelPosition())
+				.bounds(this.width - 46, panelTop + 4, 40, 16).build();
+		panelButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
+				Component.translatable("gui.ingameinfoxml.editor.panel")));
+		addRenderableWidget(panelButton);
+
 		this.refreshFields();
 	}
 
@@ -115,8 +123,17 @@ public class GuiHudEditor extends Screen {
 		return Button.builder(Component.translatable(key), onPress).bounds(x, y, width, height).build();
 	}
 
+	private void togglePanelPosition() {
+		this.panelAtTop = !this.panelAtTop;
+		this.rebuildWidgets();
+	}
+
 	private int panelTop() {
-		return Math.max(92, this.height - PANEL_HEIGHT);
+		return this.panelAtTop ? 0 : Math.max(0, this.height - PANEL_HEIGHT);
+	}
+
+	private int panelBottom() {
+		return Math.min(this.height, this.panelTop() + PANEL_HEIGHT);
 	}
 
 	private int listTop() {
@@ -124,7 +141,7 @@ public class GuiHudEditor extends Screen {
 	}
 
 	private int listBottom() {
-		return this.height - 6;
+		return this.panelBottom() - 6;
 	}
 
 	private int visibleLines() {
@@ -377,15 +394,17 @@ public class GuiHudEditor extends Screen {
 	public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
 		// Deliberately no blur: the HUD behind the tray must stay readable while
 		// the player edits it. The tray itself is translucent and covers the
-		// lower part of the screen.
+		// bottom edge of the screen.
 	}
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
 		final int panelTop = this.panelTop();
-		guiGraphics.fill(0, panelTop, this.width, this.height, 0xD0101010);
-		guiGraphics.fill(0, panelTop, this.width, panelTop + 1, 0xFF3A8EE6);
-		guiGraphics.fill(147, panelTop + 4, 148, this.height - 6, 0xFF404040);
+		final int panelBottom = this.panelBottom();
+		guiGraphics.fill(0, panelTop, this.width, panelBottom, 0xD0101010);
+		final int accentY = this.panelAtTop ? panelBottom - 1 : panelTop;
+		guiGraphics.fill(0, accentY, this.width, accentY + 1, 0xFF3A8EE6);
+		guiGraphics.fill(147, panelTop + 4, 148, panelBottom - 6, 0xFF404040);
 
 		super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
 

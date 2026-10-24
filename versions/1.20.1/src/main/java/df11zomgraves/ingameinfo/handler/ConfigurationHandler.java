@@ -141,12 +141,23 @@ public class ConfigurationHandler {
 		msptDecimalPlace = MSPT_DECIMAL_PLACE_DEFAULT.get();
 		tpsDecimalPlace = TPS_DECIMAL_PLACE_DEFAULT.get();
 		displayInvisiblePlayer = DISPLAY_INVISIBLE_PLAYER_DEFAULT.get();
-		// Exception caught during firing event: class java.lang.Integer cannot be cast to class java.lang.Long ?
-		try {
-			seed = (long)SEED_DEFAULT.get();
+		// NightConfig may hand back an Integer for a small TOML integer even though
+		// the spec declares Long. Accept any Number instead of failing the cast.
+		Object rawSeed = SEED_DEFAULT.get();
+		if (rawSeed instanceof Number number) {
+			seed = number.longValue();
 		}
-		catch (Exception e) {
-			InGameInfoXML.logger.error(e.getMessage());
+		else if (rawSeed != null) {
+			try {
+				seed = Long.parseLong(rawSeed.toString().trim());
+			}
+			catch (NumberFormatException e) {
+				InGameInfoXML.logger.warn("Invalid defaultSeedInServer value, using 0: {}", rawSeed);
+				seed = 0L;
+			}
+		}
+		else {
+			seed = 0L;
 		}
 		alignmentMiddleCenter = ALIGNMENT_MIDDLECENTER_DEFAULT.get();
 

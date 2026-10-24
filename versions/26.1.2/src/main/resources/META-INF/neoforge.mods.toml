@@ -8,6 +8,7 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 displayURL="https://github.com/code-onigiri/InGameInfo-reloaded"
+logoFile="logo.png"
 credits="DaftPVF, bspkrs, Lunatrius, DF11ZomGraves"
 authors="${mod_authors}"
 description='''${mod_description}'''

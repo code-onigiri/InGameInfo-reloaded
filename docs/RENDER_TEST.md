@@ -279,20 +279,30 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 
 1. ワールド内で `F9` を押す（またはチャットで `/igi editor`）。画面下にエディタが開き、
    上の HUD は表示されたままになる。
-2. 行一覧で行を選び、テキスト欄を編集する。`Tag...` を押すとタグ一覧が開き、
+2. `Panel` を押すとエディタが上端へ移動し、下側の HUD が見える。もう一度押すと
+   下端へ戻る。
+3. 行一覧で行を選び、テキスト欄を編集する。`Tag...` を押すとタグ一覧が開き、
    タグをクリックするとカーソル位置に `<tag>` が挿入されてエディタへ戻る。
-3. 3x3 のアライメントボタンで表示位置を切り替え、`Offset` の X / Y を変えると
+4. 3x3 のアライメントボタンで表示位置を切り替え、`Offset` の X / Y を変えると
    HUD がその場で移動する。
-4. `Save` で保存。ステータスが `Saved InGameInfo.xml` になり、
+5. `Save` で保存。ステータスが `Saved InGameInfo.xml` になり、
    `run/config/InGameInfo.xml` と `run/config/ingameinfoxml-client.toml` が更新される。
-5. `Done` で閉じ、`F9` で開き直すと編集内容が残っている。
-6. クライアントを再起動し、オフセットが保持されていることを確認する。
+6. `Done` で閉じ、`F9` で開き直すと編集内容が残っている。
+7. クライアントを再起動し、オフセットが保持されていることを確認する。
 
 ![HUD エディタ](render/editor-1.20.1.png)
 
 ![エディタのタグピッカー](render/editor-picker-1.20.1.png)
 
 ![オフセット変更後](render/editor-offset-1.20.1.png)
+
+パネルが下にある状態と、`Panel` で上へ移した状態を次に示します。下の画像では
+エディタが下側の HUD を覆っていますが、上の画像ではパネルが上端にあり、下部の
+HUD まで読めます。
+
+![下側パネル](render/editor-panel-bottom-1.20.1.png)
+
+![上側パネル](render/editor-panel-top-1.20.1.png)
 
 ### デバッグ要素インスペクター
 
@@ -407,6 +417,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 | `/igi load` の XML / JSON / TXT 入力 | OK | チャットの `Done!` と HUD で確認 |
 | `/igi reload` | OK | チャットの `Reloading... / Done!` |
 | HUD エディタの表示・ライブ HUD | OK | [editor-1.20.1.png](render/editor-1.20.1.png) |
+| エディタの `Panel` で下端・上端を切り替え | OK（2026-10-24） | [editor-panel-bottom-1.20.1.png](render/editor-panel-bottom-1.20.1.png) / [editor-panel-top-1.20.1.png](render/editor-panel-top-1.20.1.png) |
 | デバッグ要素インスペクター（F8、全タグ・検索・スクロール） | OK（2026-10-24） | [debug-1.20.1.png](render/debug-1.20.1.png) |
 | 計算式 `{{ ... }}`（35 行、全関数・`format`・失敗時） | OK（2026-10-24） | [expressions-1.20.1.png](render/expressions-1.20.1.png) |
 | タグピッカーから `<energy>` を挿入 | OK | [editor-picker-1.20.1.png](render/editor-picker-1.20.1.png) |
@@ -572,26 +583,21 @@ magick docs/render/hud-1.20.1.png -format %c histogram:info:- | sort -nr | head 
 `#FCFC54` と `#FCFCFC` が上位に出れば、少なくとも黄色・白の文字が描画されています。
 
 エディタのスクリーンショットでは、下のパネルが画面外にはみ出さず、上に HUD が
-残っていること、`Save` 後に `ingameinfoxml-client.toml` の `topleft` が
-`"5 7"` になっていることを確認します。
+残っていること、`Panel` で上端へ移すと下側の HUD が見えること、`Save` 後に
+`ingameinfoxml-client.toml` の `topleft` が `"5 7"` になっていることを確認します。
 
 ### Mekanism / Cobblemon / Tinkers' Construct
 
-ここで使う MOD の jar はリポジトリに含めません。`versions/<version>/libs/debug-mods/`
-に置き、`build.gradle` の `ext.debugMods` を true にして開発クライアントへ読み込みます。
-依存 MOD の自動解決や
-On/Off の仕組みは [DEBUG_MODS.md](DEBUG_MODS.md) を参照してください。
+ここで使う MOD の jar はリポジトリに含めません。初回の `downloadDebugMods` が
+CurseForge Maven から `versions/<version>/libs/debug-mods/` へ取得し、
+`build.gradle` の `ext.debugMods` を true にした MOD だけが `run/mods` に入ります。
+依存 MOD の自動解決や On/Off の仕組みは [DEBUG_MODS.md](DEBUG_MODS.md) を参照して
+ください。
 
 #### 1.21.1（Mekanism + Cobblemon）
 
-`versions/1.21.1/libs/debug-mods/` に次の 3 つを置きます。Cobblemon は Kotlin
-ランタイムを同梱しないため、Kotlin for Forge も必要です（`cobblemon: true` なら
-自動で一緒に読み込まれます）。
-
-- `Mekanism-1.21.1-10.7.19.85.jar`
-- `Cobblemon-neoforge-1.8.2+1.21.1.jar`
-- `kotlinforforge-5.12.0-all.jar`
-
+Cobblemon は Kotlin ランタイムを同梱しないため、Kotlin for Forge も必要です。
+`cobblemon: true` ならカタログの依存として自動で取得・追加されます。
 `build.gradle` の `ext.debugMods` を `cobblemon: true`, `mekanism: true` にしてから
 起動します。
 
@@ -631,16 +637,15 @@ Mixin 設定も refmap も含まれていないため（`unzip -l` で確認）�
 を通す `debug-mods.gradle` の経路で読み込みます。
 
 `build.gradle` の `ext.debugMods` を `tconstruct: true` にしてから起動します。
+Mantle はカタログの依存として自動で取得・追加されます。
 
 ```bash
-cp TConstruct-1.20.1-3.12.1.231.jar Mantle-1.20.1-1.11.117.jar \
-  versions/1.20.1/libs/debug-mods/
 cd versions/1.20.1
 ./gradlew runClient --args="--quickPlaySingleplayer RenderTest"
 ```
 
-`syncDebugMods` が `TConstruct-1.20.1-3.12.1.231_mapped_official_1.20.1.jar` と
-`Mantle-1.20.1-1.11.117_mapped_official_1.20.1.jar` を `run/mods` にコピーし、
+`syncDebugMods` が `tconstruct-74072-8944121_mapped_official_1.20.1.jar` と
+`mantle-74924-8809819_mapped_official_1.20.1.jar` を `run/mods` にコピーし、
 ログに `[igi] Debug mods: tconstruct, mantle` を出します。ゲーム内で
 `/give @s tconstruct:pickaxe` を持った状態の HUD は次のとおりです。
 
@@ -662,15 +667,9 @@ mods 0 broken false
 Botania のクロスヘア先ブロックのマナを読む 9 タグを、1.20.1 の ForgeGradle 開発
 クライアントで確認しました。対象はマナプール、マナスプレッダー、生成花／機能花です。
 
-`versions/1.20.1/libs/debug-mods/` に次の 3 jar を置き、`build.gradle` の
-`ext.debugMods` を `botania: true` にします。Patchouli と Curios は Botania の必須
-依存として自動で追加されます。
-
-```text
-Botania-1.20.1-446-FORGE.jar
-Patchouli-1.20.1-84-FORGE.jar
-curios-forge-5.9.1+1.20.1.jar
-```
+カタログは Botania 456 を固定しています。`build.gradle` の `ext.debugMods` を
+`botania: true` にします。Patchouli と Curios は Botania の必須依存として自動で
+追加されます。
 
 ```bash
 cd versions/1.20.1
@@ -682,6 +681,8 @@ cd versions/1.20.1
 ログは `[igi] Debug mods: botania, patchouli, curios`、`Registered 563 tags.`
 （既定 547 + Botania 12 + Curios 4）になります。デバッグ要素インスペクターでは
 `508 tags / 14 categories` と Botania カテゴリの 12 タグを確認できます。
+Botania 456 でもマナプールが `500000/1000000 (50.0%)` と描画されることを
+[botania-456-pool-1.20.1.png](render/botania-456-pool-1.20.1.png) で確認しました。
 
 本番 jar の Mixin refmap は SRG 名のため、そのままでは
 `InvalidAccessorException: No candidates were found matching f_91041_...` で起動に
@@ -721,7 +722,9 @@ flower: 100/300 (33.3%)
 3 つの画面を上下に並べた確認画像を次に示します。
 [botania-tags-1.20.1.png](render/botania-tags-1.20.1.png)。上からマナプール、
 マナスプレッダー、エンドフレイム。各画面とも対象ブロックにクロスヘアが当たり、
-対応する行だけが値を持ち、他の行は `0/0 (0.0%)` です。
+対応する行だけが値を持ち、他の行は `0/0 (0.0%)` です。Botania 456 のマナプール
+だけを撮り直した画像は
+[botania-456-pool-1.20.1.png](render/botania-456-pool-1.20.1.png) です。
 
 ## 新しいバージョンへの展開
 
