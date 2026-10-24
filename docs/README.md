@@ -36,7 +36,7 @@
 | [DEBUG_MODS.md](DEBUG_MODS.md) | `ext.debugMods` で開発用 MOD を切り替える手順 |
 | [RENDER_TEST.md](RENDER_TEST.md) | ヘッドレス描画テストの準備、確認項目、バージョン別の結果 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 独立ビルドの構成、パーサーと値の流れ、MOD 連携 SPI |
-| [render/](render/) | 確認に使ったスクリーンショットとクライアントログ |
+| [render/](render/) | 確認に使ったスクリーンショット |
 
 ## スクリーンショット
 

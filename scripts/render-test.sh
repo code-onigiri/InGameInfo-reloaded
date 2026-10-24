@@ -16,7 +16,7 @@ WORLD="${2:-RenderTest}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GAME_DIR="$ROOT/versions/$VERSION"
 OUT_DIR="$ROOT/docs/render"
-LOG="$OUT_DIR/client-$VERSION.log"
+LOG="$GAME_DIR/build/render-test.log"
 SHOT="$OUT_DIR/hud-$VERSION.png"
 HUD_DELAY="${HUD_DELAY:-35}"
 
@@ -45,7 +45,7 @@ if [ ! -d "$GAME_DIR/run/saves/$WORLD" ]; then
     exit 1
 fi
 
-mkdir -p "$OUT_DIR"
+mkdir -p "$GAME_DIR/build" "$OUT_DIR"
 export GRADLE_USER_HOME="${GRADLE_USER_HOME:-$ROOT/.gradle}"
 
 echo "client log: $LOG"

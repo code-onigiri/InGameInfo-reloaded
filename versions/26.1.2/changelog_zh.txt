@@ -1,4 +1,20 @@
-﻿InGameInfo XML 2.9.1.100, Release, 2026/5/10
+InGameInfo XML 2.9.2.101，Release，2026/10/24
+通用
+	1.将 1.12.2 的 HUD、配置界面、标签列表、命令、XML/JSON/TXT 读写和 9 种语言移植到 Minecraft 1.20.1、1.21.1 和 26.1.2。
+	2.增加 HUD 编辑器（F9）和调试元素查看器（F8 或 /igi debug）。
+	3.增加 {{ ... }} 表达式，支持四则运算、括号、round、min、max、abs、floor、ceil 和 Java 风格 format()。
+	4.增加 AE2、Mekanism、Cobblemon、Tinkers' Construct、Botania、Create、Curios、Serene Seasons、Ars Nouveau、Iron's Spells、Tough As Nails、Vampirism、Cold Sweat、Thirst Was Taken、Goety 和 Paragliders 的可选联动。
+	5.增加 Forge Energy 和 NeoForge Energy 标签。
+	6.增加 Gradle 调试模组开关（ext.debugMods）、调试反混淆和 JDK 17/21/25 的 Nix flake。
+	7.对底层概念已变化的标签保留 1.12.2 名称，并记录兼容值。
+1.20.1
+	需要 Forge 47.4.28 和 Java 17。
+1.21.1
+	需要 NeoForge 21.1.264 和 Java 21。
+26.1.2
+	需要 NeoForge 26.1.2.122 和 Java 25。
+
+InGameInfo XML 2.9.1.100, Release, 2026/5/10
 通用
 	1.增加“displayInvisiblePlayer”选项，决定nearbyplayer相关指令是否获取隐身状态的玩家。
 	2.增加nearbyplayerabsorption标签，用于显示附近玩家的伤害吸收值。

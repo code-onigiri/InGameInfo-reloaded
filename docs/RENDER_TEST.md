@@ -139,7 +139,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 ```
 
 - 出力: `docs/render/hud-<version>.png`
-- ログ: `docs/render/client-<version>.log`
+- ログ: `versions/<version>/build/render-test.log`
 - 待ち時間: 既定 35 秒。`HUD_DELAY=60` のように延ばせる
 - 画面: 1280x720x24、GLX 有効、llvmpipe（ソフトウェア GL）
 
