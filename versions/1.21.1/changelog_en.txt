@@ -1,3 +1,7 @@
+InGameInfo XML 2.9.2.102, Release, 2026/10/24
+Common
+	1.Update the mod author, display URL, issue tracker URL and credits.
+
 InGameInfo XML 2.9.2.101, Release, 2026/10/24
 Common
 	1.Port the 1.12.2 HUD, configuration GUI, tag list, commands, XML/JSON/TXT loaders and printers, and 9 languages to Minecraft 1.20.1, 1.21.1 and 26.1.2.

@@ -4,7 +4,7 @@
 
 [InGameInfoXML](https://github.com/Lunatrius/InGame-Info-XML) の Forge / NeoForge 移植です。
 1.12.2 の HUD 定義（XML / JSON / TXT）をできるだけそのまま使い、Minecraft 1.20.1 /
-1.21.1 / 26.1.2 で表示できます。
+1.21.1 / 26.1.2 で表示できます。メンテナンスは code-onigiri が行っています。
 
 ![既定の HUD](docs/render/hud-1.20.1.png)
 
@@ -35,7 +35,7 @@ nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew build'
 nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew build'
 ```
 
-成果物は `versions/<version>/build/libs/ingameinfoxml-2.9.2.101.jar` です。対応する
+成果物は `versions/<version>/build/libs/ingameinfoxml-2.9.2.102.jar` です。対応する
 Minecraft の `mods/` ディレクトリへ入れます。Nix を使わない場合は、各バージョンに
 合った JDK と同梱の Gradle wrapper を用意してください。
 

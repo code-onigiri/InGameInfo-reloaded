@@ -6,6 +6,8 @@ A Forge / NeoForge port of [InGameInfoXML](https://github.com/Lunatrius/InGame-I
 It reuses the 1.12.2 HUD definitions (XML / JSON / TXT) as far as possible and renders
 them on Minecraft 1.20.1, 1.21.1 and 26.1.2.
 
+Maintained by [code-onigiri](https://github.com/code-onigiri).
+
 ![Default HUD](docs/render/hud-1.20.1.png)
 
 ## Features
@@ -36,7 +38,7 @@ nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew build'
 nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew build'
 ```
 
-The jar is written to `versions/<version>/build/libs/ingameinfoxml-2.9.2.101.jar`. Put it
+The jar is written to `versions/<version>/build/libs/ingameinfoxml-2.9.2.102.jar`. Put it
 in the `mods/` directory of the matching Minecraft version. Without Nix, install the JDK
 required by that version and use the bundled Gradle wrapper.
 
