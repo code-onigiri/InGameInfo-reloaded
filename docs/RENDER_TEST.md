@@ -27,6 +27,8 @@ MOD 連携タグそのものは、連携 MOD を入れた環境で別途確認�
 
 - Nix（flake 有効）と、このリポジトリの `flake.nix`
 - Xvfb・xdotool・ImageMagick・Mesa（llvmpipe）は `mc1201` シェルに含まれます
+- dev shell はホストの GPU を使います。llvmpipe を強制するのは
+  `scripts/render-test.sh` だけです
 - 1.20.1 のテスト用ワールド（下記で作成）
 - 実クライアントを起動できる程度のメモリ（2 GB 以上を推奨）
 
@@ -64,7 +66,7 @@ GRADLE_USER_HOME=/tmp/gradle-home ./gradlew runClient
 
 ### 2. テスト用データパックを入れる
 
-`run/saves/RenderTest/datapacks/igi-test/` に次の 3 ファイルを置きます。1.20.1 の
+`run/saves/RenderTest/datapacks/igi-test/` に次の 4 ファイルを置きます。1.20.1 の
 データパック形式（pack_format 15、`data/<namespace>/functions`）です。
 
 `pack.mcmeta`
@@ -89,6 +91,11 @@ effect give @a minecraft:speed 999999 2 true
 effect give @a minecraft:night_vision 999999 0 true
 effect give @a minecraft:strength 999999 1 true
 effect give @a minecraft:regeneration 999999 0 true
+```
+
+`data/igi/functions/equip.mcfunction`
+
+```mcfunction
 item replace entity @a armor.head with minecraft:diamond_helmet
 item replace entity @a armor.chest with minecraft:diamond_chestplate
 item replace entity @a armor.legs with minecraft:diamond_leggings
@@ -97,9 +104,11 @@ item replace entity @a weapon.mainhand with minecraft:diamond_sword
 item replace entity @a weapon.offhand with minecraft:shield
 ```
 
-この関数は tick ごとに実行され、時刻・天候・装備・効果を固定します。HUD の
-「Day / Biome / Light / EXP / FPS / Entities / 手持ち / ポーション / 防具」を毎回同じ
-状態で比較できるようにするためです。
+`igi:test` は tick ごとに実行され、時刻・天候・ゲームモード・効果を固定します。
+装備は `igi:equip` に分けてあり、tick では実行しません。tick でメインハンドを
+上書きすると、手持ちを変えても毎 tick ダイヤの剣に戻ります。さらにホットバーを
+切り替えるたびに、選択中のスロットがダイヤの剣になります。装備タグの確認ができなく
+なるため、装備の固定は tick から外しています。
 
 ワールドを開いた状態でデータパックを追加した場合は、チャットで次を実行します。
 
@@ -108,10 +117,13 @@ item replace entity @a weapon.offhand with minecraft:shield
 /datapack list
 /datapack enable "file/igi-test"
 /function igi:test
+/function igi:equip
 ```
 
 `/datapack list` に `igi-test` が enabled と出れば有効です。ワールド作成前に
-`datapacks/` へ置いた場合は、ワールド読み込み時に自動で有効になります。
+`datapacks/` へ置いた場合は、ワールド読み込み時に自動で有効になります。既定の HUD を
+撮る前に `/function igi:equip` を一度実行してください。別の装備を試すときは、その後に
+`/item replace` で持ち替えても tick では戻りません。
 
 ### 3. 表示定義を確認する
 
@@ -142,6 +154,12 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 - ログ: `versions/<version>/build/render-test.log`
 - 待ち時間: 既定 35 秒。`HUD_DELAY=60` のように延ばせる
 - 画面: 1280x720x24、GLX 有効、llvmpipe（ソフトウェア GL）
+- 出力先: `SHOT=/tmp/check.png` のように環境変数で変更できる
+
+llvmpipe はソフトウェア描画なので、ここの FPS は実機より低くなります。通常の
+`runClient` はホストの GPU を使うため、FPS の確認はそちらで行います。ワールドに
+入って F3 を押し、右上の GPU 名が `llvmpipe` ではなく、実機の GPU（例:
+`Mesa Intel(R) Iris(R) Xe Graphics`）になっていることを確認してください。
 
 1.21.1 / 26.1.2 は NeoForge / ModDevGradle なので、Gradle の `--args` ではなく
 `-PquickPlayWorld=RenderTest` でワールドを指定します。スクリプトは
@@ -167,8 +185,11 @@ this world?` に `I know what I'm doing!`、続く `Upgrading World Completed` �
 `/tmp/gradle-home/caches/neoformruntime/assets/objects/` へコピーすると再開できます。
 
 スクリプトはクライアントを起動したあと `xdotool search --name "Minecraft"` で
-ウィンドウを探し、見つかったら待ってから `import -window root` で撮ります。GPU も
-ログインも不要です。
+ウィンドウを探し、見つかったら待ってから `import -window root` で撮ります。撮影の
+直前に `LIBGL_ALWAYS_SOFTWARE=1`、`GALLIUM_DRIVER=llvmpipe`、
+`MESA_LOADER_DRIVER_OVERRIDE=llvmpipe`、`__GLX_VENDOR_LIBRARY_NAME=mesa` を
+設定するため、GPU もログインも不要です。通常の `runClient` はこれらの変数を
+設定しないので、実機の GPU で描画されます。
 
 ### トラブルシューティング
 
@@ -176,8 +197,10 @@ this world?` に `I know what I'm doing!`、続く `Upgrading World Completed` �
   `Failed to create display` が出る場合は、Gradle デーモンが Xvfb の DISPLAY を
   引き継いでいないことが原因です。スクリプトは `--no-daemon` を付けています。
   手動で試すときも必ず `--no-daemon` を付けてください。
-- **画面が真っ黒**: `LIBGL_ALWAYS_SOFTWARE=1`、`GALLIUM_DRIVER=llvmpipe`、
-  `MESA_LOADER_DRIVER_OVERRIDE=llvmpipe` が dev shell で設定されているか確認します。
+- **画面が真っ黒**: `scripts/render-test.sh` を使わずに手動で Xvfb を起動した
+  場合は、`LIBGL_ALWAYS_SOFTWARE=1`、`GALLIUM_DRIVER=llvmpipe`、
+  `MESA_LOADER_DRIVER_OVERRIDE=llvmpipe` を自分で設定します。dev shell は実 GPU を
+  使うため、これらの変数は設定されません。
 - **ワールドが見つからない**: `versions/<version>/run/saves/RenderTest` があるか、
   名前が一致しているか確認します。quick play は名前の一致に厳密です。
 - **前回のプロセスが残っている**: `pgrep -af 'gradle|Minecraft'` を確認し、

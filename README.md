@@ -169,7 +169,9 @@ summarizes what each document covers.
 ```
 
 Each version is a separate Gradle project. Start the development client with
-`cd versions/<version> && ./gradlew runClient`.
+`cd versions/<version> && ./gradlew runClient`. The dev shell leaves the host GPU
+enabled, so the client runs on hardware. Only `scripts/render-test.sh` forces Mesa's
+llvmpipe for reproducible headless captures.
 
 ### Development mods
 

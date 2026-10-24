@@ -159,7 +159,9 @@ XML の本文で `<` を書くときは `&lt;` にしてください。詳細は
 ```
 
 バージョンごとに Gradle プロジェクトを分けています。開発クライアントは
-`cd versions/<version> && ./gradlew runClient` で起動します。
+`cd versions/<version> && ./gradlew runClient` で起動します。dev shell はホストの GPU
+を使うため、クライアントはハードウェア描画で動きます。Mesa の llvmpipe を強制する
+のは `scripts/render-test.sh` だけです。
 
 ### 開発用 MOD
 

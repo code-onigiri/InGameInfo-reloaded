@@ -11,13 +11,20 @@
 # Requirements: xvfb-run, xdotool and ImageMagick's import on PATH.
 set -euo pipefail
 
+# The dev shell leaves the host GPU enabled for normal play. Headless captures
+# need a deterministic renderer, so force Mesa's software implementation here.
+export LIBGL_ALWAYS_SOFTWARE=1
+export MESA_LOADER_DRIVER_OVERRIDE=llvmpipe
+export GALLIUM_DRIVER=llvmpipe
+export __GLX_VENDOR_LIBRARY_NAME=mesa
+
 VERSION="${1:-1.20.1}"
 WORLD="${2:-RenderTest}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GAME_DIR="$ROOT/versions/$VERSION"
 OUT_DIR="$ROOT/docs/render"
 LOG="$GAME_DIR/build/render-test.log"
-SHOT="$OUT_DIR/hud-$VERSION.png"
+SHOT="${SHOT:-$OUT_DIR/hud-$VERSION.png}"
 HUD_DELAY="${HUD_DELAY:-35}"
 
 # Forge and NeoForge need different ways to pass quick-play arguments to the
