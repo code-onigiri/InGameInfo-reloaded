@@ -132,7 +132,7 @@ item replace entity @a weapon.offhand with minecraft:shield
 元の内容に戻して `/igi reload` してください（既定ファイルは削除しても次回起動時に
 再生成されます）。
 
-設定値は `run/config/ingameinfoxml-client.toml` です。スクリーンショットを既定値で
+設定値は `run/config/ingameinforeloaded-client.toml` です。スクリーンショットを既定値で
 揃えたい場合は、この TOML も退避してから削除します。
 
 ## HUD の自動テスト
@@ -206,7 +206,7 @@ this world?` に `I know what I'm doing!`、続く `Upgrading World Completed` �
 - **前回のプロセスが残っている**: `pgrep -af 'gradle|Minecraft'` を確認し、
   必要なら `pkill -f 'quickPlaySingleplayer RenderTest'` で止めます。
 - **設定が残っていて表示が違う**: `run/config/InGameInfo.xml` と
-  `run/config/ingameinfoxml-client.toml` を退避して再実行します。
+  `run/config/ingameinforeloaded-client.toml` を退避して再実行します。
 
 ## 目視確認のポイント
 
@@ -286,7 +286,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 4. 3x3 のアライメントボタンで表示位置を切り替え、`Offset` の X / Y を変えると
    HUD がその場で移動する。
 5. `Save` で保存。ステータスが `Saved InGameInfo.xml` になり、
-   `run/config/InGameInfo.xml` と `run/config/ingameinfoxml-client.toml` が更新される。
+   `run/config/InGameInfo.xml` と `run/config/ingameinforeloaded-client.toml` が更新される。
 6. `Done` で閉じ、`F9` で開き直すと編集内容が残っている。
 7. クライアントを再起動し、オフセットが保持されていることを確認する。
 
@@ -477,6 +477,23 @@ Xvfb を再起動せずにクライアントだけ入れ替えると、前回の
 誤ったスクリーンショットになることがあります。撮る前に必ずウィンドウを確認して
 ください。
 
+### クライアント専用化と MOD ID 変更（2026-10-24）
+
+MOD ID を `ingameinforeloaded` に変更し、クライアント専用として扱うようにしました。
+
+| 項目 | 結果 |
+|---|---|
+| 1.20.1 クライアントの HUD 描画 | OK（`Day 0, 07:00`、Biome、Light、EXP、FPS、Entities、装備、ポーション） |
+| 旧 `ingameinfoxml-client.toml` の移行 | OK。`Migrated ingameinfoxml-client.toml to ingameinforeloaded-client.toml` を確認 |
+| 1.20.1 dedicated server | OK。`client-side-only mods` としてスキップされ、`Done` まで起動 |
+| 1.21.1 dedicated server | OK。`Done` まで起動し、`Invalid dist DEDICATED_SERVER` は出ない |
+| 26.1.2 dedicated server | OK。`Done` まで起動し、クライアント GUI のクラス読み込みエラーは出ない |
+| 1.21.1 / 26.1.2 クライアントの HUD | OK。テキスト行が描画されることを確認 |
+
+1.21.1 と 26.1.2 のサーバーでは、MOD のコンストラクタがクライアント GUI を登録しない
+ため、専用サーバーでも起動できます。Forge 版は `clientSideOnly=true` で読み込み自体を
+スキップします。
+
 ## MOD 連携
 
 任意連携タグを実 MOD で確認した手順と結果を、MOD ごとにまとめます。開発クライアント
@@ -584,7 +601,7 @@ magick docs/render/hud-1.20.1.png -format %c histogram:info:- | sort -nr | head 
 
 エディタのスクリーンショットでは、下のパネルが画面外にはみ出さず、上に HUD が
 残っていること、`Panel` で上端へ移すと下側の HUD が見えること、`Save` 後に
-`ingameinfoxml-client.toml` の `topleft` が `"5 7"` になっていることを確認します。
+`ingameinforeloaded-client.toml` の `topleft` が `"5 7"` になっていることを確認します。
 
 ### Mekanism / Cobblemon / Tinkers' Construct
 

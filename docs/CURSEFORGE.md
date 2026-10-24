@@ -124,7 +124,7 @@ The `{{ ... }}` form lets a line contain a small calculation:
   settings.
 
 The editor writes the HUD definition to `config/InGameInfo.xml` and alignment offsets to
-`config/ingameinfoxml-client.toml`.
+`config/ingameinforeloaded-client.toml`.
 
 ## Gallery
 
@@ -164,9 +164,9 @@ alignment.
 ## Installation
 
 1. Install Forge or NeoForge for your Minecraft version.
-2. Put the matching `ingameinfoxml-*.jar` in the `mods` folder.
+2. Put the matching `ingameinforeloaded-*.jar` in the `mods` folder.
 3. Start the game once. The mod creates `config/InGameInfo.xml` and
-   `config/ingameinfoxml-client.toml`.
+   `config/ingameinforeloaded-client.toml`.
 4. Press `F9` to open the editor, or edit `config/InGameInfo.xml` and run
    `/igi reload`.
 

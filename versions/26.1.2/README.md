@@ -11,7 +11,7 @@ Minecraft 26.1.2、NeoForge 26.1.2.122、Java 25 向けの実装です。HUD、�
 GRADLE_USER_HOME=/tmp/gradle-home ./gradlew build --no-daemon
 ```
 
-成果物は `build/libs/ingameinfoxml-2.9.2.103.jar` です。Nix を使う場合は、リポジトリの
+成果物は `build/libs/ingameinforeloaded-2.9.2.104.jar` です。Nix を使う場合は、リポジトリの
 ルートで `nix develop .#mc2612` を実行すると JDK 25 と描画テスト用のツールが入ります。
 
 ## 開発

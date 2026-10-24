@@ -5,6 +5,9 @@
 側のワールドファイルサイズなど）は再現できないため、タグ名を維持したまま互換値を
 返します。
 
+この MOD はクライアント専用です。HUD、設定 GUI、タグ一覧、エディタはクライアントで
+動かし、dedicated server には導入しません。
+
 ## 表示定義ファイル
 
 - 既定ファイル名は `InGameInfo.xml`（1.12.2 と同じ）。`config/` 直下に置きます。
@@ -29,8 +32,10 @@
 ## 設定
 
 1.12.2 の `Configuration` は Forge / NeoForge の TOML
-（`config/ingameinfoxml-client.toml`）になりました。キー名と既定値は可能な限り合わせて
-います。以下の表は 1.20.1 / 1.21.1 / 26.1.2 で共通です。
+（`config/ingameinforeloaded-client.toml`）になりました。キー名と既定値は可能な限り合わせて
+います。MOD ID は `ingameinforeloaded` で、2.9.2.104 の初回起動時に旧
+`config/ingameinfoxml-client.toml` を新ファイルへコピーします。旧ファイルは残ります。
+以下の表は 1.20.1 / 1.21.1 / 26.1.2 で共通です。
 
 | 1.12.2 | 1.20.1 | 備考 |
 |---|---|---|
@@ -75,7 +80,7 @@
   （26.1.2 は 84）。
 
 1.12.2 の設定 GUI は Forge の Config Screen に置き換えました（Mods 画面 →
-InGame Info XML → Config）。GUI の項目名は `config/ingameinfoxml-client.toml` の
+InGame Info XML → Config）。GUI の項目名は `config/ingameinforeloaded-client.toml` の
 コメントとゲーム内言語ファイルで確認できます。
 
 ## タグ
@@ -234,7 +239,7 @@ HUD に出すため、クライアントから `RequestAe2Packet` を送り、�
 1.12.2 にはない GUI で、`F9` または `/igi editor` から開けます。既定では
 画面下に開き、**Panel** ボタンで上端へ移せます。行は
 `config/InGameInfo.xml` に、アライメントの X / Y は
-`config/ingameinfoxml-client.toml` に保存します。`Esc` は保存せずに閉じるだけです。
+`config/ingameinforeloaded-client.toml` に保存します。`Esc` は保存せずに閉じるだけです。
 エディタで保存したオフセットは再起動後も保持されます。TOML を直接編集した場合は
 ゲームを再起動してください（実行中の `Reloading` はライブのアライメントを上書き
 しないため）。

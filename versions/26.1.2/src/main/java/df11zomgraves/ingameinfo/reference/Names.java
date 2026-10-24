@@ -1,8 +1,10 @@
 package df11zomgraves.ingameinfo.reference;
 
 public final class Names {
-	public static final String MODID = "ingameinfoxml";
-	public static final String VERSION = "2.9.2.103";
+	public static final String MODID = "ingameinforeloaded";
+	/** Translation keys keep the original prefix so existing language files and key bindings keep working. */
+	public static final String TRANSLATION_PREFIX = "ingameinfoxml";
+	public static final String VERSION = "2.9.2.104";
 	public static final String VERSION_CHAT = "chat.ingameinfo.version";
 	public static final String SHOW_SEED = "chat.ingameinfo.seed";
 	

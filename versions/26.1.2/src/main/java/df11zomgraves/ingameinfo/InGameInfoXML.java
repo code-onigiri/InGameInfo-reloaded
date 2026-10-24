@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import df11zomgraves.ingameinfo.api.PluginLoader;
-import df11zomgraves.ingameinfo.client.gui.config.GuiConfigScreen;
+import df11zomgraves.ingameinfo.client.ClientSetup;
 import df11zomgraves.ingameinfo.command.arguments.InGameInfoArgumentTypes;
 import df11zomgraves.ingameinfo.handler.ConfigurationHandler;
 import df11zomgraves.ingameinfo.handler.Ticker;
@@ -14,14 +14,15 @@ import df11zomgraves.ingameinfo.network.PacketHandler;
 import df11zomgraves.ingameinfo.reference.Names;
 import df11zomgraves.ingameinfo.tag.TagRegistry;
 import df11zomgraves.ingameinfo.value.ValueRegistry;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
@@ -36,9 +37,11 @@ public class InGameInfoXML {
 
 	public InGameInfoXML(IEventBus modEventBus, ModContainer container) {
 		PacketHandler.init(modEventBus);
-		container.registerConfig(ModConfig.Type.CLIENT, ConfigurationHandler.SPEC);
-		container.registerExtensionPoint(IConfigScreenFactory.class,
-				(modContainer, parent) -> new GuiConfigScreen(parent));
+		if (FMLEnvironment.getDist() == Dist.CLIENT) {
+			ClientSetup.registerConfigScreen(container);
+			ConfigurationHandler.migrateLegacyConfig();
+			container.registerConfig(ModConfig.Type.CLIENT, ConfigurationHandler.SPEC);
+		}
 		modEventBus.addListener(this::clientSetup);
 		InGameInfoArgumentTypes.COMMAND_ARGUMENT_TYPES.register(modEventBus);
 	}

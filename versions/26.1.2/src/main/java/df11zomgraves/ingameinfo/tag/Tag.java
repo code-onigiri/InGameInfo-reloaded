@@ -58,11 +58,11 @@ public abstract class Tag {
 	}
 
 	public String getLocalizedCategory() {
-		return Component.translatable(Names.MODID + ".tag.category." + getCategory() + ".name").getString();
+		return Component.translatable(Names.TRANSLATION_PREFIX + ".tag.category." + getCategory() + ".name").getString();
 	}
 
 	public String getLocalizedDescription() {
-		return Component.translatable(Names.MODID + ".tag." + getRawName() + ".desc").getString();
+		return Component.translatable(Names.TRANSLATION_PREFIX + ".tag." + getRawName() + ".desc").getString();
 	}
 
 	public abstract String getCategory();

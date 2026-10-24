@@ -28,8 +28,11 @@ Minecraft のバージョン間では Forge / NeoForge の API だけでなく�
 
 1. `InGameInfoXML` コンストラクタ
    - ネットワークパケット登録
+   - クライアントのときだけ `ClientSetup` で Config Screen ファクトリを登録
+   - 旧 `ingameinfoxml-client.toml` を `ingameinforeloaded-client.toml` へ移行
    - `ConfigurationHandler.SPEC` を CLIENT 設定として登録
-   - Config Screen ファクトリ登録
+   - Forge 版は `clientSideOnly=true`、NeoForge 版は `displayTest="IGNORE_ALL_VERSION"` で
+     クライアント専用として扱う
 2. `FMLClientSetupEvent`
    - `Ticker` をローダーのイベントバスへ登録（1.21.1 / 26.1.2 の `InGameInfoCore` は
      `@SubscribeEvent` を持たないため登録しない。`Ticker` が直接呼ぶ）

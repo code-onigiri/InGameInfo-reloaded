@@ -11,6 +11,7 @@ displayURL="https://github.com/code-onigiri/InGameInfo-reloaded"
 logoFile="logo.png"
 credits="DaftPVF, bspkrs, Lunatrius, DF11ZomGraves"
 authors="${mod_authors}"
+displayTest="IGNORE_ALL_VERSION"
 description='''${mod_description}'''
 
 [[dependencies.${mod_id}]]

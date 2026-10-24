@@ -1,5 +1,9 @@
 package df11zomgraves.ingameinfo.handler;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import df11zomgraves.ingameinfo.InGameInfoCore;
 import df11zomgraves.ingameinfo.InGameInfoXML;
 import df11zomgraves.ingameinfo.reference.Alignment;
@@ -8,6 +12,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.loading.FMLPaths;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Forge's config APIs
@@ -178,6 +183,27 @@ public class ConfigurationHandler {
 		InGameInfoXML.logger.warn("Invalid scale '{}', using 1.0. Valid values: 0.5, 1.0, 1.5, 2.0", value);
 		return 1.0D;
 	}
+	/**
+	 * Copies the 2.9.2.103 config file to the new mod id before the loader creates
+	 * a fresh one. The old file is left in place so users can roll back.
+	 */
+	public static void migrateLegacyConfig() {
+		Path configDir = FMLPaths.CONFIGDIR.get();
+		Path legacy = configDir.resolve("ingameinfoxml-client.toml");
+		Path current = configDir.resolve(Names.MODID + "-client.toml");
+		if (!Files.exists(legacy) || Files.exists(current)) {
+			return;
+		}
+		try {
+			Files.createDirectories(configDir);
+			Files.copy(legacy, current);
+			InGameInfoXML.logger.info("Migrated {} to {}", legacy.getFileName(), current.getFileName());
+		}
+		catch (IOException e) {
+			InGameInfoXML.logger.warn("Could not migrate {}", legacy, e);
+		}
+	}
+
 	
 	public static void applyConfiguration() {
 		SHOW_OVERLAY_ITEM_ICONS_DEFAULT.set(showOverlayItemIcons);

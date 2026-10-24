@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import df11zomgraves.ingameinfo.api.PluginLoader;
-import df11zomgraves.ingameinfo.client.gui.config.GuiConfigScreen;
+import df11zomgraves.ingameinfo.client.ClientSetup;
 import df11zomgraves.ingameinfo.command.arguments.InGameInfoArgumentTypes;
 import df11zomgraves.ingameinfo.handler.ConfigurationHandler;
 import df11zomgraves.ingameinfo.handler.Ticker;
@@ -14,15 +14,15 @@ import df11zomgraves.ingameinfo.network.PacketHandler;
 import df11zomgraves.ingameinfo.reference.Names;
 import df11zomgraves.ingameinfo.tag.TagRegistry;
 import df11zomgraves.ingameinfo.value.ValueRegistry;
-import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -38,9 +38,11 @@ public class InGameInfoXML {
 	public InGameInfoXML(FMLJavaModLoadingContext context) {
 		PacketHandler.init();
 		IEventBus modEventBus = context.getModEventBus();
-		context.registerConfig(ModConfig.Type.CLIENT, ConfigurationHandler.SPEC);
-		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
-				() -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parent) -> new GuiConfigScreen(parent)));
+		if (FMLEnvironment.dist == Dist.CLIENT) {
+			ClientSetup.registerConfigScreen();
+			ConfigurationHandler.migrateLegacyConfig();
+			context.registerConfig(ModConfig.Type.CLIENT, ConfigurationHandler.SPEC);
+		}
 		modEventBus.addListener(this::clientSetup);
 		InGameInfoArgumentTypes.COMMAND_ARGUMENT_TYPES.register(modEventBus);
 	}

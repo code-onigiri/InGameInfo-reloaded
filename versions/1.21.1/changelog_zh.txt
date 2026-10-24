@@ -1,3 +1,9 @@
+InGameInfo XML 2.9.2.104，Release，2026/10/24
+通用
+	1.将模组 ID 改为 ingameinforeloaded，并在首次启动时迁移现有的 ingameinfoxml-client.toml。
+	2.将模组标记为仅客户端，专用服务器会跳过它，不再加载客户端 GUI 类。
+	3.保留现有翻译键和按键绑定。
+
 InGameInfo XML 2.9.2.103，Release，2026/10/24
 通用
 	1.HUD 编辑器增加 Panel 按钮，可在屏幕底部和顶部之间移动面板。

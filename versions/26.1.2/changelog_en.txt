@@ -1,3 +1,9 @@
+InGameInfo XML 2.9.2.104, Release, 2026/10/24
+Common
+	1.Change the mod id to ingameinforeloaded and migrate the existing ingameinfoxml-client.toml on first launch.
+	2.Mark the mod as client-only so dedicated servers skip it and no longer load client GUI classes.
+	3.Keep the existing translation keys and key bindings.
+
 InGameInfo XML 2.9.2.103, Release, 2026/10/24
 Common
 	1.Add a Panel button to the HUD editor to move the panel between the bottom and top edges.
