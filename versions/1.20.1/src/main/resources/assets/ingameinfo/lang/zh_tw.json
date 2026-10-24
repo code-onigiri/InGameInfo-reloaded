@@ -256,7 +256,7 @@
   "ingameinfoxml.tag.humidity.desc": "生態域濕度.",
   "ingameinfoxml.key.category": "InGame Info XML",
   "ingameinfoxml.key.toggle": "Toggle Overlay",
-  "commands.ingameinfoxml.usage": "/igi <reload|load|save|enable|disable|taglist|config> [文件名]",
+  "commands.ingameinfoxml.usage": "/igi <reload|load|save|enable|disable|taglist|debug|editor|config> [文件名]",
   "commands.ingameinfoxml.reload": "正在重新加載...",
   "commands.ingameinfoxml.load": "正在加載%s...",
   "commands.ingameinfoxml.save": "正在保存%s...",
@@ -325,5 +325,12 @@
   "gui.ingameinfoxml.search": "搜尋",
   "ingameinfoxml.tag.category.mekanism.name": "通用機械",
   "ingameinfoxml.tag.category.cobblemon.name": "方塊寶可夢",
-  "ingameinfoxml.tag.category.tinkers.name": "匠魂"
+  "ingameinfoxml.tag.category.tinkers.name": "匠魂",
+  "key.ingameinfoxml.debug": "開啟除錯元素",
+  "gui.ingameinfoxml.debug": "除錯元素",
+  "gui.ingameinfoxml.debug.search": "搜尋標籤",
+  "gui.ingameinfoxml.debug.count": "%s 個標籤 / %s 個分類",
+  "gui.ingameinfoxml.debug.hint": "點擊標籤以複製",
+  "gui.ingameinfoxml.debug.copied": "已複製 %s",
+  "gui.ingameinfoxml.debug.empty": "沒有符合的標籤"
 }

@@ -2,9 +2,11 @@ package df11zomgraves.ingameinfo.tag;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import df11zomgraves.ingameinfo.InGameInfoXML;
 import df11zomgraves.ingameinfo.integration.IntegrationLoader;
@@ -47,6 +49,11 @@ public class TagRegistry {
 			tags.add(entry.getValue());
 		}
 		return tags;
+	}
+
+	public List<Tag> getUniqueTags() {
+		final Set<Tag> tags = new LinkedHashSet<Tag>(this.stringTagMap.values());
+		return new ArrayList<Tag>(tags);
 	}
 
 	public void init() {

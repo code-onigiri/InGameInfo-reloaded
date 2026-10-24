@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import javax.annotation.Nonnull;
 
 import df11zomgraves.ingameinfo.InGameInfoCore;
+import df11zomgraves.ingameinfo.client.gui.debug.GuiDebugElements;
 import df11zomgraves.ingameinfo.client.gui.editor.GuiHudEditor;
 import df11zomgraves.ingameinfo.command.InGameInfoCommand;
 import df11zomgraves.ingameinfo.reference.Names;
@@ -45,6 +46,12 @@ public class ForgeClientEventHandler {
 			Minecraft mc = Minecraft.getInstance();
 			if (mc.screen == null) {
 				mc.setScreen(new GuiHudEditor());
+			}
+		}
+		while (KeyInputHandler.KEY_DEBUG.consumeClick()) {
+			Minecraft mc = Minecraft.getInstance();
+			if (mc.screen == null) {
+				mc.setScreen(new GuiDebugElements());
 			}
 		}
 	}

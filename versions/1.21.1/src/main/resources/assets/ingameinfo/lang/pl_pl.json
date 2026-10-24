@@ -256,7 +256,7 @@
   "ingameinfoxml.tag.humidity.desc": "Wilgotność biomu.",
   "ingameinfoxml.key.category": "InGame Info XML",
   "ingameinfoxml.key.toggle": "Przełącz Nakładkę.",
-  "commands.ingameinfoxml.usage": "/igi <reload|load|save|enable|disable|taglist|config> [nazwapliku]",
+  "commands.ingameinfoxml.usage": "/igi <reload|load|save|enable|disable|taglist|debug|editor|config> [nazwapliku]",
   "commands.ingameinfoxml.reload": "Przeładowanie...",
   "commands.ingameinfoxml.load": "Ładowanie %s...",
   "commands.ingameinfoxml.save": "Zapisywanie %s...",
@@ -325,5 +325,12 @@
   "gui.ingameinfoxml.search": "Szukaj",
   "ingameinfoxml.tag.category.mekanism.name": "Mekanism",
   "ingameinfoxml.tag.category.cobblemon.name": "Cobblemon",
-  "ingameinfoxml.tag.category.tinkers.name": "Tinkers' Construct"
+  "ingameinfoxml.tag.category.tinkers.name": "Tinkers' Construct",
+  "key.ingameinfoxml.debug": "Otwórz elementy debugowania",
+  "gui.ingameinfoxml.debug": "Elementy debugowania",
+  "gui.ingameinfoxml.debug.search": "Szukaj tagów",
+  "gui.ingameinfoxml.debug.count": "%s tagów / %s kategorii",
+  "gui.ingameinfoxml.debug.hint": "Kliknij tag, aby go skopiować",
+  "gui.ingameinfoxml.debug.copied": "Skopiowano %s",
+  "gui.ingameinfoxml.debug.empty": "Brak pasujących tagów"
 }

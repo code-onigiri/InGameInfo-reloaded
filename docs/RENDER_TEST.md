@@ -268,6 +268,30 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 
 ![オフセット変更後](render/editor-offset-1.20.1.png)
 
+### デバッグ要素インスペクター
+
+1. ワールド内で `F8` を押す（またはチャットで `/igi debug`）。
+2. タイトル、`<タグ数> tags / <カテゴリ数> categories`、カテゴリ見出し、タグ名と値が
+   表示されることを確認する。
+3. 検索欄に `health` や `mek` などを入れて絞り込む。カテゴリ見出しの件数も
+   絞り込み後の数になる。
+4. ホイールでスクロールし、末尾の `Formatting` カテゴリまで到達できることを確認する。
+5. タグをクリックし、クリップボードに `<タグ名>` が入ること、一覧の下に
+   「`<...>` をコピーしました」と出ることを確認する。
+6. MOD 連携を有効にしている場合は、そのカテゴリと値も表示されることを確認する。
+7. `Esc` または `Done` で閉じる。
+
+![デバッグ要素 1.20.1](render/debug-1.20.1.png)
+
+![デバッグ要素 1.21.1](render/debug-1.21.1.png)
+
+![デバッグ要素 26.1.2](render/debug-26.1.2.png)
+
+1.20.1 / 1.21.1 / 26.1.2 のいずれも、Xvfb + llvmpipe の 1280x720 で開いて
+スクリーンショットを確認済みです。追加 MOD なしのテスト環境では
+`494 tags / 12 categories` でした。1.21.1 で Mekanism と Cobblemon を有効にすると
+`632 tags` になり、連携タグが一覧に増えます。
+
 #### xdotool で自動操作するとき
 
 - 1280x720 の Xvfb では、ゲームの描画領域は 854x480（GUI スケール 2）で、ルート
@@ -320,6 +344,7 @@ GRADLE_USER_HOME=/tmp/gradle-home \
 | `/igi load` の XML / JSON / TXT 入力 | OK | チャットの `Done!` と HUD で確認 |
 | `/igi reload` | OK | チャットの `Reloading... / Done!` |
 | HUD エディタの表示・ライブ HUD | OK | [editor-1.20.1.png](render/editor-1.20.1.png) |
+| デバッグ要素インスペクター（F8、全タグ・検索・スクロール） | OK（2026-10-24） | [debug-1.20.1.png](render/debug-1.20.1.png) |
 | タグピッカーから `<energy>` を挿入 | OK | [editor-picker-1.20.1.png](render/editor-picker-1.20.1.png) |
 | エディタの `Save` で XML に 1 行保存 | OK | `InGameInfo.xml` の `<var>energy</var>` |
 | X=5 / Y=7 の保存と再起動後の保持 | OK | [editor-offset-1.20.1.png](render/editor-offset-1.20.1.png) |
@@ -338,6 +363,7 @@ NeoForge 21.1.264 でも同じ HUD・GUI を確認しました。設定画面は
 | 設定 GUI 1/3〜3/3 のページ移動 | OK | [config-1.21.1.png](render/config-1.21.1.png) |
 | 設定 GUI の `Done` 後に再度開く | OK | 1/3 に戻り、値も保持 |
 | HUD エディタ（背景がぼやけず HUD が読める） | OK | [editor-1.21.1.png](render/editor-1.21.1.png) |
+| デバッグ要素インスペクター（`/igi debug`） | OK（2026-10-24） | [debug-1.21.1.png](render/debug-1.21.1.png) |
 | `/igi save quiet.xml` | OK | チャットに `Done!` |
 | `defaultSeedInServer` の補正ループ | 修正済み | TOML が `"0"` で安定、`.bak` なし |
 
@@ -357,6 +383,7 @@ NeoForge 26.1.2.122 でも同じ HUD・GUI を確認しました。設定画面�
 | 設定 GUI 1/3〜3/3 のページ移動 | OK | [config-26.1.2.png](render/config-26.1.2.png) |
 | 設定 GUI の `Done` 後に再度開く | OK | 値も保持 |
 | HUD エディタ（背景がぼやけず HUD が読める） | OK | [editor-26.1.2.png](render/editor-26.1.2.png) |
+| デバッグ要素インスペクター（F8） | OK（2026-10-24） | [debug-26.1.2.png](render/debug-26.1.2.png) |
 | `/igi save test2612.xml` | OK | チャットに `Done!` |
 | 初回参加時の既定 HUD 表示 | 修正済み | `ConfigReloadListener` で解決 |
 | `scripts/render-test.sh 26.1.2 RenderTest` の自動撮影 | OK | [hud-26.1.2.png](render/hud-26.1.2.png) |

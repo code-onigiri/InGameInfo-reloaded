@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import java.util.ArrayList;
 import java.util.List;
 
 import df11zomgraves.ingameinfo.gui.overlay.Info;
@@ -89,6 +90,24 @@ public abstract class Tag {
 		setPlayer(null);
 		TagNearbyPlayer.releaseResources();
 		TagPlayerEffect.releaseResources();
+	}
+
+	/**
+	 * Evaluates a tag for the debug inspector without leaking icon or item entries
+	 * into the live HUD queue, and without letting one broken tag stop the list.
+	 */
+	public static String getValueForDebug(final Tag tag) {
+		final List<Info> previous = Tag.info;
+		Tag.info = new ArrayList<Info>();
+		try {
+			final String value = tag.getValue();
+			return value == null ? "" : value;
+		} catch (final Throwable t) {
+			final String message = t.getMessage();
+			return "ERROR: " + t.getClass().getSimpleName() + (message == null ? "" : ": " + message);
+		} finally {
+			Tag.info = previous;
+		}
 	}
 
 	public static String getIconTag(final Info info) {

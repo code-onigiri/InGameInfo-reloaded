@@ -19,6 +19,8 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 - XML / JSON / TXT プリンター（`/igi save`）
 - 設定画面（Forge / NeoForge の Config Screen）と `/igi config`
 - タグ一覧 GUI（`/igi taglist`）
+- デバッグ要素インスペクター（`F8` または `/igi debug`）。全登録タグをカテゴリ別に
+  一覧し、現在値をライブ表示。検索・スクロール・クリックでコピー
 - HUD エディタ（`F9` または `/igi editor`）。行の追加・削除・並べ替え、
   9 アライメントの選択とオフセット調整、タグ一覧からクリックで挿入、ライブプレビュー
 - 主要 MOD の任意連携（Create / Curios / Serene Seasons / Ars Nouveau /
@@ -42,6 +44,7 @@ NeoForge へ移植するリポジトリです。1.12.2 版の HUD 書式・設�
 │   ├── COMPATIBILITY.md       # 1.12.2 との差異と再現方法
 │   ├── ARCHITECTURE.md        # マルチバージョン構成と MOD 連携 SPI
 │   ├── RENDER_TEST.md         # ヘッドレス描画テストの手順
+│   ├── DEBUG_SCREEN.md        # デバッグ要素インスペクターの使い方
 │   └── DEBUG_MODS.md          # デバッグ用 MOD の On/Off 手順
 ├── gradle/debug-mods.gradle   # libs/debug-mods の選択・deobf・run/mods への同期
 ├── scripts/render-test.sh     # Xvfb + llvmpipe で HUD をスクリーンショット
@@ -152,6 +155,7 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 - `/igi save <file.xml|file.json|file.txt>` — 現在の表示定義を保存
 - `/igi enable` / `/igi disable` — HUD の一時的な有効・無効
 - `/igi taglist` — 登録タグの一覧 GUI
+- `/igi debug` — デバッグ要素インスペクターを開く（既定キーは `F8`）
 - `/igi editor` — HUD エディタを開く（既定キーは `F9`）
 - `/igi alignment get|set <ALIGN> [x y]` — アライメントのオフセット
 - `/igi config <key> <value>` — 設定の変更
@@ -179,6 +183,21 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 ステータスにエラーを表示します。
 
 ![HUD エディタ](docs/render/editor-1.20.1.png)
+
+## デバッグ要素インスペクター
+
+`F8` または `/igi debug` で、登録されている全タグと現在値を一覧できます。HUD の XML を
+書く前のタグ名・値の確認や、MOD 連携タグが実際に登録されているかの確認に使います。
+
+- カテゴリ別に表示し、`formatting` だけは末尾
+- 20 tick ごとに値を更新。例外が出たタグは赤で `ERROR: ...`
+- 検索欄はタグ名と説明文で絞り込み
+- タグをクリックすると `<タグ名>` をクリップボードへコピー
+
+![デバッグ要素](docs/render/debug-1.20.1.png)
+
+詳しい操作と 1.21.1 / 26.1.2 のスクリーンショットは
+[docs/DEBUG_SCREEN.md](docs/DEBUG_SCREEN.md) を参照してください。
 
 ## MOD 連携
 

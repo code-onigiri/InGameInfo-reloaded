@@ -60,6 +60,24 @@ Minecraft のバージョン間では Forge / NeoForge の API だけでなく�
 - 1.12.2 の設定ファイルにはエディタ用の保存先がないため、行は XML、オフセットは TOML に
   分けて保存します。
 
+## デバッグ要素インスペクター
+
+`client/gui/debug/GuiDebugElements` は、登録タグをカテゴリ別に並べて現在値を表示する
+読み取り専用の画面です。`F8` と `/igi debug` の両方から開きます。
+
+- 一覧は `TagRegistry#getUniqueTags()` の `LinkedHashSet<Tag>` から作り、表示名で
+  重複を落とす。インデックス付きタグは `getName()`（実際のインデックス付きの名前）、
+  それ以外は `getFormattedName()` を使う。
+- 値の取得は `Tag#getValueForDebug(Tag)`。`Tag.info` を新しいリストに差し替えて
+  1 タグだけ `getValue()` を呼び、`finally` で元に戻す。例外は `ERROR: ...` の
+  文字列にして画面に出す（1 つのタグの失敗で画面全体を落とさない）。
+- 値は 20 tick ごとに `Tag.setWorld` / `Tag.setPlayer` をしてから取り直す。
+- デバッグ画面を開くと `mc.screen != null` になり、許可リストにないため
+  `Ticker.isRunning()` が false になって HUD が止まる。デバッグ画面の背後に HUD が
+  重なると読みにくいので、意図的に許可リストへ入れていない。
+- 1.20.1 / 1.21.1 は `GuiGraphics`、26.1.2 は `GuiGraphicsExtractor` を使う。
+  ロジックは 3 バージョンで同じ。
+
 ## パーサーと値
 
 - `parser/xml`, `parser/json`, `parser/text` が `Map<Alignment, List<List<Value>>>`

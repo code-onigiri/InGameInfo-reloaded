@@ -1,9 +1,12 @@
 # デバッグ用 MOD の On/Off
 
 開発クライアントで任意の MOD を一時的に有効化するための仕組みです。MOD の jar は
-リポジトリに含めず、バージョンごとの `libs/debug-mods/` に置きます。選択した jar だけが
-`ext.debugMods` で true にした jar だけが `run/mods` にコピーされ、前回の選択は
-次回の起動時に自動で外れます。
+リポジトリに含めず、バージョンごとの `libs/debug-mods/` に置きます。`ext.debugMods` で
+true にした jar だけが `run/mods` にコピーされ、前回の選択は次回の起動時に自動で
+外れます。
+
+有効化した MOD の連携タグが登録されているかは、ゲーム内で `F8` または `/igi debug` を
+押して開く[デバッグ要素インスペクター](DEBUG_SCREEN.md)で確認できます。
 
 ## 使い方
 
