@@ -1,6 +1,6 @@
 # CurseForge listing copy
 
-This file contains the text for the CurseForge project page. The description is in English so it can be used as the primary listing text; the Japanese notes at the end are for the upload work and are not part of the description.
+This file contains the English text for the CurseForge project page. A Japanese translation is in [CURSEFORGE_ja.md](CURSEFORGE_ja.md). The upload notes at the end are for the upload work and are not part of the description.
 
 ## Summary (Summary field, 256 characters or fewer)
 
