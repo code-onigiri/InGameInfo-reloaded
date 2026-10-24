@@ -717,4 +717,4 @@ flower: 100/300 (33.3%)
 
 - [アーキテクチャ](ARCHITECTURE.md)
 - [1.12.2 との互換性](COMPATIBILITY.md)
-- [リポジトリ README](../README.md)
+- [リポジトリ README（英語）](../README.md) / [日本語版](../README_ja.md)

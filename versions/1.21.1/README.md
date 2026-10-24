@@ -2,7 +2,8 @@
 
 Minecraft 1.21.1、NeoForge 21.1.264、Java 21 向けの実装です。HUD、設定 GUI、タグ一覧、
 コマンド、XML / JSON / TXT の読み書き、計算式、MOD 連携の説明は、ルートの
-[README](../../README.md) と [docs/README.md](../../docs/README.md) にまとめています。
+[README（英語）](../../README.md) / [README_ja（日本語）](../../README_ja.md) と
+[docs/README.md](../../docs/README.md) にまとめています。
 
 ## ビルド
 

@@ -1,5 +1,7 @@
 # InGameInfoXML (reloaded)
 
+[English](README.md) | [日本語](README_ja.md)
+
 [InGameInfoXML](https://github.com/Lunatrius/InGame-Info-XML) の Forge / NeoForge 移植です。
 1.12.2 の HUD 定義（XML / JSON / TXT）をできるだけそのまま使い、Minecraft 1.20.1 /
 1.21.1 / 26.1.2 で表示できます。
@@ -144,6 +146,8 @@ XML の本文で `<` を書くときは `&lt;` にしてください。詳細は
 .
 ├── flake.nix                  # JDK / Mesa / Xvfb / ImageMagick 入り dev shell
 ├── LICENSE                    # MIT
+├── README.md                  # 英語版
+├── README_ja.md               # 日本語版
 ├── common/                    # バージョン非依存の設計メモ
 ├── docs/                      # 利用者・開発者向けの文書
 ├── gradle/debug-mods.gradle   # 開発用 MOD の選択と deobf
