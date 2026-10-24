@@ -122,9 +122,11 @@ public interface InGameInfoPlugin {
 `Ae2Integration`、`MekanismIntegration`、`CobblemonIntegration`、
 `TinkersIntegration` を登録します。Tinkers は 1.20.1 のみ対象です。
 `EnergyIntegration` は Forge / NeoForge 標準機能なので常に登録します。各連携は `Reflect` 経由で MOD のクラスを呼ぶため、コンパイル時依存も
-実行時のクラスロードエラーもありません。クロスヘア先のブロックを優先して読むタグは
-末尾に `over` を付けます（`createrpmover`, `ae2networkover` など）。旧名は
-エイリアスとして残し、既存の表示定義を壊さないようにしています。
+実行時のクラスロードエラーもありません。MOD 連携タグのうち、クロスヘア先の
+ブロックを第一候補にし、別の場所にもフォールバックするものは、末尾に `over` を
+付けます（`createrpmover`, `ae2networkover` など）。旧名はエイリアスとして残し、
+既存の表示定義を壊さないようにしています。Botania のマナ系はインベントリ／
+アクセサリだけを読むため、`over` の対象ではありません。
 
 `Reflect` はクラス階層だけでなく実装インターフェースの default メソッドも探します。
 AE2 の `IInWorldGridNodeHost#getGridNode()` や `IGridNode#getGrid()` はインターフェース

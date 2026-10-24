@@ -126,8 +126,9 @@ Forge / NeoForge Energy 連携を含む）。
 
 次のタグは、対応 MOD が入っている場合だけ登録されます。MOD がない環境では
 `{createrpmover}` のような未知のタグとして扱われ、HUD にはそのまま残ります
-（1.12.2 の未登録タグと同じ挙動）。クロスヘア先のブロックを優先して読むタグは
-末尾に `over` を付けます。旧名は別名として残しているため、既存の設定はそのまま動きます。
+（1.12.2 の未登録タグと同じ挙動）。MOD 連携タグのうち、クロスヘア先のブロックを
+第一候補にし、別の場所にもフォールバックするものは、末尾に `over` を付けます。
+旧名は別名として残しているため、既存の設定はそのまま動きます。
 
 - Create: `createrpmover`, `createkineticover`, `createstressover`,
   `createstresscapacityover`, `createstresspercentover`, `createnetworksizeover`
@@ -148,6 +149,8 @@ Forge / NeoForge Energy 連携を含む）。
 - Goety: `goetysouls`, `goetyactive`
 - Paragliders: `stamina`, `maxstamina`, `staminapencent`, `staminadepleted`
 - Botania（1.20.1 のみ）: `botaniamana`, `botaniamaxmana`, `botaniamanapercent`
+  （プレイヤーのインベントリ／アクセサリ内のマナを合算する。ブロックを見るタグでは
+  ないため `over` は付けない）
 - Applied Energistics 2: `ae2networkover`, `ae2channelsover`, `ae2channelmodeover`,
   `ae2gridpowerover`, `ae2gridmaxpowerover`, `ae2gridpowerusageover`,
   `ae2gridpowerinjectionover`, `ae2channelpowerover`, `ae2cellused`, `ae2celltotal`,

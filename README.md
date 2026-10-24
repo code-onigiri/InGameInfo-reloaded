@@ -226,9 +226,12 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 | Tinkers' Construct（1.20.1 のみ） | `tinkersdurability`, `tinkersmaxdurability`, `tinkersdurabilitypercent`, `tinkersminingspeed`, `tinkersattackdamage`, `tinkersharvestlevel`, `tinkersmodifiers`, `tinkersbroken` |
 | Forge / NeoForge Energy（常時） | `energy`, `maxenergy`, `energypercent`, `fe` ほか |
 
-クロスヘア先のブロックを優先して読むタグは末尾に `over` を付けます
-（`createrpmover`, `ae2networkover` など）。Create は搭乗中の装置、AE2 は
-リンク済みワイヤレス端末にもフォールバックしますが、名前は `over` に統一しています。
+MOD 連携タグのうち、クロスヘア先のブロックを第一候補にし、別の場所にも
+フォールバックするものは、末尾に `over` を付けます（`createrpmover`,
+`ae2networkover` など）。Create は搭乗中の装置、AE2 はリンク済みワイヤレス端末が
+フォールバック先です。逆に Botania の `botaniamana` 系はプレイヤーの
+インベントリ／アクセサリのマナだけを読むため、`over` は付けていません。本体の
+`mouseover*` 系も名前自体が見た対象を表すので、`over` は付けません。
 旧名（`createrpm`, `ae2network` など）は別名として残しているため、既存の設定ファイルは
 そのまま動きます。Create のタグは対象ブロックがない場合も行を消さず、RPM・ストレス系は
 `0.0`、`createkineticover` は `false` を返します（搭乗中の Create 装置がある場合は
