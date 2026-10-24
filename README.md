@@ -97,8 +97,8 @@ JSON / TXT 形式の読み込みと、`/igi save` による拡張子別の書き
 - `format("書式", 値)` は Java の `String.format(Locale.ENGLISH, ...)` と同じ順序
 
 未知のタグや文法エラーがあると、その `{{ ... }}` は元の文字列のまま表示されます。
-`${...}` を使わないのは、`$` が色コードの接頭辞と衝突するためです。XML の本文で
-`<` を書くときは `&lt;` にしてください。詳細は [docs/EXPRESSIONS.md](docs/EXPRESSIONS.md)。
+XML の本文で `<` を書くときは `&lt;` にしてください。詳細は
+[docs/EXPRESSIONS.md](docs/EXPRESSIONS.md)。
 
 ![計算式](docs/render/expressions-1.20.1.png)
 
