@@ -129,6 +129,12 @@ braces literally, so remove expression lines if the same file is shared with 1.1
 The editor writes the HUD definition to `config/InGameInfo.xml` and alignment offsets to
 `config/ingameinfoxml-client.toml`.
 
+## Gallery
+
+The Gallery tab shows the HUD, the in-game editor with its movable panel, the tag browser,
+the config screen, expressions and optional mod integrations. The project avatar is the
+same artwork at 400x400.
+
 ## Commands
 
 | Command | What it does |
@@ -274,16 +280,18 @@ original author. Minecraft is a trademark of Mojang Studios.
 - The CurseForge **Summary** field should use the short text above. Keep it to one
   sentence; the moderation policy asks for a summary that is not a copy of the
   description.
-- The project **avatar must be 400x400 pixels**. The current `logo.png` is 48x48, so
-  export a 400x400 PNG before uploading the avatar. Do not use a solid-color image.
+- The project **avatar must be 400x400 pixels**. Use
+  [docs/curseforge/avatar-400.png](curseforge/avatar-400.png); it is the 48x48 logo
+  scaled 8x with matching padding. Do not use a solid-color image.
 - Upload the jars as separate files for 1.20.1 Forge, 1.21.1 NeoForge and 26.1.2
   NeoForge. Do not put version numbers in the project name; use the file names and
   game-version tags instead.
 - Add a changelog to each file. The moderation policy requires file updates to describe
   what changed.
-- Add Gallery images: the default HUD, the HUD editor (bottom and top panel), the tag
-  list, the config screen and at least one mod integration. The description intentionally
-  refers to the Gallery instead of hotlinking external images.
+- Gallery images are ready in [docs/curseforge/](curseforge/). Upload them in the order
+  and with the English captions in [docs/curseforge/README.md](curseforge/README.md):
+  HUD, editor, tag list, config, expressions, Botania and AE2. The description refers to
+  the Gallery instead of hotlinking external images.
 - Keep the English text first. If a Japanese description is added, put it after the
   English section.
 - The policy allows project links and social links at the bottom of the description, but

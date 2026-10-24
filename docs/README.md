@@ -19,6 +19,7 @@
 2. [デバッグ用 MOD の On/Off](DEBUG_MODS.md): 開発クライアントへ任意の MOD を入れる
 3. [描画テスト](RENDER_TEST.md): Xvfb + llvmpipe で HUD と GUI を確認する
 4. [CurseForge 掲載文](CURSEFORGE.md): プロジェクトの Summary と Description、投稿時の注意
+5. [CurseForge 用画像](curseforge/README.md): Gallery へアップロードする画像と 400x400 アバター
 
 ### 移植者
 
@@ -38,6 +39,7 @@
 | [RENDER_TEST.md](RENDER_TEST.md) | ヘッドレス描画テストの準備、確認項目、バージョン別の結果 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | 独立ビルドの構成、パーサーと値の流れ、MOD 連携 SPI |
 | [CURSEFORGE.md](CURSEFORGE.md) | CurseForge の Summary / Description とモデレーション確認項目 |
+| [curseforge/](curseforge/) | CurseForge の Gallery 画像、英語キャプション、400x400 アバター |
 | [render/](render/) | 確認に使ったスクリーンショット |
 
 ## スクリーンショット
