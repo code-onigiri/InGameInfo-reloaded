@@ -47,7 +47,6 @@ The code was initially written with AI-assisted vibe coding and then reviewed an
 Player, world, inventory, effects, performance and mod values.
 
 <div class="spoiler">
-<br>
 
 - **Player:** health, max health, absorption, hunger, saturation, armor, air, experience,
   level, game mode, score, team, effects and attributes.
@@ -70,7 +69,6 @@ The full tag list, including aliases kept for 1.12.2 compatibility, is available
 The XML structure, color codes and save formats.
 
 <div class="spoiler">
-<br>
 
 Lines are grouped under an alignment in `config/InGameInfo.xml`:
 
@@ -95,7 +93,6 @@ Lines are grouped under an alignment in `config/InGameInfo.xml`:
 Arithmetic, functions and Java-style formatting.
 
 <div class="spoiler">
-<br>
 
 The `{{ ... }}` form lets a line contain a small calculation:
 
@@ -140,7 +137,6 @@ Reload, load, save, show or hide the overlay, open the editor or inspector, and 
 alignment.
 
 <div class="spoiler">
-<br>
 
 | Command | What it does |
 |---|---|
@@ -179,7 +175,6 @@ alignment.
 Optional tags for other mods. AE2 values update once per second.
 
 <div class="spoiler">
-<br>
 
 | Mod | Data exposed as tags | Versions | Verification |
 |---|---|---|---|
@@ -208,7 +203,6 @@ Optional tags for other mods. AE2 values update once per second.
 What is retained, what changed, and which tags return compatibility values.
 
 <div class="spoiler">
-<br>
 
 - The file structure, `{tag}` syntax, alignment names and color codes are retained.
 - Tag names that still have a modern equivalent keep their old names. Common alternatives
@@ -242,7 +236,6 @@ The interface and tag descriptions are available in:
 Build-only integrations and 26.1.2 coverage.
 
 <div class="spoiler">
-<br>
 
 - Some optional integrations are compiled but not value-verified in every version.
 - Some third-party mods do not publish a 26.1.2 build.
