@@ -127,12 +127,13 @@ Nix を使わない場合は JDK 17 / 21 / 25 のいずれかと、1.20.1 / 1.21
 | `thirst` | `twtthirst`, `twtquenched`, `twtexhaustion` |
 | `goety` | `goetysouls`, `goetyactive` |
 | `paraglider` | `stamina`, `maxstamina`, `staminapencent`, `staminadepleted` |
-| `botania`（1.20.1 のみ） | `botaniamana`, `botaniamaxmana`, `botaniamanapercent` |
+| `botania`（1.20.1 のみ） | `botaniamana`, `botaniamaxmana`, `botaniamanapercent`、`botaniamanapoolover` ほか対象ブロック 9 タグ |
 | Energy（常時） | `energy`, `maxenergy`, `energypercent` |
 
 Paragliders は 1.20.1 / 1.21.1 の実クライアントで表示を確認済みです。1.20.1 の
 開発実行では本番 jar が SRG 名のため、deobf した jar を使います（手順は
-[docs/RENDER_TEST.md](../docs/RENDER_TEST.md)）。26.1.2 はコンパイル確認までです。
+[docs/RENDER_TEST.md](../docs/RENDER_TEST.md)）。Botania も 1.20.1 の開発クライアントで
+対象ブロック 9 タグの表示を確認済みです。26.1.2 はコンパイル確認までです。
 
 ## テスト
 

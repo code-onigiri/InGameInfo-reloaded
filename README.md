@@ -219,7 +219,7 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 | Thirst Was Taken | `twtthirst`, `twtquenched`, `twtexhaustion` |
 | Goety | `goetysouls`, `goetyactive` |
 | Paragliders | `stamina`, `maxstamina`, `staminapencent`, `staminadepleted` |
-| Botania（1.20.1 のみ） | `botaniamana`, `botaniamaxmana`, `botaniamanapercent` |
+| Botania（1.20.1 のみ） | インベントリ／アクセサリ: `botaniamana`, `botaniamaxmana`, `botaniamanapercent`。対象ブロック: `botaniamanapoolover`, `botaniamanapoolmaxover`, `botaniamanapoolpercentover`, `botaniaspreadermanaover`, `botaniaspreadermaxmanaover`, `botaniaspreaderpercentover`, `botaniaflowermanaover`, `botaniaflowermaxmanaover`, `botaniaflowerpercentover` |
 | Applied Energistics 2 | `ae2networkover`, `ae2channelsover`, `ae2channelmodeover`, `ae2gridpowerover`, `ae2gridpowerusageover`, `ae2cellused`, `ae2celltotal`, `ae2celltypes`, `ae2cellstatus` ほか |
 | Mekanism | `mekanismradiation`, `mekanismradiationlevel`, `mekanismradiationmax`, `mekanismradiationseverity`, `mekanismradiationenabled`, `mekanismradiationpercent` |
 | Cobblemon | `cobblemonpartysize`, `cobblemonparty1`〜`cobblemonparty6`（種族・レベル・HP・状態・色違い・タイプ） |
@@ -229,9 +229,10 @@ Forge、1.21.1 / 26.1.2 は NeoForge）と、表示定義
 MOD 連携タグのうち、クロスヘア先のブロックを第一候補にし、別の場所にも
 フォールバックするものは、末尾に `over` を付けます（`createrpmover`,
 `ae2networkover` など）。Create は搭乗中の装置、AE2 はリンク済みワイヤレス端末が
-フォールバック先です。逆に Botania の `botaniamana` 系はプレイヤーの
-インベントリ／アクセサリのマナだけを読むため、`over` は付けていません。本体の
-`mouseover*` 系も名前自体が見た対象を表すので、`over` は付けません。
+フォールバック先です。Botania は `botaniamana` 系がプレイヤーのインベントリ／
+アクセサリのマナだけを読むのに対し、`botaniamanapoolover` などの `...over` は
+クロスヘア先のブロックだけを読みます（対象が違えば 0。フォールバックなし）。
+本体の `mouseover*` 系も名前自体が見た対象を表すので、`over` は付けません。
 旧名（`createrpm`, `ae2network` など）は別名として残しているため、既存の設定ファイルは
 そのまま動きます。Create のタグは対象ブロックがない場合も行を消さず、RPM・ストレス系は
 `0.0`、`createkineticover` は `false` を返します（搭乗中の Create 装置がある場合は
@@ -248,6 +249,10 @@ Mekanism と Cobblemon は 1.21.1 の実クライアントで、放射線量（�
 確認済みです。Tinkers' Construct は 1.20.1 の ForgeGradle 開発クライアントで 8 タグの表示を
 確認しました（`libs/debug-mods` の jar を `build.gradle` の `ext.debugMods` で
 `tconstruct: true` にして deobf 読み込み。`/give` の素材未設定ツールのため数値は最小値）。
+Botania は 1.20.1 の ForgeGradle 開発クライアントで、マナプール／スプレッダー／
+エンドフレイムを見たときの 9 タグを確認しました（`500000/1000000`、`400/1000`、
+`100/300`）。本番 jar の Mixin refmap は `build.gradle` の `mixin.env` 設定で
+公式名に読み替えています。
 1.20.1 の Mekanism / Cobblemon と 26.1.2 の 3 連携はビルド確認までです。
 MOD が入っていない場合や API が変わった場合はタグを登録しない／空文字を返すため、
 HUD の他の行には影響しません。

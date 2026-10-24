@@ -20,6 +20,7 @@ ext.debugMods = [
         cobblemon: false,
         mekanism: false,
         ae2: false,
+        botania: false,  // Botania（1.20.1 のみ、Patchouli / Curios は自動）
 ]
 ```
 
@@ -66,6 +67,9 @@ versions/26.1.2/libs/debug-mods/
 | `ae2` | ae2-1.21.1.jar |
 | `guideme` | guideme-21.1.20.jar |
 | `kotlinforforge` | kotlinforforge-5.12.0-all.jar |
+| `botania` | Botania-1.20.1-446-FORGE.jar |
+| `patchouli` | Patchouli-1.20.1-84-FORGE.jar |
+| `curios` | curios-forge-5.9.1+1.20.1.jar |
 
 選択した MOD の必須依存（`mandatory = true` または `type = "REQUIRED"`）と、
 `modLoader` に指定された言語プロバイダは、jar があれば自動で追加されます。
@@ -73,6 +77,7 @@ versions/26.1.2/libs/debug-mods/
 - `tconstruct` → `mantle`
 - `cobblemon` → `kotlinforforge`
 - `ae2` → `guideme`
+- `botania` → `patchouli`, `curios`
 
 true にした別名が jar に見つからない場合、利用できる別名を添えて Gradle が失敗します。
 
@@ -89,6 +94,20 @@ true にした別名が jar に見つからない場合、利用できる別名�
 Tinkers' Construct / Mantle の jar には Mixin 設定も refmap も含まれていません
 （`unzip -l` で確認）。追加の Mixin 設定ファイルを書く必要はなく、開発実行で問題に
 なるのは Mixin ではなく SRG 名の解決です。
+
+Mixin を含む MOD（Botania など）は deobf しても refmap が SRG 名のままで、開発実行
+では `InvalidAccessorException: No candidates were found matching f_91041_...` の
+ようになります。1.20.1 の `build.gradle` は次のプロパティを設定し、
+`build/createSrgToMcp/output.srg` を使って refmap を公式名に読み替えます。
+
+```groovy
+property 'mixin.env.remapRefMap', 'true'
+property 'mixin.env.refMapRemappingFile',
+        project.file('build/createSrgToMcp/output.srg').absolutePath
+```
+
+Botania 1.20.1-446 はこの設定で開発クライアントに読み込めました。MOD 側の Mixin が
+別の理由で失敗する場合は、本番クライアントでの確認に切り替えてください。
 
 ## 管理対象の記録
 
@@ -115,3 +134,7 @@ Gradle の `Copy` タスクは入力が空だと `NO-SOURCE` になり削除処�
   deobf 済み。
 - 1.21.1 で Cobblemon が起動しない: `kotlinforforge` の jar も
   `libs/debug-mods/` に置く（`cobblemon: true` なら自動追加）。
+- Botania で `InvalidAccessorException` / `No candidates were found matching
+  f_91041_`: 1.20.1 の `mixin.env.remapRefMap` 設定と
+  `build/createSrgToMcp/output.srg` の生成を確認する。`runClient` は
+  `createSrgToMcp` に依存している。

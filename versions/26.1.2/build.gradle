@@ -89,5 +89,6 @@ ext.debugMods = [
         cobblemon: false,
         mekanism: false,
         ae2: false,
+        botania: false,
 ]
 apply from: rootProject.file('../../gradle/debug-mods.gradle')

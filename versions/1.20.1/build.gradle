@@ -74,6 +74,13 @@ minecraft {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
+            // Production mods ship Mixin refmaps with SRG names, but the development
+            // runtime uses official names. Let Mixin remap those refmaps so mods such
+            // as Botania can be tested from libs/debug-mods without editing the jar.
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile',
+                    project.file('build/createSrgToMcp/output.srg').absolutePath
+
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -212,6 +219,7 @@ ext.debugMods = [
         cobblemon: false,
         mekanism: false,
         ae2: false,
+        botania: false,
 ]
 ext.igiForgeDeobf = true
 apply from: rootProject.file('../../gradle/debug-mods.gradle')

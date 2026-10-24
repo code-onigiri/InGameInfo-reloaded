@@ -148,9 +148,12 @@ Forge / NeoForge Energy 連携を含む）。
   （Tough As Nails と衝突しないよう `twt` 接頭辞）
 - Goety: `goetysouls`, `goetyactive`
 - Paragliders: `stamina`, `maxstamina`, `staminapencent`, `staminadepleted`
-- Botania（1.20.1 のみ）: `botaniamana`, `botaniamaxmana`, `botaniamanapercent`
-  （プレイヤーのインベントリ／アクセサリ内のマナを合算する。ブロックを見るタグでは
-  ないため `over` は付けない）
+- Botania（1.20.1 のみ）: インベントリ／アクセサリは `botaniamana`, `botaniamaxmana`,
+  `botaniamanapercent`（マナを合算）。クロスヘア先のブロックは `botaniamanapoolover`,
+  `botaniamanapoolmaxover`, `botaniamanapoolpercentover`, `botaniaspreadermanaover`,
+  `botaniaspreadermaxmanaover`, `botaniaspreaderpercentover`, `botaniaflowermanaover`,
+  `botaniaflowermaxmanaover`, `botaniaflowerpercentover`（マナプール／スプレッダー／
+  生成・機能花。対象が違えば 0 を返し、フォールバックはしない）
 - Applied Energistics 2: `ae2networkover`, `ae2channelsover`, `ae2channelmodeover`,
   `ae2gridpowerover`, `ae2gridmaxpowerover`, `ae2gridpowerusageover`,
   `ae2gridpowerinjectionover`, `ae2channelpowerover`, `ae2cellused`, `ae2celltotal`,

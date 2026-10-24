@@ -18,8 +18,9 @@ GUI を実際に描画し、スクリーンショットで確認する手順を�
 - コマンド（`/igi save`、`/igi reload` など）の入出力
 
 MOD 連携タグそのものは、連携 MOD を入れた環境で別途確認します。SPI の読み込みだけなら
-ログの `PluginLoader` 出力で確認できます。実 MOD を入れた確認は
-下の「MOD 連携（Paragliders）」にまとめています。
+ログの `PluginLoader` 出力で確認できます。実 MOD を入れた確認は下の「MOD 連携」
+（Paragliders / AE2 / Mekanism / Cobblemon / Tinkers' Construct / Botania）に
+まとめています。
 
 ## 前提
 
@@ -444,9 +445,10 @@ HUD 設定に次の行を足して確認します。
 [integration-paraglider-1.20.1.png](render/integration-paraglider-1.20.1.png) と
 [integration-paraglider-1.21.1.png](render/integration-paraglider-1.21.1.png) に残しています。
 
-Mixin を含む本番 jar（例: Cold Sweat）は deobf しても refmap が SRG のままで
-`@Shadow field f_91074_ was not located` になるため、開発実行では検証できません。
-その場合は本番環境（実際の Forge クライアント）で確認します。
+Mixin を含む本番 jar（例: Cold Sweat）は deobf しても refmap が SRG のままです。
+1.20.1 の `build.gradle` は `mixin.env.remapRefMap` を設定しているため、Botania は
+開発実行で読み込めました（後述）。Cold Sweat のように別の Mixin 問題が残る場合は
+本番環境（実際の Forge クライアント）で確認します。
 
 ## MOD 連携（Applied Energistics 2、1.20.1 / 1.21.1）
 
@@ -584,6 +586,72 @@ mods 0 broken false
 今後の課題です。本番用クライアント（`.prism-test/mcprod`）でも同じ表示を確認して
 います。確認画像:
 [integration-tinkers-1.20.1.png](render/integration-tinkers-1.20.1.png)。
+
+## MOD 連携（Botania、1.20.1）
+
+Botania のクロスヘア先ブロックのマナを読む 9 タグを、1.20.1 の ForgeGradle 開発
+クライアントで確認しました。対象はマナプール、マナスプレッダー、生成花／機能花です。
+
+`versions/1.20.1/libs/debug-mods/` に次の 3 jar を置き、`build.gradle` の
+`ext.debugMods` を `botania: true` にします。Patchouli と Curios は Botania の必須
+依存として自動で追加されます。
+
+```text
+Botania-1.20.1-446-FORGE.jar
+Patchouli-1.20.1-84-FORGE.jar
+curios-forge-5.9.1+1.20.1.jar
+```
+
+```bash
+cd versions/1.20.1
+./gradlew listDebugMods
+./gradlew runClient --args="--quickPlaySingleplayer RenderTest"
+```
+
+`listDebugMods` は `[ON] botania`、`[AUTO] patchouli`、`[AUTO] curios` を表示し、
+ログは `[igi] Debug mods: botania, patchouli, curios`、`Registered 563 tags.`
+（既定 547 + Botania 12 + Curios 4）になります。デバッグ要素インスペクターでは
+`508 tags / 14 categories` と Botania カテゴリの 12 タグを確認できます。
+
+本番 jar の Mixin refmap は SRG 名のため、そのままでは
+`InvalidAccessorException: No candidates were found matching f_91041_...` で起動に
+失敗します。1.20.1 の `build.gradle` は `mixin.env.remapRefMap` と
+`mixin.env.refMapRemappingFile` を設定済みで、`build/createSrgToMcp/output.srg` を
+使って公式名に読み替えます。jar を書き換える必要はありません。
+
+HUD 設定:
+
+```xml
+pool: <var>botaniamanapoolover</var>/<var>botaniamanapoolmaxover</var> (<var>botaniamanapoolpercentover</var>%)
+spreader: <var>botaniaspreadermanaover</var>/<var>botaniaspreadermaxmanaover</var> (<var>botaniaspreaderpercentover</var>%)
+flower: <var>botaniaflowermanaover</var>/<var>botaniaflowermaxmanaover</var> (<var>botaniaflowerpercentover</var>%)
+```
+
+テスト用ブロックを置き、クロスヘアがブロックに当たるよう視点を合わせます。
+
+```mcfunction
+/setblock ~3 ~1 ~ botania:mana_pool{mana:500000,manaCap:1000000}
+/setblock ~3 ~1 ~ botania:mana_spreader{mana:400}
+/setblock ~3 ~1 ~ botania:endoflame{mana:100}
+/tp @s ~ ~ ~ -90 8
+```
+
+マナプールはブロックの高さに合わせて pitch を 8 前後にしないとクロスヘアが外れ、
+`0/0 (0.0%)` になります。スプレッダーと花も、十字カーソルがブロックに当たって
+いることを確認してください。
+
+確認結果:
+
+```text
+pool: 500000/1000000 (50.0%)
+spreader: 400/1000 (40.0%)
+flower: 100/300 (33.3%)
+```
+
+3 つの画面を上下に並べた確認画像:
+[botania-tags-1.20.1.png](render/botania-tags-1.20.1.png)。上からマナプール、
+マナスプレッダー、エンドフレイム。各画面とも対象ブロックにクロスヘアが当たり、
+対応する行だけが値を持ち、他の行は `0/0 (0.0%)` です。
 
 ## 新しいバージョンへ展開するとき
 
