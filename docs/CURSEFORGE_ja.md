@@ -1,14 +1,8 @@
-# CurseForge 掲載文（日本語）
-
-CurseForge の Summary 欄と Description 欄に貼る日本語文です。英語版は
-[CURSEFORGE.md](CURSEFORGE.md) にあります。アップロード時の注意は英語版の末尾にあり、
-このファイルには含めていません。
-
-## Summary（Summary 欄、256 文字以内）
+## Summary（256 文字以内）
 
 1.20.1、1.21.1、26.1.2 向けの自由にカスタマイズできる HUD で、表示行を XML、JSON、TXT で定義してゲーム内で編集でき、他の MOD のタグも任意で追加できます。
 
-## Description（Description 欄）
+## Description
 
 # InGameInfoXML (Reloaded)
 

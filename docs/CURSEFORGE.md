@@ -1,12 +1,8 @@
-# CurseForge listing copy
-
-This file contains the English text for the CurseForge project page. A Japanese translation is in [CURSEFORGE_ja.md](CURSEFORGE_ja.md). The upload notes at the end are for the upload work and are not part of the description.
-
-## Summary (Summary field, 256 characters or fewer)
+## Summary (256 characters or fewer)
 
 A fully customizable HUD for Minecraft 1.20.1, 1.21.1 and 26.1.2. Define every line in XML, JSON or TXT, edit it in game, and add optional tags from other mods.
 
-## Description (Description field)
+## Description
 
 # InGameInfoXML (Reloaded)
 
