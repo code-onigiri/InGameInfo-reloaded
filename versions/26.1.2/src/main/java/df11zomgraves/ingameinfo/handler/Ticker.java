@@ -79,8 +79,9 @@ public class Ticker {
 			event.setCanceled(true);
 		else if (overlay.equals(VanillaGuiLayers.EFFECTS) && !ConfigurationHandler.showOverlayPotions)
 			event.setCanceled(true);
-		else if (canRun() && overlay.equals(VanillaGuiLayers.DEBUG_OVERLAY))
-			event.setCanceled(true);
+		// 26.1 note: VanillaGuiLayers no longer has a DEBUG_OVERLAY constant and no
+		// replacement hook exists in this tree, so replaceDebug cannot cancel the
+		// vanilla debug screen here (same as the shipped 26.1.2 behaviour).
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)

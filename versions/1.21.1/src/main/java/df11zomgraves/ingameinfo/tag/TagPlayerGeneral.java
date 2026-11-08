@@ -7,6 +7,7 @@ import df11zomgraves.ingameinfo.util.MBlockPos;
 import df11zomgraves.ingameinfo.util.StringConvertUtils;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.LightLayer;
@@ -401,7 +402,7 @@ public abstract class TagPlayerGeneral extends Tag {
 	public static class Eating extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.isUsingItem() && player.getUseItem().isEdible());
+			return String.valueOf(player.isUsingItem() && player.getUseItem().has(DataComponents.FOOD));
 		}
 	}
 

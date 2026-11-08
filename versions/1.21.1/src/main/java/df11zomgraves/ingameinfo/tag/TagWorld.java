@@ -292,9 +292,14 @@ public abstract class TagWorld extends Tag {
 	public static class LocalTemperature extends TagWorld {
 		@Override
 		public String getValue() {
-			// Position-aware: the biome temperature adjusted for this position (e.g. altitude).
-			return String.format(Locale.ENGLISH, "%.2f",
-					world.getBiome(playerPosition).value().getTemperature(playerPosition) * 100);
+			// Position-aware: Biome.getTemperature(pos) is private, so apply the same
+			// height adjustment it performs (temperature drops 0.00625 per block above
+			// sea level) on top of the modified climate temperature.
+			float temperature = world.getBiome(playerPosition).value().getModifiedClimateSettings().temperature();
+			final int seaLevel = world.getSeaLevel();
+			if (playerPosition.getY() > seaLevel)
+				temperature -= (playerPosition.getY() - seaLevel) * 0.00625F;
+			return String.format(Locale.ENGLISH, "%.2f", temperature * 100);
 		}
 	}
 

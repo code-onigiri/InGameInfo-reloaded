@@ -10,6 +10,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.LightLayer;
 
 public abstract class TagPlayerGeneral extends Tag {
@@ -319,7 +320,9 @@ public abstract class TagPlayerGeneral extends Tag {
 		@Override
 		public String getValue() {
 			try {
-				return String.valueOf(player.isInWaterOrRain() || player.isInBubbleColumn());
+				// Entity.isInBubbleColumn no longer exists in 26.1; being inside a bubble
+				// column block is the same state.
+				return String.valueOf(player.isInWaterOrRain() || player.getInBlockState().is(Blocks.BUBBLE_COLUMN));
 			} catch (final Exception e) {
 				return "false";
 			}

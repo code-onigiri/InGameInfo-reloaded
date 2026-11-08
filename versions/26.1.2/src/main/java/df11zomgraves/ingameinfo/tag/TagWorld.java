@@ -143,7 +143,14 @@ public abstract class TagWorld extends Tag {
 	public static class LocalDifficulty extends TagWorld {
 		@Override
 		public String getValue() {
-			final DifficultyInstance diff = world.getCurrentDifficultyAt(playerPosition);
+			// ClientLevel has no getCurrentDifficultyAt in 26.1; rebuild it from the
+			// clock time and the chunk's real inhabited time. The moon-phase factor has
+			// no client-accessible source in this version, so it stays 0.
+			long inhabitedTime = 0L;
+			if (world.hasChunkAt(playerPosition))
+				inhabitedTime = world.getChunkAt(playerPosition).getInhabitedTime();
+			final DifficultyInstance diff = new DifficultyInstance(world.getDifficulty(), world.getOverworldClockTime(),
+					inhabitedTime, 0.0F);
 			return String.format(Locale.ENGLISH, "%.2f", diff.getEffectiveDifficulty());
 		}
 	}
@@ -292,9 +299,14 @@ public abstract class TagWorld extends Tag {
 	public static class LocalTemperature extends TagWorld {
 		@Override
 		public String getValue() {
-			// Position-aware: the biome temperature adjusted for this position (e.g. altitude).
-			return String.format(Locale.ENGLISH, "%.2f",
-					world.getBiome(playerPosition).value().getTemperature(playerPosition, world.getSeaLevel()) * 100);
+			// Position-aware: Biome.getTemperature(pos, seaLevel) is private, so apply the
+			// same height adjustment it performs (temperature drops 0.00625 per block above
+			// sea level) on top of the modified climate temperature.
+			float temperature = world.getBiome(playerPosition).value().getModifiedClimateSettings().temperature();
+			final int seaLevel = world.getSeaLevel();
+			if (playerPosition.getY() > seaLevel)
+				temperature -= (playerPosition.getY() - seaLevel) * 0.00625F;
+			return String.format(Locale.ENGLISH, "%.2f", temperature * 100);
 		}
 	}
 
