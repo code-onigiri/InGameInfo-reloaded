@@ -30,8 +30,11 @@ versions/<version>/
 │   ├── command/        # /igi コマンド
 │   ├── gui/overlay/    # HUD の描画要素
 │   ├── handler/        # 設定・イベント・キー
+│   ├── integration/    # MOD 連携の実装（リフレクションのみで参照）
+│   ├── network/        # サーバーへの値リクエスト
 │   ├── parser/         # XML / JSON / TXT
 │   ├── printer/        # XML / JSON / TXT 出力
+│   ├── reference/      # 定数（名前・キー）
 │   ├── tag/            # タグ実装
 │   ├── util/
 │   └── value/          # 値・式・書式（Expression / Value）
