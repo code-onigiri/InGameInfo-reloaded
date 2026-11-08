@@ -62,7 +62,7 @@ nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew build'
 nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew build'
 ```
 
-成果物は `versions/<version>/build/libs/ingameinforeloaded-2.9.2.104.jar` です。1.20.1 は
+成果物は `versions/<version>/build/libs/ingameinforeloaded-2.9.2.105.jar` です。1.20.1 は
 Forge 47.4.28、1.21.1 は NeoForge 21.1.264、26.1.2 は NeoForge 26.1.2.122 の
 クライアントに入れて使います。クライアント専用のため、dedicated server では Forge が
 読み込みをスキップし、NeoForge もクライアント GUI を読み込みません。開発用クライアントは

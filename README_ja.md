@@ -35,13 +35,13 @@ nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew build'
 nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew build'
 ```
 
-成果物は `versions/<version>/build/libs/ingameinforeloaded-2.9.2.104.jar` です。対応する
+成果物は `versions/<version>/build/libs/ingameinforeloaded-2.9.2.105.jar` です。対応する
 Minecraft の `mods/` ディレクトリへ入れます。Nix を使わない場合は、各バージョンに
 合った JDK と同梱の Gradle wrapper を用意してください。
 
 この MOD はクライアント専用です。Forge は dedicated server で読み込みをスキップし、
 NeoForge 版もサーバーではクライアント GUI のクラスを読み込みません。クライアントに
-入れてください。MOD ID は `ingameinforeloaded` で、2.9.2.104 の初回起動時に
+入れてください。MOD ID は `ingameinforeloaded` で、初回起動時に
 `config/ingameinfoxml-client.toml` を `config/ingameinforeloaded-client.toml` へコピーします。
 
 ## 使い方

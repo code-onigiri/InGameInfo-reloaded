@@ -38,13 +38,13 @@ nix develop .#mc1211 -c bash -c 'cd versions/1.21.1 && ./gradlew build'
 nix develop .#mc2612 -c bash -c 'cd versions/26.1.2 && ./gradlew build'
 ```
 
-The jar is written to `versions/<version>/build/libs/ingameinforeloaded-2.9.2.104.jar`. Put it
+The jar is written to `versions/<version>/build/libs/ingameinforeloaded-2.9.2.105.jar`. Put it
 in the `mods/` directory of the matching Minecraft version. Without Nix, install the JDK
 required by that version and use the bundled Gradle wrapper.
 
 The mod is client-side only. Forge skips it on dedicated servers, and the NeoForge
 build does not load client GUI classes there. Install it on clients. The mod id is
-`ingameinforeloaded`; the first 2.9.2.104 launch copies the old
+`ingameinforeloaded`; the first launch copies the old
 `config/ingameinfoxml-client.toml` to `config/ingameinforeloaded-client.toml`.
 
 ## Usage

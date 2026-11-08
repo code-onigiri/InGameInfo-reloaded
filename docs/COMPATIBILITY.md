@@ -33,7 +33,7 @@
 
 1.12.2 の `Configuration` は Forge / NeoForge の TOML
 （`config/ingameinforeloaded-client.toml`）になりました。キー名と既定値は可能な限り合わせて
-います。MOD ID は `ingameinforeloaded` で、2.9.2.104 の初回起動時に旧
+います。MOD ID は `ingameinforeloaded` で、初回起動時に旧
 `config/ingameinfoxml-client.toml` を新ファイルへコピーします。旧ファイルは残ります。
 以下の表は 1.20.1 / 1.21.1 / 26.1.2 で共通です。
 
@@ -50,6 +50,7 @@
 | （なし） | `numericAmplifier` | 追加。ポーション倍率を `II` ではなく `2` で出す |
 | （なし） | `sendSeedToChat` | 追加。シードをチャットへ |
 | （なし） | `seed` | 追加。マルチでサーバーが応答しない場合の表示用 |
+| （なし） | `shareSeedWithClients` | 追加（サーバー側）。`false` にするとクライアントの seed 要求に応答しない。既定 `true` |
 | （なし） | `showSurvivalHUD` | 追加。体力・空腹・酸素などのバニラ HUD |
 | （なし） | `healthDigit` ほか | 追加。小数桁数 |
 | （なし） | `displayInvisiblePlayer` | 追加。近傍プレイヤーに透明プレイヤーを含める |
@@ -158,7 +159,8 @@ Forge / NeoForge Energy 連携を含む）。
 - Thirst Was Taken: `twtthirst`, `twtquenched`, `twtexhaustion`
   （Tough As Nails と衝突しないよう `twt` 接頭辞）
 - Goety: `goetysouls`, `goetyactive`
-- Paragliders: `stamina`, `maxstamina`, `staminapencent`, `staminadepleted`
+- Paragliders: `stamina`, `maxstamina`, `staminapercent`, `staminadepleted`
+  （旧綴り `staminapencent` も別名として使用可能）
 - Botania（1.20.1 のみ）: インベントリ／アクセサリは `botaniamana`, `botaniamaxmana`,
   `botaniamanapercent`（マナを合算）。クロスヘア先のブロックは `botaniamanapoolover`,
   `botaniamanapoolmaxover`, `botaniamanapoolpercentover`, `botaniaspreadermanaover`,

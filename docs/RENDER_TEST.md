@@ -536,7 +536,7 @@ GRADLE_USER_HOME=/tmp/gradle-home nix develop <repo>#mc1201 \
 HUD 設定に次の行を足して確認します。
 
 ```xml
-<var>stamina</var> / <var>maxstamina</var> (<var>staminapencent</var>) depleted=<var>staminadepleted</var>
+<var>stamina</var> / <var>maxstamina</var> (<var>staminapercent</var>) depleted=<var>staminadepleted</var>
 ```
 
 結果は 1.20.1 / 1.21.1 とも `1000 / 1000 (100.0%) depleted=false` で、
