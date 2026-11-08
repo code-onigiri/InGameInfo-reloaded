@@ -16,10 +16,13 @@ jobs:
         include:
           - version: "1.20.1"
             java: "17"
+            gradle: "8.8"
           - version: "1.21.1"
             java: "21"
+            gradle: "8.8"
           - version: "26.1.2"
             java: "25"
+            gradle: "9.8.2"
     steps:
       - uses: actions/checkout@v4
 
@@ -29,12 +32,16 @@ jobs:
           distribution: temurin
           java-version: ${{ matrix.java }}
 
-      - name: Set up Gradle
+      # The version projects do not commit gradle-wrapper.jar, so install
+      # the Gradle version each project's wrapper properties specify.
+      - name: Set up Gradle ${{ matrix.gradle }}
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ matrix.gradle }}
 
       - name: Build
         working-directory: versions/${{ matrix.version }}
-        run: ./gradlew build --stacktrace
+        run: gradle build --stacktrace
 
       - name: Upload jar
         uses: actions/upload-artifact@v4
