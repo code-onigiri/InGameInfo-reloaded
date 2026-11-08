@@ -23,9 +23,14 @@ public record ResponseMSPTPacket(double mspt) implements CustomPacketPayload {
 
 	public static void handle(final ResponseMSPTPacket packet, final IPayloadContext context) {
 		context.enqueueWork(() -> {
-			InGameInfoXML.mspt = packet.mspt();
-			InGameInfoXML.tps = (packet.mspt() == -1) ? -1 : Math.min(1000.0 / packet.mspt(), 20);
+			// Only a positive mspt is real data; anything else leaves the
+			// "no data" (-1) state untouched instead of dividing by it.
+			if (packet.mspt() > 0) {
+				InGameInfoXML.mspt = packet.mspt();
+				InGameInfoXML.tps = Math.min(1000.0 / packet.mspt(), 20);
+			}
 			InGameInfoXML.serverInstalled = true;
+			InGameInfoXML.msptRequestSentAt = 0;
 		});
 	}
 }

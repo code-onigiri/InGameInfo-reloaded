@@ -17,14 +17,33 @@ public final class ArsNouveauIntegration {
         return Minecraft.getInstance().player;
     }
 
+    private static long cachedTick = Long.MIN_VALUE;
+    private static double cachedCurrent;
+    private static double cachedMaximum;
+
+    // Mana changes arrive on tick boundaries, so resolve the reflective calls
+    // once per tick and share the result between the mana/max/percent tags.
+    private static void refresh() {
+        final Player player = player();
+        final long tick = player != null && player.level() != null ? player.level().getGameTime() : Long.MIN_VALUE;
+        if (tick != Long.MIN_VALUE && tick == cachedTick) {
+            return;
+        }
+        final Object current = Reflect.callStatic(MANA_UTIL, "getCurrentMana", player);
+        final Object maximum = Reflect.callStatic(MANA_UTIL, "getMaxMana", player);
+        cachedCurrent = current instanceof Number ? ((Number) current).doubleValue() : 0.0D;
+        cachedMaximum = maximum instanceof Number ? ((Number) maximum).doubleValue() : 0.0D;
+        cachedTick = tick;
+    }
+
     private static double current() {
-        final Object value = Reflect.callStatic(MANA_UTIL, "getCurrentMana", player());
-        return value instanceof Number ? ((Number) value).doubleValue() : 0.0D;
+        refresh();
+        return cachedCurrent;
     }
 
     private static double maximum() {
-        final Object value = Reflect.callStatic(MANA_UTIL, "getMaxMana", player());
-        return value instanceof Number ? ((Number) value).doubleValue() : 0.0D;
+        refresh();
+        return cachedMaximum;
     }
 
     public static class Mana extends IntegrationTag {

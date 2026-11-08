@@ -27,7 +27,11 @@ public class RequestMSPTPacket {
 				long[] times = server.getTickTime(player.level().dimension());
 				if (times != null) {
 					double mspt = MathUtils.mean(times) * 1.0E-6D;
-					PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new ResponseMSPTPacket(mspt));
+					// A mean of 0 means no ticks have been measured yet; sending it
+					// would make the client publish a fake 20 TPS, so stay silent
+					// and let the client keep its "no data" state.
+					if (mspt > 0)
+						PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new ResponseMSPTPacket(mspt));
 				}
 			}
 		});

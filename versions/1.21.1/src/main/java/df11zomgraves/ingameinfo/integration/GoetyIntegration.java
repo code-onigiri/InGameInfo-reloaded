@@ -4,8 +4,6 @@ import df11zomgraves.ingameinfo.tag.TagRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
-import java.util.Locale;
-
 /** Goety soul energy tags. */
 public final class GoetyIntegration {
     private static final String SOUL_HELPER = "com.Polarice3.Goety.utils.SEHelper";
@@ -25,7 +23,7 @@ public final class GoetyIntegration {
         @Override
         protected String value() {
             final Object value = Reflect.callStatic(SOUL_HELPER, "getSESouls", player());
-            return value instanceof Number ? String.format(Locale.ENGLISH, "%.0f", ((Number) value).doubleValue()) : "0";
+            return value instanceof Number ? String.valueOf(((Number) value).intValue()) : "0";
         }
     }
 

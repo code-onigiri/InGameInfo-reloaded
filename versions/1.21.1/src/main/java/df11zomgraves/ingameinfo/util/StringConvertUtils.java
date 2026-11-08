@@ -12,6 +12,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 
 public class StringConvertUtils {
+	private static final DecimalFormat[] FLOAT_FORMATS = new DecimalFormat[7];
+
+	static {
+		for (int i = 0; i < FLOAT_FORMATS.length; i++) {
+			DecimalFormat df = new DecimalFormat(i == 0 ? "0" : ("0." + "0".repeat(i)),
+					DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+			df.setRoundingMode(RoundingMode.HALF_UP);
+			FLOAT_FORMATS[i] = df;
+		}
+	}
+
 	public static String numToRoman(int amplifier) {
 		StringBuilder s = new StringBuilder();
 		if (amplifier == 0)
@@ -47,9 +58,7 @@ public class StringConvertUtils {
 			decimalPlace = 0;
 		else if (decimalPlace > 6)
 			decimalPlace = 6;
-		DecimalFormat df = new DecimalFormat(decimalPlace == 0 ? "0" : ("0." + "0".repeat(decimalPlace)),
-				DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-		df.setRoundingMode(RoundingMode.HALF_UP);
-		return df.format(value);
+		// DecimalFormat is not thread-safe, but this is only called from the client main thread.
+		return FLOAT_FORMATS[decimalPlace].format(value);
 	}
 }

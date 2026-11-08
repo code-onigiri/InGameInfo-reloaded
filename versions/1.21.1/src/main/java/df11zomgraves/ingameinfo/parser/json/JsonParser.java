@@ -58,6 +58,11 @@ public class JsonParser implements IParser {
     private List<List<Value>> getLines(final JsonElement elementLines) {
         final List<List<Value>> listLines = new ArrayList<List<Value>>();
 
+        if (elementLines == null || !elementLines.isJsonArray()) {
+            InGameInfoXML.logger.error("Skipping json configuration entry that is not an array of lines: {}", elementLines);
+            return listLines;
+        }
+
         final JsonArray arrayLines = elementLines.getAsJsonArray();
         for (final JsonElement elementLine : arrayLines) {
             if (elementLine != null && elementLine.isJsonArray()) {
@@ -84,9 +89,16 @@ public class JsonParser implements IParser {
                     }
 
                     if (value.isSimple()) {
+                        if (!entry.getValue().isJsonPrimitive()) {
+                            InGameInfoXML.logger.error("Skipping json value of type {} with a non-scalar argument: {}", type, entry.getValue());
+                            continue;
+                        }
                         value.setRawValue(entry.getValue().getAsString(), false);
                     } else if (entry.getValue().isJsonArray()) {
                         value.values.addAll(getValues(entry.getValue().getAsJsonArray()));
+                    } else {
+                        InGameInfoXML.logger.error("Skipping json value of type {} whose argument is not an array: {}", type, entry.getValue());
+                        continue;
                     }
                     values.add(value);
                 }

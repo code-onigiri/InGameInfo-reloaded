@@ -1,17 +1,30 @@
 package df11zomgraves.ingameinfo.tag;
 
+import df11zomgraves.ingameinfo.InGameInfoXML;
 import df11zomgraves.ingameinfo.gui.overlay.InfoIcon;
 import df11zomgraves.ingameinfo.handler.ConfigurationHandler;
 import df11zomgraves.ingameinfo.util.MBlockPos;
 import df11zomgraves.ingameinfo.util.StringConvertUtils;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.LightLayer;
 
 public abstract class TagPlayerGeneral extends Tag {
 	protected final MBlockPos pos = new MBlockPos();
+
+	private static boolean lightFailureLogged;
+
+	/** Light tags keep their historical "0" fallback, but the failure is logged once instead of vanishing silently. */
+	protected static String lightFallback(final String tagName, final Exception e) {
+		if (!lightFailureLogged) {
+			lightFailureLogged = true;
+			InGameInfoXML.logger.debug("Light tag {} failed; reporting 0", tagName, e);
+		}
+		return "0";
+	}
 
 	@Override
 	public String getCategory() {
@@ -27,7 +40,7 @@ public abstract class TagPlayerGeneral extends Tag {
 				int light = Math.max(skyLevel, blockLevel);
 				return String.valueOf(light);
 			} catch (final Exception e) {
-				return "0";
+				return lightFallback("light", e);
 			}
 		}
 	}
@@ -42,7 +55,7 @@ public abstract class TagPlayerGeneral extends Tag {
 				int light = Math.max(skyLevel, blockLevel);
 				return String.valueOf(light);
 			} catch (final Exception e) {
-				return "0";
+				return lightFallback("lighteye", e);
 			}
 		}
 	}
@@ -54,7 +67,7 @@ public abstract class TagPlayerGeneral extends Tag {
 				int blockLevel = world.getBrightness(LightLayer.BLOCK, playerPosition);
 				return String.valueOf(blockLevel);
 			} catch (final Exception e) {
-				return "0";
+				return lightFallback("lightnosun", e);
 			}
 		}
 	}
@@ -67,7 +80,7 @@ public abstract class TagPlayerGeneral extends Tag {
 				int blockLevel = world.getBrightness(LightLayer.BLOCK, this.pos);
 				return String.valueOf(blockLevel);
 			} catch (final Exception e) {
-				return "0";
+				return lightFallback("lightnosuneye", e);
 			}
 		}
 	}
@@ -79,7 +92,7 @@ public abstract class TagPlayerGeneral extends Tag {
 				int skyLevel = world.getBrightness(LightLayer.SKY, playerPosition) - world.getSkyDarken();
 				return String.valueOf(Mth.clamp(skyLevel, 0, 15));
 			} catch (final Exception e) {
-				return "0";
+				return lightFallback("lightsun", e);
 			}
 		}
 	}
@@ -92,7 +105,7 @@ public abstract class TagPlayerGeneral extends Tag {
 				int skyLevel = world.getBrightness(LightLayer.SKY, this.pos) - world.getSkyDarken();
 				return String.valueOf(Mth.clamp(skyLevel, 0, 15));
 			} catch (final Exception e) {
-				return "0";
+				return lightFallback("lightsuneye", e);
 			}
 		}
 	}
@@ -125,38 +138,58 @@ public abstract class TagPlayerGeneral extends Tag {
 	public static class Health extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			float playerHealth = player.getHealth();
-			return StringConvertUtils.getFloatDisplayFormat(playerHealth, ConfigurationHandler.healthDecimalPlace);
+			try {
+				float playerHealth = player.getHealth();
+				return StringConvertUtils.getFloatDisplayFormat(playerHealth, ConfigurationHandler.healthDecimalPlace);
+			} catch (final Exception e) {
+				return "0";
+			}
 		}
 	}
 
 	public static class MaxHealth extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			float playerHealth = player.getMaxHealth();
-			return StringConvertUtils.getFloatDisplayFormat(playerHealth, ConfigurationHandler.healthDecimalPlace);
+			try {
+				float playerHealth = player.getMaxHealth();
+				return StringConvertUtils.getFloatDisplayFormat(playerHealth, ConfigurationHandler.healthDecimalPlace);
+			} catch (final Exception e) {
+				return "0";
+			}
 		}
 	}
 
 	public static class Absorption extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			float playerAbsorption = player.getAbsorptionAmount();
-			return StringConvertUtils.getFloatDisplayFormat(playerAbsorption, ConfigurationHandler.healthDecimalPlace);
+			try {
+				float playerAbsorption = player.getAbsorptionAmount();
+				return StringConvertUtils.getFloatDisplayFormat(playerAbsorption, ConfigurationHandler.healthDecimalPlace);
+			} catch (final Exception e) {
+				return "0";
+			}
 		}
 	}
 
 	public static class Armor extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.getArmorValue());
+			try {
+				return String.valueOf(player.getArmorValue());
+			} catch (final Exception e) {
+				return "0";
+			}
 		}
 	}
 
 	public static class FoodLevel extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.getFoodData().getFoodLevel());
+			try {
+				return String.valueOf(player.getFoodData().getFoodLevel());
+			} catch (final Exception e) {
+				return "0";
+			}
 		}
 	}
 
@@ -171,30 +204,41 @@ public abstract class TagPlayerGeneral extends Tag {
 	public static class SaturationLevel extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			float saturationLevel = player.getFoodData().getSaturationLevel();
-			return StringConvertUtils.getFloatDisplayFormat(saturationLevel, ConfigurationHandler.hungerDecimalPlace);
+			try {
+				float saturationLevel = player.getFoodData().getSaturationLevel();
+				return StringConvertUtils.getFloatDisplayFormat(saturationLevel, ConfigurationHandler.hungerDecimalPlace);
+			} catch (final Exception e) {
+				return "0";
+			}
 		}
 	}
 
 	public static class Exhaustion extends TagPlayerGeneral {
-		private static final java.lang.reflect.Field EXHAUSTION_LEVEL;
+		private static final java.lang.reflect.Field EXHAUSTION_LEVEL = resolveExhaustionLevel();
 
-		static {
+		private static java.lang.reflect.Field resolveExhaustionLevel() {
 			try {
-				EXHAUSTION_LEVEL = net.minecraft.world.food.FoodData.class.getDeclaredField("exhaustionLevel");
-				EXHAUSTION_LEVEL.setAccessible(true);
+				final java.lang.reflect.Field field = net.minecraft.world.food.FoodData.class
+						.getDeclaredField("exhaustionLevel");
+				field.setAccessible(true);
+				return field;
 			} catch (final ReflectiveOperationException e) {
-				throw new ExceptionInInitializerError(e);
+				// A renamed field must degrade this one tag, not abort registration.
+				InGameInfoXML.logger.error("Could not access FoodData.exhaustionLevel; the exhaustion tag will report 0", e);
+				return null;
 			}
 		}
 
 		@Override
 		public String getValue() {
+			if (EXHAUSTION_LEVEL == null) {
+				return "0.0";
+			}
 			try {
 				return StringConvertUtils.getFloatDisplayFormat(EXHAUSTION_LEVEL.getFloat(player.getFoodData()),
 						ConfigurationHandler.hungerDecimalPlace);
-			} catch (final IllegalAccessException e) {
-				return "0.0";
+			} catch (final Exception e) {
+				return "0";
 			}
 		}
 	}
@@ -202,22 +246,29 @@ public abstract class TagPlayerGeneral extends Tag {
 	public static class AirTicks extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.getAirSupply());
+			try {
+				return String.valueOf(player.getAirSupply());
+			} catch (final Exception e) {
+				return "0";
+			}
 		}
 	}
 
 	public static class MaxAirTicks extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			// The original mod always reported the vanilla value.
-			return String.valueOf(300);
+			return String.valueOf(player.getMaxAirSupply());
 		}
 	}
 
 	public static class PlayerLevel extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.experienceLevel);
+			try {
+				return String.valueOf(player.experienceLevel);
+			} catch (final Exception e) {
+				return "0";
+			}
 		}
 	}
 
@@ -245,63 +296,99 @@ public abstract class TagPlayerGeneral extends Tag {
 	public static class Username extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return player.getGameProfile().name();
+			try {
+				return player.getGameProfile().name();
+			} catch (final Exception e) {
+				return "";
+			}
 		}
 	}
 
 	public static class InWater extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.isInWater());
+			try {
+				return String.valueOf(player.isInWater());
+			} catch (final Exception e) {
+				return "false";
+			}
 		}
 	}
 
 	public static class Wet extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.isInWater() || player.isInWaterOrRain());
+			try {
+				return String.valueOf(player.isInWaterOrRain() || player.isInBubbleColumn());
+			} catch (final Exception e) {
+				return "false";
+			}
 		}
 	}
 
 	public static class Alive extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.isAlive());
+			try {
+				return String.valueOf(player.isAlive());
+			} catch (final Exception e) {
+				return "false";
+			}
 		}
 	}
 
 	public static class Burning extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.isOnFire());
+			try {
+				return String.valueOf(player.isOnFire());
+			} catch (final Exception e) {
+				return "false";
+			}
 		}
 	}
 
 	public static class Riding extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.isPassenger());
+			try {
+				return String.valueOf(player.isPassenger());
+			} catch (final Exception e) {
+				return "false";
+			}
 		}
 	}
 
 	public static class Sneaking extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.isShiftKeyDown());
+			try {
+				return String.valueOf(player.isShiftKeyDown());
+			} catch (final Exception e) {
+				return "false";
+			}
 		}
 	}
 
 	public static class Sprinting extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.isSprinting());
+			try {
+				return String.valueOf(player.isSprinting());
+			} catch (final Exception e) {
+				return "false";
+			}
 		}
 	}
 
 	public static class Invisible extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.isInvisible());
+			try {
+				return String.valueOf(player.isInvisible());
+			} catch (final Exception e) {
+				return "false";
+			}
 		}
 	}
 
@@ -317,7 +404,11 @@ public abstract class TagPlayerGeneral extends Tag {
 	public static class PlayerIcon extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			final PlayerInfo playerInfo = minecraft.getConnection().getPlayerInfo(player.getUUID());
+			final var connection = minecraft.getConnection();
+			final PlayerInfo playerInfo = connection != null ? connection.getPlayerInfo(player.getUUID()) : null;
+			if (playerInfo == null) {
+				return "";
+			}
 			final InfoIcon icon = new InfoIcon(playerInfo.getSkin().body().texturePath());
 			icon.setTextureData(8, 8, 8, 8, 64, 64);
 			icon.setDisplayDimensions(0, 0, 8, 8);
@@ -329,15 +420,18 @@ public abstract class TagPlayerGeneral extends Tag {
 	public static class Eating extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			// 1.12.2 hardcoded this to false as well.
-			return "false";
+			return String.valueOf(player.isUsingItem() && player.getUseItem().has(DataComponents.FOOD));
 		}
 	}
 
 	public static class Freezing extends TagPlayerGeneral {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.isFreezing());
+			try {
+				return String.valueOf(player.isFreezing());
+			} catch (final Exception e) {
+				return "false";
+			}
 		}
 	}
 

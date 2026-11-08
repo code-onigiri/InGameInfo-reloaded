@@ -17,17 +17,18 @@ public class TagRegistry {
 	private Map<String, Tag> stringTagMap = new HashMap<String, Tag>();
 
 	private void register(final String name, final Tag tag) {
-		if (this.stringTagMap.containsKey(name)) {
-			InGameInfoXML.logger.error("Duplicate tag key '" + name + "'!");
-			return;
-		}
-
 		if (name == null) {
 			InGameInfoXML.logger.error("Tag name cannot be null!");
 			return;
 		}
 
-		this.stringTagMap.put(name.toLowerCase(Locale.ENGLISH), tag);
+		final String nameLowerCase = name.toLowerCase(Locale.ENGLISH);
+		if (this.stringTagMap.containsKey(nameLowerCase)) {
+			InGameInfoXML.logger.error("Duplicate tag key '" + name + "'!");
+			return;
+		}
+
+		this.stringTagMap.put(nameLowerCase, tag);
 	}
 
 	public void register(final Tag tag) {

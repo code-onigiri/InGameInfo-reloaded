@@ -77,14 +77,17 @@ public final class ToughAsNailsIntegration {
         @Override
         protected String value() {
             final Object value = temperature();
-            return value instanceof Enum<?> ? String.valueOf(((Enum<?>) value).ordinal()) : "-1";
+            return value instanceof Enum<?> ? String.valueOf(((Enum<?>) value).ordinal()) : "";
         }
     }
 
     public static void register() {
         TagRegistry.INSTANCE.register(new Thirst().setName("thirst"));
         TagRegistry.INSTANCE.register(new Hydration().setName("hydration"));
-        TagRegistry.INSTANCE.register(new Temperature().setName("temperature").setAliases("bodytemperature"));
+        // The core registers "temperature" for the world temperature before
+        // integrations load, so that name can never resolve to this tag;
+        // register under the alias name instead of logging a duplicate error.
+        TagRegistry.INSTANCE.register(new Temperature().setName("bodytemperature"));
         TagRegistry.INSTANCE.register(new TemperatureLevel().setName("temperaturelevel"));
     }
 }

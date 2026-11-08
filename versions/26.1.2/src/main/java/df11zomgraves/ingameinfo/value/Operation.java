@@ -11,12 +11,25 @@ public enum Operation {
         @Override
         public String getValue(final Value value) {
             final int size = value.values.size();
+            if (size < 2) {
+                return "";
+            }
             final int operandCount = (size - 2) / 2;
-            final double base = value.getDoubleValue(1);
-            for (int i = 2; i < 2 + operandCount; i++) {
-                final double operand = value.getDoubleValue(i);
-                if (base > operand) {
-                    return value.getValue(operandCount + i);
+            try {
+                final double base = value.getDoubleValue(1);
+                for (int i = 2; i < 2 + operandCount; i++) {
+                    final double operand = value.getDoubleValue(i);
+                    if (base > operand) {
+                        return value.getValue(operandCount + i);
+                    }
+                }
+            } catch (final NumberFormatException e) {
+                final String base = value.getValue(1);
+                for (int i = 2; i < 2 + operandCount; i++) {
+                    final String operand = value.getValue(i);
+                    if (base.compareTo(operand) > 0) {
+                        return value.getValue(operandCount + i);
+                    }
                 }
             }
             return size % 2 == 0 ? "" : value.getValue(size - 1);
@@ -26,12 +39,25 @@ public enum Operation {
         @Override
         public String getValue(final Value value) {
             final int size = value.values.size();
+            if (size < 2) {
+                return "";
+            }
             final int operandCount = (size - 2) / 2;
-            final double base = value.getDoubleValue(1);
-            for (int i = 2; i < 2 + operandCount; i++) {
-                final double operand = value.getDoubleValue(i);
-                if (base < operand) {
-                    return value.getValue(operandCount + i);
+            try {
+                final double base = value.getDoubleValue(1);
+                for (int i = 2; i < 2 + operandCount; i++) {
+                    final double operand = value.getDoubleValue(i);
+                    if (base < operand) {
+                        return value.getValue(operandCount + i);
+                    }
+                }
+            } catch (final NumberFormatException e) {
+                final String base = value.getValue(1);
+                for (int i = 2; i < 2 + operandCount; i++) {
+                    final String operand = value.getValue(i);
+                    if (base.compareTo(operand) < 0) {
+                        return value.getValue(operandCount + i);
+                    }
                 }
             }
             return size % 2 == 0 ? "" : value.getValue(size - 1);
@@ -41,12 +67,25 @@ public enum Operation {
         @Override
         public String getValue(final Value value) {
             final int size = value.values.size();
+            if (size < 2) {
+                return "";
+            }
             final int operandCount = (size - 2) / 2;
-            final double base = value.getDoubleValue(1);
-            for (int i = 2; i < 2 + operandCount; i++) {
-                final double operand = value.getDoubleValue(i);
-                if (base >= operand) {
-                    return value.getValue(operandCount + i);
+            try {
+                final double base = value.getDoubleValue(1);
+                for (int i = 2; i < 2 + operandCount; i++) {
+                    final double operand = value.getDoubleValue(i);
+                    if (base >= operand) {
+                        return value.getValue(operandCount + i);
+                    }
+                }
+            } catch (final NumberFormatException e) {
+                final String base = value.getValue(1);
+                for (int i = 2; i < 2 + operandCount; i++) {
+                    final String operand = value.getValue(i);
+                    if (base.compareTo(operand) >= 0) {
+                        return value.getValue(operandCount + i);
+                    }
                 }
             }
             return size % 2 == 0 ? "" : value.getValue(size - 1);
@@ -56,12 +95,25 @@ public enum Operation {
         @Override
         public String getValue(final Value value) {
             final int size = value.values.size();
+            if (size < 2) {
+                return "";
+            }
             final int operandCount = (size - 2) / 2;
-            final double base = value.getDoubleValue(1);
-            for (int i = 2; i < 2 + operandCount; i++) {
-                final double operand = value.getDoubleValue(i);
-                if (base <= operand) {
-                    return value.getValue(operandCount + i);
+            try {
+                final double base = value.getDoubleValue(1);
+                for (int i = 2; i < 2 + operandCount; i++) {
+                    final double operand = value.getDoubleValue(i);
+                    if (base <= operand) {
+                        return value.getValue(operandCount + i);
+                    }
+                }
+            } catch (final NumberFormatException e) {
+                final String base = value.getValue(1);
+                for (int i = 2; i < 2 + operandCount; i++) {
+                    final String operand = value.getValue(i);
+                    if (base.compareTo(operand) <= 0) {
+                        return value.getValue(operandCount + i);
+                    }
                 }
             }
             return size % 2 == 0 ? "" : value.getValue(size - 1);
@@ -71,6 +123,9 @@ public enum Operation {
         @Override
         public String getValue(final Value value) {
             final int size = value.values.size();
+            if (size < 2) {
+                return "";
+            }
             final int operandCount = (size - 2) / 2;
             try {
                 final double base = value.getDoubleValue(1);
@@ -97,6 +152,9 @@ public enum Operation {
         @Override
         public String getValue(final Value value) {
             final int size = value.values.size();
+            if (size < 2) {
+                return "";
+            }
             final int operandCount = (size - 2) / 2;
             try {
                 final double base = value.getDoubleValue(1);

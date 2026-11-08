@@ -20,6 +20,9 @@ public abstract class Tag {
 	protected static LocalPlayer player;
 	protected static List<Info> info;
 
+	/** True while a tag is being evaluated for the debug inspector (see {@link #getValueForDebug}). */
+	public static boolean evaluatingDebug;
+
 	private String name = null;
 	private String[] aliases = new String[0];
 
@@ -98,7 +101,9 @@ public abstract class Tag {
 	 */
 	public static String getValueForDebug(final Tag tag) {
 		final List<Info> previous = Tag.info;
+		final boolean previousDebug = evaluatingDebug;
 		Tag.info = new ArrayList<Info>();
+		evaluatingDebug = true;
 		try {
 			final String value = tag.getValue();
 			return value == null ? "" : value;
@@ -107,14 +112,14 @@ public abstract class Tag {
 			return "ERROR: " + t.getClass().getSimpleName() + (message == null ? "" : ": " + message);
 		} finally {
 			Tag.info = previous;
+			evaluatingDebug = previousDebug;
 		}
 	}
 
 	public static String getIconTag(final Info info) {
-		String str = "";
-		for (int i = 0; i < info.getWidth() && minecraft.font.width(str) < info.getWidth(); i++) {
-			str += " ";
-		}
-		return String.format("{ICON|%s}", str);
+		// Measure one space and repeat it, instead of re-measuring a growing string per character.
+		final int spaceWidth = Math.max(1, minecraft.font.width(" "));
+		final int spaces = (info.getWidth() + spaceWidth - 1) / spaceWidth;
+		return String.format("{ICON|%s}", " ".repeat(spaces));
 	}
 }

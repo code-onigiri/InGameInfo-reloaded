@@ -1,7 +1,9 @@
 package df11zomgraves.ingameinfo.handler;
 
 import df11zomgraves.ingameinfo.InGameInfoCore;
+import df11zomgraves.ingameinfo.client.gui.editor.GuiHudEditor;
 import df11zomgraves.ingameinfo.reference.Names;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -28,6 +30,11 @@ public final class ConfigReloadListener implements ResourceManagerReloadListener
 
 	@Override
 	public void onResourceManagerReload(final ResourceManager resourceManager) {
+		// While the HUD editor is open, its in-memory lines are the working copy;
+		// reloading from disk here would silently discard unsaved edits.
+		if (Minecraft.getInstance().screen instanceof GuiHudEditor) {
+			return;
+		}
 		// The reload may run on a worker thread; the core applies this on the render thread.
 		InGameInfoCore.INSTANCE.requestReload();
 	}

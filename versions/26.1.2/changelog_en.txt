@@ -1,3 +1,17 @@
+InGameInfo XML 2.9.2.105, Release, 2026/11/08
+Common
+	1.Fix the pitch tag showing yaw, and fix wrong values in the daytime, dimension, localtemperature, speedy and several other tags.
+	2.Fix the nearby-player and potion-effect tags freezing at their first snapshot; they now refresh while playing.
+	3.Fix the AE2 integration disabling itself for the rest of the session after a single failed packet, and stop one lost MSPT response from freezing the tps/mspt tags.
+	4.Cache the reflection lookups used by the optional mod integrations and stop re-resolving them every frame.
+	5.Fix HUD config saving/loading losing data: numeric-looking strings are no longer re-typed, files are written as UTF-8, failed writes no longer truncate the existing config, and a broken config no longer wipes the HUD currently shown.
+	6.Validate HUD file names in /igi load and the config screen (path traversal is rejected), make the network payloads optional so clients can join servers without the mod, and add the server option shareSeedWithClients.
+	7.Fix the staminapercent tag name (the misspelled staminapencent remains as an alias) and show potion effect levels V and above correctly.
+1.20.1
+	1.Fix the client ticker running twice per tick, and run config reloads on the render thread instead of the config watcher thread.
+26.1.2
+	1.Restore the positional localdifficulty calculation and the bubble-column check in the wet tag.
+
 InGameInfo XML 2.9.2.104, Release, 2026/10/24
 Common
 	1.Change the mod id to ingameinforeloaded and migrate the existing ingameinfoxml-client.toml on first launch.

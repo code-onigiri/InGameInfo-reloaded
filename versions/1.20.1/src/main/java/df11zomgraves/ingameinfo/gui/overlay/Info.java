@@ -23,8 +23,8 @@ public abstract class Info {
         drawInfo(guiGraphics);
 
         for (final Info child : this.children) {
-            child.offsetX = this.x;
-            child.offsetY = this.y;
+            child.offsetX = this.getX();
+            child.offsetY = this.getY();
 
             child.draw(guiGraphics);
         }

@@ -13,6 +13,9 @@ public abstract class TagTime extends Tag {
     public static class MinecraftDay extends TagTime {
         @Override
         public String getValue() {
+            if (world == null) {
+                return "";
+            }
             return String.format(Locale.ENGLISH, "%d", world.getOverworldClockTime() / 24000);
         }
     }
@@ -20,6 +23,9 @@ public abstract class TagTime extends Tag {
     public static class MinecraftHour extends TagTime {
         @Override
         public String getValue() {
+            if (world == null) {
+                return "";
+            }
             final long hour = (world.getOverworldClockTime() / 1000 + 6) % 24;
             return String.format(Locale.ENGLISH, "%02d", hour);
         }
@@ -28,6 +34,9 @@ public abstract class TagTime extends Tag {
     public static class MinecraftMinute extends TagTime {
         @Override
         public String getValue() {
+            if (world == null) {
+                return "";
+            }
             final long minute = (world.getOverworldClockTime() % 1000) * 60 / 1000;
             return String.format(Locale.ENGLISH, "%02d", minute);
         }
@@ -36,6 +45,9 @@ public abstract class TagTime extends Tag {
     public static class Minecraft24 extends TagTime {
         @Override
         public String getValue() {
+            if (world == null) {
+                return "";
+            }
             final long time = world.getOverworldClockTime();
             final long hour = (time / 1000 + 6) % 24;
             final long minute = (time % 1000) * 60 / 1000;
@@ -46,6 +58,9 @@ public abstract class TagTime extends Tag {
     public static class Minecraft12 extends TagTime {
         @Override
         public String getValue() {
+            if (world == null) {
+                return "";
+            }
             final long time = world.getOverworldClockTime();
             long hour = (time / 1000 + 6) % 24;
             final long minute = (time % 1000) * 60 / 1000;

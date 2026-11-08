@@ -18,15 +18,44 @@ public final class ThirstWasTakenIntegration {
         return Minecraft.getInstance().player;
     }
 
+    private static Object attachmentType;
+
     private static Object thirst() {
         if (Reflect.cls(ATTACHMENT) != null) {
-            final Object supplier = Reflect.staticField(ATTACHMENT, "PLAYER_THIRST");
-            final Object type = Reflect.call(supplier, "get");
-            return Reflect.call(player(), "getData", type);
+            if (attachmentType == null) {
+                final Object supplier = Reflect.staticField(ATTACHMENT, "PLAYER_THIRST");
+                attachmentType = supplier == null ? null : Reflect.call(supplier, "get");
+            }
+            // Never call getData with a null type: Reflect would happily match
+            // any single-argument overload and could return unrelated data.
+            if (attachmentType != null) {
+                final Object data = Reflect.call(player(), "getData", attachmentType);
+                if (data != null) {
+                    return data;
+                }
+            }
+            // The attachment class exists but produced nothing (renamed members
+            // or no data attached); fall through to the capability path instead
+            // of silently reporting zero thirst.
         }
         final Object capability = Reflect.staticField(CAPABILITIES, "PLAYER_THIRST");
+        if (capability == null) {
+            return null;
+        }
         // 1.20.1 returns a LazyOptional here; 1.21.1 uses the attachment path above.
-        return Reflect.call(Reflect.call(player(), "getCapability", capability), "orElse", (Object) null);
+        return unwrap(Reflect.call(player(), "getCapability", capability));
+    }
+
+    private static Object unwrap(final Object value) {
+        if (value == null) {
+            return null;
+        }
+        // Only Optional/LazyOptional-style holders are unwrapped; if the API
+        // generation returns the thirst data directly, keep it as is.
+        if (Reflect.call(value, "isPresent") instanceof Boolean) {
+            return Reflect.call(value, "orElse", (Object) null);
+        }
+        return value;
     }
 
     private static double number(final Object value) {

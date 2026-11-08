@@ -34,6 +34,10 @@ public class InGameInfoXML {
 	public static double tps = -1;
 	public static boolean serverInstalled = false;
 	public static boolean existMSPT = false;
+	/** True while the seed was set locally via /igi setseed; a late seed response must not overwrite it. */
+	public static boolean seedSetLocally = false;
+	/** Time the first still-unanswered MSPT request was sent, or 0 when none is outstanding. */
+	public static long msptRequestSentAt = 0;
 
 	public InGameInfoXML(FMLJavaModLoadingContext context) {
 		PacketHandler.init();
@@ -52,7 +56,7 @@ public class InGameInfoXML {
 			logger.warn("Chloride installed. may cause FPS do not display. use Xenon instead.");
 		
 		IEventBus bus = MinecraftForge.EVENT_BUS;
-		bus.register(InGameInfoCore.INSTANCE);
+		// InGameInfoCore has no @SubscribeEvent methods; Ticker drives it directly.
 		bus.register(Ticker.INSTANCE);
 		ValueRegistry.INSTANCE.init();
 		TagRegistry.INSTANCE.init();

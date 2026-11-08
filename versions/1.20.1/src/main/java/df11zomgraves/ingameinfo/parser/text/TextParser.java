@@ -73,19 +73,15 @@ public class TextParser implements IParser {
 
     @Override
     public boolean load(final InputStream inputStream) {
-        try {
-            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            final BufferedReader reader = new BufferedReader(inputStreamReader);
-            String line, content = "";
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            final StringBuilder content = new StringBuilder();
+            String line;
 
             while ((line = reader.readLine()) != null) {
-                content += line + "\n";
+                content.append(line).append("\n");
             }
 
-            reader.close();
-            inputStreamReader.close();
-
-            this.tokenizer.tokenize(content);
+            this.tokenizer.tokenize(content.toString());
         } catch (final Exception e) {
         	InGameInfoXML.logger.fatal("Could not read text configuration file!", e);
             return false;
@@ -114,8 +110,8 @@ public class TextParser implements IParser {
     }
 
     private boolean alignmentsTail(final Map<Alignment, List<List<Value>>> format) {
-        if (alignment(format)) {
-            alignmentsTail(format);
+        while (alignment(format)) {
+            // Loop instead of recursing once per alignment block.
         }
 
         return true;
@@ -150,8 +146,8 @@ public class TextParser implements IParser {
     }
 
     private boolean linesTail(final List<List<Value>> lines) throws AlignmentException {
-        if (line(lines)) {
-            linesTail(lines);
+        while (line(lines)) {
+            // Loop instead of recursing once per line.
         }
 
         return true;
@@ -179,8 +175,8 @@ public class TextParser implements IParser {
     }
 
     private boolean valuesTail(final List<Value> values) throws AlignmentException {
-        if (value(values)) {
-            valuesTail(values);
+        while (value(values)) {
+            // Loop instead of recursing once per value.
         }
 
         return true;
@@ -224,21 +220,25 @@ public class TextParser implements IParser {
             value.setRawValue("", true);
         }
 
-        if (this.token.getType().equals(TokenType.STRING)) {
-            nextToken();
-
-            expr = argumentGroupA(value);
-
-            if (this.token.getType().equals(TokenType.FUNC_TAIL)) {
+        try {
+            if (this.token.getType().equals(TokenType.STRING)) {
                 nextToken();
+
+                expr = argumentGroupA(value);
+
+                if (this.token.getType().equals(TokenType.FUNC_TAIL)) {
+                    nextToken();
+                } else {
+                    expr = false;
+                }
             } else {
                 expr = false;
             }
-        } else {
-            expr = false;
+        } finally {
+            // A nested alignment tag throws out of argument parsing; the level
+            // must be restored either way or later lines mis-parse.
+            this.level--;
         }
-
-        this.level--;
 
         final Alignment alignment = Alignment.parse(lexem);
         if (alignment != null) {
@@ -277,11 +277,11 @@ public class TextParser implements IParser {
     }
 
     private boolean argumentsATail(final Value value) throws AlignmentException {
-        if (this.token.getType().equals(TokenType.ARGS_SEPARATOR)) {
+        while (this.token.getType().equals(TokenType.ARGS_SEPARATOR)) {
             nextToken();
 
-            if (argument(value)) {
-                argumentsATail(value);
+            if (!argument(value)) {
+                return false;
             }
         }
 
@@ -298,7 +298,9 @@ public class TextParser implements IParser {
             nextToken();
             expr = function(value.values, this.token.getLexem());
         } else {
-            expr = string(value.values, "");
+            // A missing argument (], /, >, EOF, NEWLINE) is a parse error,
+            // not an empty argument, and the token stays unconsumed.
+            expr = false;
         }
 
         return expr;
@@ -329,11 +331,11 @@ public class TextParser implements IParser {
     }
 
     private boolean argumentsBTail(final Value value) throws AlignmentException {
-        if (this.token.getType().equals(TokenType.ARGS_SEPARATOR)) {
+        while (this.token.getType().equals(TokenType.ARGS_SEPARATOR)) {
             nextToken();
 
-            if (argument(value)) {
-                argumentsBTail(value);
+            if (!argument(value)) {
+                return false;
             }
         }
 

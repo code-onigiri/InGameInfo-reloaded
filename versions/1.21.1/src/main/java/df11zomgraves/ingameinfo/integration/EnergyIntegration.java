@@ -3,6 +3,7 @@ package df11zomgraves.ingameinfo.integration;
 import df11zomgraves.ingameinfo.tag.TagRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 
@@ -13,9 +14,24 @@ public final class EnergyIntegration {
     private EnergyIntegration() {
     }
 
+    private static ItemStack cachedStack;
+    private static IEnergyStorage cachedStorage;
+
     private static IEnergyStorage energy() {
         final Player player = Minecraft.getInstance().player;
-        return player == null ? null : player.getMainHandItem().getCapability(Capabilities.EnergyStorage.ITEM);
+        if (player == null) {
+            cachedStack = null;
+            cachedStorage = null;
+            return null;
+        }
+        // The three energy tags are evaluated one after another for the same
+        // held stack, so only resolve the capability again when it changes.
+        final ItemStack stack = player.getMainHandItem();
+        if (stack != cachedStack) {
+            cachedStack = stack;
+            cachedStorage = stack.getCapability(Capabilities.EnergyStorage.ITEM);
+        }
+        return cachedStorage;
     }
 
     public static class Energy extends IntegrationTag {
@@ -50,10 +66,14 @@ public final class EnergyIntegration {
         @Override
         protected String value() {
             final IEnergyStorage storage = energy();
-            if (storage == null || storage.getMaxEnergyStored() <= 0) {
+            if (storage == null) {
                 return "0.0";
             }
-            return String.format(Locale.ENGLISH, "%.1f", storage.getEnergyStored() * 100.0D / storage.getMaxEnergyStored());
+            final int max = storage.getMaxEnergyStored();
+            if (max <= 0) {
+                return "0.0";
+            }
+            return String.format(Locale.ENGLISH, "%.1f", storage.getEnergyStored() * 100.0D / max);
         }
     }
 

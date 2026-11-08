@@ -40,6 +40,8 @@ public abstract class TagPlayerEquipment extends Tag {
 	}
 
 	protected ItemStack getItemStack(final int slot) {
+		if (player == null)
+			return ItemStack.EMPTY;
 		if (slot == -2)
 			return player.getOffhandItem();
 		if (slot == -1)
@@ -58,14 +60,17 @@ public abstract class TagPlayerEquipment extends Tag {
 			if (itemStack.isEmpty()) {
 				return "";
 			}
-			final int regularArrows = EntityHelper.getItemCountInInventory(player.getInventory(), Items.ARROW);
-			final int spectralArrows = EntityHelper.getItemCountInInventory(player.getInventory(),
-					Items.SPECTRAL_ARROW);
-			final int tippedArrows = EntityHelper.getItemCountInInventory(player.getInventory(), Items.TIPPED_ARROW);
-			int arrowCount = regularArrows + spectralArrows + tippedArrows;
-			Item item = itemStack.getItem();
-			boolean showArrows;
-			showArrows = item instanceof BowItem || item instanceof CrossbowItem;
+			final Item item = itemStack.getItem();
+			final boolean showArrows = item instanceof BowItem || item instanceof CrossbowItem;
+			int arrowCount = 0;
+			if (showArrows) {
+				final int regularArrows = EntityHelper.getItemCountInInventory(player.getInventory(), Items.ARROW);
+				final int spectralArrows = EntityHelper.getItemCountInInventory(player.getInventory(),
+						Items.SPECTRAL_ARROW);
+				final int tippedArrows = EntityHelper.getItemCountInInventory(player.getInventory(),
+						Items.TIPPED_ARROW);
+				arrowCount = regularArrows + spectralArrows + tippedArrows;
+			}
 			final String arrows = showArrows ? " (" + arrowCount + ")" : "";
 			return itemStack.getDisplayName().getString() + arrows;
 		}
@@ -79,6 +84,9 @@ public abstract class TagPlayerEquipment extends Tag {
 
 		@Override
 		public String getValue() {
+			if (player == null) {
+				return String.valueOf(0);
+			}
 			final int regularArrows = EntityHelper.getItemCountInInventory(player.getInventory(), Items.ARROW);
 			final int spectralArrows = EntityHelper.getItemCountInInventory(player.getInventory(),
 					Items.SPECTRAL_ARROW);
@@ -164,8 +172,7 @@ public abstract class TagPlayerEquipment extends Tag {
 				return String.valueOf(0);
 			}
 
-			return String.valueOf(EntityHelper.getItemCountInInventory(player.getInventory(), itemStack.getItem(),
-					itemStack.getDamageValue()));
+			return String.valueOf(EntityHelper.getItemCountInInventory(player.getInventory(), itemStack.getItem()));
 		}
 	}
 
@@ -193,6 +200,9 @@ public abstract class TagPlayerEquipment extends Tag {
 
 		@Override
 		public String getValue() {
+			if (player == null) {
+				return "";
+			}
 			String itemTag = "";
 			for (int i = this.slot * 9; i < this.slot * 9 + 9; i++) {
 				final ItemStack itemStack = player.getInventory().getItem(i);

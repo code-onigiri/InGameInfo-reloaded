@@ -60,12 +60,21 @@ public class InfoIcon extends Info {
 		this.iconHeight = iconHeight;
 		this.textureWidth = textureWidth;
 		this.textureHeight = textureHeight;
-		this.uv0.set((float) iconX / textureWidth, (float) iconY / textureHeight);
-		this.uv1.set((float) (iconX + iconWidth) / textureWidth, (float) (iconY + iconHeight) / textureHeight);
+		if (textureWidth > 0 && textureHeight > 0) {
+			this.uv0.set((float) iconX / textureWidth, (float) iconY / textureHeight);
+			this.uv1.set((float) (iconX + iconWidth) / textureWidth, (float) (iconY + iconHeight) / textureHeight);
+		} else {
+			// 0 以下のテクスチャサイズでは UV を計算しない（Infinity/NaN を描画へ流さない）。
+			this.uv0.set(0, 0);
+			this.uv1.set(0, 0);
+		}
 	}
 
 	@Override
 	public void drawInfo(GuiGraphics guiGraphics) {
+		if (this.textureWidth <= 0 || this.textureHeight <= 0) {
+			return;
+		}
 		final int x = getX() + (int) this.xy0.x;
 		final int y = getY() + (int) this.xy0.y;
 		guiGraphics.blit(this.resourceLocation, x, y, this.displayWidth, this.displayHeight, this.iconX, this.iconY,

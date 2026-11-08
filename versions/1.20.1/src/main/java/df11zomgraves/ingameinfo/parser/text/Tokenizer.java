@@ -23,9 +23,33 @@ public class Tokenizer {
 
         str = str.trim();
 
+        boolean atLineStart = true;
         while (str.length() > 0) {
+            if (atLineStart) {
+                // Indentation is formatting, not content: skip blanks at the
+                // start of a line instead of folding them into STRING lexems.
+                int indent = 0;
+                while (indent < str.length() && (str.charAt(indent) == ' ' || str.charAt(indent) == '\t' || str.charAt(indent) == '\r')) {
+                    indent++;
+                }
+                if (indent > 0) {
+                    str = str.substring(indent);
+                    start.setColumn(start.getColumn() + indent);
+                    end.setRow(start.getRow());
+                    end.setColumn(start.getColumn());
+                    if (str.length() == 0) {
+                        break;
+                    }
+                }
+            }
+
             match = false;
             for (final TokenType tokenType : TokenType.values()) {
+                if (tokenType.equals(TokenType.EOF)) {
+                    // EOF is only the synthetic end marker appended below; a
+                    // literal '$' in the input is ordinary STRING content.
+                    continue;
+                }
                 final Matcher matcher = tokenType.getPattern().matcher(str);
                 if (matcher.find()) {
                     match = true;
@@ -42,6 +66,7 @@ public class Tokenizer {
 
                     this.tokens.add(new Token(lexem, start.clone(), end.clone(), tokenType));
                     start = end.clone();
+                    atLineStart = tokenType.equals(TokenType.NEWLINE);
                     break;
                 }
             }

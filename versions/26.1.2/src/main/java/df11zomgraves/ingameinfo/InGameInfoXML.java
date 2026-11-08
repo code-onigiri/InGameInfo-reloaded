@@ -34,6 +34,10 @@ public class InGameInfoXML {
 	public static double tps = -1;
 	public static boolean serverInstalled = false;
 	public static boolean existMSPT = false;
+	/** True while the seed was set locally via /igi setseed; a late seed response must not overwrite it. */
+	public static boolean seedSetLocally = false;
+	/** Time the first still-unanswered MSPT request was sent, or 0 when none is outstanding. */
+	public static long msptRequestSentAt = 0;
 
 	public InGameInfoXML(IEventBus modEventBus, ModContainer container) {
 		PacketHandler.init(modEventBus);

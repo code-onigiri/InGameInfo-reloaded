@@ -32,6 +32,9 @@ public abstract class TagMouseOver extends Tag {
 					final EntityHitResult targetEntity = (EntityHitResult) hitResult;
 					return targetEntity.getEntity().getDisplayName().getString();
 				} else if (hitType == HitResult.Type.BLOCK) {
+					if (world == null || player == null) {
+						return "";
+					}
 					final BlockHitResult targetBlock = (BlockHitResult) hitResult;
 					final BlockPos pos = targetBlock.getBlockPos();
 					final BlockState blockState = world.getBlockState(pos);
@@ -55,6 +58,9 @@ public abstract class TagMouseOver extends Tag {
 					res = BuiltInRegistries.ENTITY_TYPE.getKey(targetEntity.getEntity().getType());
 					return res.toString();
 				} else if (hitType == HitResult.Type.BLOCK) {
+					if (world == null) {
+						return "";
+					}
 					final BlockHitResult targetBlock = (BlockHitResult) hitResult;
 					final BlockPos pos = targetBlock.getBlockPos();
 					final BlockState blockState = world.getBlockState(pos);
@@ -76,6 +82,9 @@ public abstract class TagMouseOver extends Tag {
 					final EntityHitResult targetEntity = (EntityHitResult) hitResult;
 					return String.valueOf(targetEntity.getEntity().getId());
 				} else if (hitType == HitResult.Type.BLOCK) {
+					if (world == null) {
+						return "";
+					}
 					final BlockHitResult targetBlock = (BlockHitResult) hitResult;
 					final Block block = world.getBlockState(targetBlock.getBlockPos()).getBlock();
 					return String.valueOf(BuiltInRegistries.BLOCK.getId(block));
@@ -104,8 +113,11 @@ public abstract class TagMouseOver extends Tag {
 		@Override
 		public String getValue() {
 			final HitResult hitResult = minecraft.hitResult;
-			final Type hitType = hitResult.getType();
-			return String.valueOf(hitType == HitResult.Type.BLOCK);
+			if (hitResult != null) {
+				final Type hitType = hitResult.getType();
+				return String.valueOf(hitType == HitResult.Type.BLOCK);
+			}
+			return "false";
 		}
 	}
 
@@ -116,6 +128,9 @@ public abstract class TagMouseOver extends Tag {
 			if (hitResult != null) {
 				final Type hitType = hitResult.getType();
 				if (hitType == HitResult.Type.BLOCK) {
+					if (world == null) {
+						return "";
+					}
 					int power = -1;
 					final BlockHitResult targetBlock = (BlockHitResult) hitResult;
 					for (final Direction side : Direction.values()) {
@@ -139,6 +154,9 @@ public abstract class TagMouseOver extends Tag {
 			if (hitResult != null) {
 				final Type hitType = hitResult.getType();
 				if (hitType == HitResult.Type.BLOCK) {
+					if (world == null) {
+						return "";
+					}
 					int power = -1;
 					final BlockHitResult targetBlock = (BlockHitResult) hitResult;
 					final BlockPos pos = targetBlock.getBlockPos();
@@ -160,6 +178,9 @@ public abstract class TagMouseOver extends Tag {
 		public String getValue() {
 			final HitResult hitResult = minecraft.hitResult;
 			if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
+				if (world == null) {
+					return "";
+				}
 				final BlockHitResult targetBlock = (BlockHitResult) hitResult;
 				return String.valueOf(world.hasNeighborSignal(targetBlock.getBlockPos()));
 			}

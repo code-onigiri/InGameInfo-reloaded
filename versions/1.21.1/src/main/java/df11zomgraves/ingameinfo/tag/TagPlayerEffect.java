@@ -3,6 +3,7 @@ package df11zomgraves.ingameinfo.tag;
 import df11zomgraves.ingameinfo.gui.overlay.InfoEffect;
 import df11zomgraves.ingameinfo.handler.ConfigurationHandler;
 import df11zomgraves.ingameinfo.util.StringConvertUtils;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.util.StringUtil;
@@ -17,6 +18,8 @@ public abstract class TagPlayerEffect extends Tag {
 	public static final int MAXIMUM_INDEX = 32 /* Potion.potionTypes.length */;
 
 	protected static MobEffectInstance[] potionEffects = null;
+	private static LocalPlayer potionEffectsPlayer = null;
+	private static long lastPotionEffectsUpdate = 0L;
 	protected final int index;
 
 	public TagPlayerEffect(final int index) {
@@ -56,17 +59,26 @@ public abstract class TagPlayerEffect extends Tag {
 	}
 
 	protected void updatePotionEffects() {
-		if (potionEffects == null) {
-			final Collection<MobEffectInstance> potionEffectCollection = player.getActiveEffects();
-			potionEffects = new MobEffectInstance[potionEffectCollection.size()];
-			if (potionEffectCollection.size() > 0) {
-				int index = 0;
-
-				for (final MobEffectInstance potionEffect : potionEffectCollection) {
-					potionEffects[index++] = potionEffect;
-				}
-			}
+		if (player == null) {
+			potionEffects = new MobEffectInstance[0];
+			potionEffectsPlayer = null;
+			return;
 		}
+
+		final long now = System.currentTimeMillis();
+		if (potionEffects != null && player == potionEffectsPlayer && now - lastPotionEffectsUpdate < 1000L) {
+			return;
+		}
+
+		final Collection<MobEffectInstance> potionEffectCollection = player.getActiveEffects();
+		potionEffects = new MobEffectInstance[potionEffectCollection.size()];
+		int index = 0;
+
+		for (final MobEffectInstance potionEffect : potionEffectCollection) {
+			potionEffects[index++] = potionEffect;
+		}
+		potionEffectsPlayer = player;
+		lastPotionEffectsUpdate = now;
 	}
 
 	public static class Effect extends TagPlayerEffect {
@@ -83,16 +95,9 @@ public abstract class TagPlayerEffect extends Tag {
 				int amp = potionEffects[potionIndex].getAmplifier();
 				if (ConfigurationHandler.numericAmplifier)
 					return String.format("%s %d", str, amp + 1);
-				switch (amp) {
-				case 1:
-					return str + " II";
-				case 2:
-					return str + " III";
-				case 3:
-					return str + " IV";
-				default:
-					return str;
-				}
+				if (amp > 0)
+					return str + StringConvertUtils.numToRoman(amp);
+				return str;
 			}
 			return "";
 		}

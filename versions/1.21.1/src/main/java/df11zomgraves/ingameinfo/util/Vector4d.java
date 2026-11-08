@@ -116,11 +116,11 @@ public class Vector4d extends Vector3d {
     }
 
     public Vector4f toVector4f() {
-        return new Vector4f((float) Math.floor(this.x), (float) Math.floor(this.y), (float) Math.floor(this.z), (float) Math.floor(this.w));
+        return new Vector4f((float) this.x, (float) this.y, (float) this.z, (float) this.w);
     }
 
     public Vector4f toVector4f(final Vector4f vec) {
-        return vec.set((float) Math.floor(this.x), (float) Math.floor(this.y), (float) Math.floor(this.z), (float) Math.floor(this.w));
+        return vec.set((float) this.x, (float) this.y, (float) this.z, (float) this.w);
     }
 
     @Override
@@ -130,7 +130,12 @@ public class Vector4d extends Vector3d {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Vector4d && equals((Vector4d) obj);
+        return obj != null && obj.getClass() == getClass() && equals((Vector4d) obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + Double.hashCode(this.w);
     }
 
     public boolean equals(final Vector4d vec) {

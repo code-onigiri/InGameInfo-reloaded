@@ -2,7 +2,9 @@ package df11zomgraves.ingameinfo.integration;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
+import df11zomgraves.ingameinfo.InGameInfoXML;
 import df11zomgraves.ingameinfo.network.PacketHandler;
 import df11zomgraves.ingameinfo.network.RequestAe2Packet;
 import df11zomgraves.ingameinfo.tag.TagRegistry;
@@ -31,6 +33,13 @@ public final class Ae2Integration {
     private static volatile boolean active = false;
     private static volatile NetworkInfo latest = NetworkInfo.NONE;
     private static int tickCounter = 0;
+    private static int sendFailures = 0;
+    private static int retryTicks = 0;
+    private static ItemStack cachedMainHand;
+    private static ItemStack cachedOffHand;
+    private static boolean handCacheValid;
+    private static Object cachedCell;
+    private static Object cachedPoweredItem;
 
     private Ae2Integration() {
     }
@@ -90,32 +99,53 @@ public final class Ae2Integration {
 
     /** Called once per client tick from the HUD ticker. */
     public static void clientTick() {
-        if (!active) {
-            return;
-        }
         final Player player = Minecraft.getInstance().player;
         if (player == null) {
             latest = NetworkInfo.NONE;
+            tickCounter = 0;
             return;
         }
         if (++tickCounter < 20) {
             return;
         }
         tickCounter = 0;
+        if (!active && retryTicks-- > 0) {
+            return;
+        }
         BlockPos target = null;
         if (Minecraft.getInstance().hitResult instanceof final BlockHitResult hit) {
             target = hit.getBlockPos();
         }
         try {
             PacketHandler.sendToServer(new RequestAe2Packet(target));
-        } catch (final Throwable ignored) {
-            // The server does not have the mod installed; keep showing client-side item tags.
-            active = false;
+            if (!active) {
+                active = true;
+                InGameInfoXML.logger.info("AE2 network tags re-enabled after a successful request.");
+            }
+            sendFailures = 0;
+        } catch (final Throwable t) {
+            // A single failure may be transient; only stop asking after repeated
+            // failures (e.g. the server does not have the mod installed), and even
+            // then probe again periodically instead of disabling for the session.
+            sendFailures++;
+            if (!active) {
+                retryTicks = 30;
+            } else if (sendFailures >= 3) {
+                active = false;
+                retryTicks = 30;
+                InGameInfoXML.logger.warn(
+                        "AE2 network requests failed repeatedly; pausing them and retrying periodically.", t);
+            }
         }
     }
 
     public static void applyServerInfo(final NetworkInfo info) {
         latest = info == null ? NetworkInfo.NONE : info;
+        if (info != null) {
+            // The server answered, so it does have the mod installed after all.
+            active = true;
+            sendFailures = 0;
+        }
     }
 
     /**
@@ -164,7 +194,12 @@ public final class Ae2Integration {
             if (stack.isEmpty() || !Reflect.isInstance(stack.getItem(), WIRELESS_TERMINAL)) {
                 continue;
             }
-            final Object grid = Reflect.call(stack.getItem(), "getLinkedGrid", stack, player.level(), player);
+            final Consumer<Object> ignore = message -> {
+            };
+            Object grid = Reflect.call(stack.getItem(), "getLinkedGrid", stack, player.level(), player);
+            if (grid == null) {
+                grid = Reflect.call(stack.getItem(), "getLinkedGrid", stack, player.level(), ignore);
+            }
             if (grid != null) {
                 return grid;
             }
@@ -189,34 +224,59 @@ public final class Ae2Integration {
         return node == null ? null : Reflect.call(node, "getGrid");
     }
 
-    private static Object cell() {
-        final Player player = Minecraft.getInstance().player;
-        if (player == null) {
-            return null;
+    // The held stacks only change identity when the player swaps items, so the
+    // reflective lookups below are resolved once per hand change and shared by
+    // every cell/power tag; the values read from the resolved objects stay live.
+    private static void refreshHandCache(final Player player) {
+        final ItemStack main = player.getMainHandItem();
+        final ItemStack off = player.getOffhandItem();
+        if (handCacheValid && main == cachedMainHand && off == cachedOffHand) {
+            return;
         }
-        for (final ItemStack stack : new ItemStack[]{player.getMainHandItem(), player.getOffhandItem()}) {
+        cachedMainHand = main;
+        cachedOffHand = off;
+        handCacheValid = true;
+        cachedCell = null;
+        cachedPoweredItem = null;
+        for (final ItemStack stack : new ItemStack[] { main, off }) {
             if (stack.isEmpty()) {
                 continue;
             }
-            final Object cell = Reflect.callStatic(STORAGE_CELLS, "getCellInventory", stack, null);
-            if (cell != null) {
-                return cell;
+            if (cachedCell == null) {
+                cachedCell = Reflect.callStatic(STORAGE_CELLS, "getCellInventory", stack, null);
+            }
+            if (cachedPoweredItem == null && Reflect.isInstance(stack.getItem(), POWER_STORAGE)) {
+                cachedPoweredItem = stack;
             }
         }
-        return null;
+    }
+
+    private static void clearHandCache() {
+        handCacheValid = false;
+        cachedMainHand = null;
+        cachedOffHand = null;
+        cachedCell = null;
+        cachedPoweredItem = null;
+    }
+
+    private static Object cell() {
+        final Player player = Minecraft.getInstance().player;
+        if (player == null) {
+            clearHandCache();
+            return null;
+        }
+        refreshHandCache(player);
+        return cachedCell;
     }
 
     private static Object poweredItem() {
         final Player player = Minecraft.getInstance().player;
         if (player == null) {
+            clearHandCache();
             return null;
         }
-        for (final ItemStack stack : new ItemStack[]{player.getMainHandItem(), player.getOffhandItem()}) {
-            if (!stack.isEmpty() && Reflect.isInstance(stack.getItem(), POWER_STORAGE)) {
-                return stack;
-            }
-        }
-        return null;
+        refreshHandCache(player);
+        return cachedPoweredItem;
     }
 
     private static long number(final Object value) {

@@ -27,9 +27,14 @@ public class ResponseMSPTPacket {
 	
 	public void handleMessage(Supplier<NetworkEvent.Context> context) {
 		context.get().enqueueWork(() -> {
-			InGameInfoXML.mspt = this.mspt;
-			InGameInfoXML.tps = (this.mspt == -1) ? -1 : Math.min(1000.0 / this.mspt, 20);
+			// Only a positive mspt is real data; anything else leaves the
+			// "no data" (-1) state untouched instead of dividing by it.
+			if (this.mspt > 0) {
+				InGameInfoXML.mspt = this.mspt;
+				InGameInfoXML.tps = Math.min(1000.0 / this.mspt, 20);
+			}
 			InGameInfoXML.serverInstalled = true;
+			InGameInfoXML.msptRequestSentAt = 0;
 		});
 		context.get().setPacketHandled(true);
 	}

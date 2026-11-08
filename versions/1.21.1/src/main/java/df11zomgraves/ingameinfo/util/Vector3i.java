@@ -40,15 +40,15 @@ public class Vector3i extends Vector2i {
     }
 
     @Override
-    public int lengthSquared() {
-        return this.x * this.x + this.y * this.y + this.z * this.z;
+    public long lengthSquared() {
+        return (long) this.x * this.x + (long) this.y * this.y + (long) this.z * this.z;
     }
 
     public final double lengthTo(final Vector3i vec) {
         return Math.sqrt(lengthSquaredTo(vec));
     }
 
-    public int lengthSquaredTo(final Vector3i vec) {
+    public long lengthSquaredTo(final Vector3i vec) {
         return pow2(this.x - vec.x) + pow2(this.y - vec.y) + pow2(this.z - vec.z);
     }
 
@@ -61,14 +61,14 @@ public class Vector3i extends Vector2i {
     }
 
     public double dot(final Vector3i vec) {
-        return this.x * vec.x + this.y * vec.y + this.z * vec.z;
+        return (double) this.x * vec.x + (double) this.y * vec.y + (double) this.z * vec.z;
     }
 
     @Override
     public Vector3i scale(final double scale) {
-        this.x *= scale;
-        this.y *= scale;
-        this.z *= scale;
+        this.x = (int) Math.round(this.x * scale);
+        this.y = (int) Math.round(this.y * scale);
+        this.z = (int) Math.round(this.z * scale);
         return this;
     }
 
@@ -123,7 +123,12 @@ public class Vector3i extends Vector2i {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Vector3i && equals((Vector3i) obj);
+        return obj != null && obj.getClass() == getClass() && equals((Vector3i) obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + this.z;
     }
 
     public boolean equals(final Vector3i vec) {

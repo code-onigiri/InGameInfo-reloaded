@@ -2,6 +2,7 @@ package df11zomgraves.ingameinfo.network;
 
 import df11zomgraves.ingameinfo.InGameInfoXML;
 import df11zomgraves.ingameinfo.reference.Names;
+import df11zomgraves.ingameinfo.tag.TagWorld;
 import df11zomgraves.ingameinfo.util.StringConvertUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -24,8 +25,12 @@ public record ResponseSeedPacket(long seed) implements CustomPacketPayload {
 
 	public static void handle(final ResponseSeedPacket packet, final IPayloadContext context) {
 		context.enqueueWork(() -> {
-			InGameInfoXML.seed = packet.seed();
-			StringConvertUtils.sendSeedToChat(packet.seed());
+			TagWorld.setSeedReceived(true);
+			// A seed set locally via /igi setseed wins over a late response.
+			if (!InGameInfoXML.seedSetLocally) {
+				InGameInfoXML.seed = packet.seed();
+				StringConvertUtils.sendSeedToChat(packet.seed());
+			}
 		});
 	}
 }

@@ -10,6 +10,7 @@ import df11zomgraves.ingameinfo.network.RequestMSPTPacket;
 import df11zomgraves.ingameinfo.network.RequestSeedPacket;
 import df11zomgraves.ingameinfo.reference.Names;
 import df11zomgraves.ingameinfo.tag.Tag;
+import df11zomgraves.ingameinfo.tag.TagWorld;
 import df11zomgraves.ingameinfo.util.MathUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -31,6 +32,8 @@ public class Ticker {
 	private final InGameInfoCore core = InGameInfoCore.INSTANCE;
 	private boolean inGame = false;
 	private long lastRemoteUpdate = 0;
+	/** How long MSPT requests may go unanswered before the server counts as not having the mod. */
+	private static final long MSPT_RESPONSE_TIMEOUT = 10000;
 
 	private boolean canRun() {
 		if (!enabled)
@@ -98,6 +101,9 @@ public class Ticker {
 				InGameInfoXML.mspt = -1;
 				InGameInfoXML.tps = -1;
 				InGameInfoXML.serverInstalled = false;
+				InGameInfoXML.seedSetLocally = false;
+				InGameInfoXML.msptRequestSentAt = 0;
+				TagWorld.setSeedReceived(false);
 				inGame = false;
 			} else if (isRunning() && InGameInfoXML.existMSPT) {
 				long delay = (System.currentTimeMillis() - lastRemoteUpdate);
@@ -107,17 +113,33 @@ public class Ticker {
 						long[] times = singleServer.getTickTime(client.level.dimension());
 						if (times != null) {
 							double worldTickTime = MathUtils.mean(times) * 1.0E-6D;
-							InGameInfoXML.mspt = worldTickTime;
-							InGameInfoXML.tps = (worldTickTime == -1) ? -1 : Math.min(1000.0 / worldTickTime, 20);
+							// A mean of 0 means no ticks measured yet; keep the
+							// "no data" state instead of publishing a fake 20 TPS.
+							if (worldTickTime > 0) {
+								InGameInfoXML.mspt = worldTickTime;
+								InGameInfoXML.tps = Math.min(1000.0 / worldTickTime, 20);
+							}
 						}
-					} else if (InGameInfoXML.serverInstalled)
-						try {
+					} else {
+						final long now = System.currentTimeMillis();
+						if (InGameInfoXML.msptRequestSentAt != 0
+								&& now - InGameInfoXML.msptRequestSentAt > MSPT_RESPONSE_TIMEOUT) {
+							// Requests kept going unanswered: the server does not
+							// have the mod, so stop asking. A single lost response
+							// no longer freezes TPS/MSPT for the whole session.
 							InGameInfoXML.serverInstalled = false;
-							PacketDistributor.sendToServer(new RequestMSPTPacket());
-						} catch (Exception e) {
-							InGameInfoXML.mspt = -1;
-							InGameInfoXML.tps = -1;
+							InGameInfoXML.msptRequestSentAt = 0;
 						}
+						if (InGameInfoXML.serverInstalled)
+							try {
+								PacketDistributor.sendToServer(new RequestMSPTPacket());
+								if (InGameInfoXML.msptRequestSentAt == 0)
+									InGameInfoXML.msptRequestSentAt = now;
+							} catch (Exception e) {
+								InGameInfoXML.mspt = -1;
+								InGameInfoXML.tps = -1;
+							}
+					}
 					lastRemoteUpdate = System.currentTimeMillis();
 				}
 			}
@@ -125,6 +147,8 @@ public class Ticker {
 			try {
 				inGame = true;
 				InGameInfoXML.serverInstalled = true;
+				InGameInfoXML.seedSetLocally = false;
+				InGameInfoXML.msptRequestSentAt = 0;
 				showVerionInfo();
 				PacketDistributor.sendToServer(new RequestSeedPacket());
 			} catch (Exception e) {

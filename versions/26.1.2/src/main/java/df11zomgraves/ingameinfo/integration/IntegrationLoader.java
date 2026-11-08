@@ -9,57 +9,41 @@ public final class IntegrationLoader {
     }
 
     public static void load() {
-        if (loaded("create")) {
-            CreateIntegration.register();
+        register("create", CreateIntegration::register);
+        register("curios", CuriosIntegration::register);
+        register("sereneseasons", SereneSeasonsIntegration::register);
+        register("ars_nouveau", ArsNouveauIntegration::register);
+        register("irons_spellbooks", IronsSpellbooksIntegration::register);
+        register("toughasnails", ToughAsNailsIntegration::register);
+        register("vampirism", VampirismIntegration::register);
+        register("cold_sweat", ColdSweatIntegration::register);
+        register("thirst", ThirstWasTakenIntegration::register);
+        register("goety", GoetyIntegration::register);
+        register("paraglider", ParaglidersIntegration::register);
+        register("botania", BotaniaIntegration::register);
+        register("ae2", Ae2Integration::register);
+        register("mekanism", MekanismIntegration::register);
+        register("cobblemon", CobblemonIntegration::register);
+        register("tconstruct", TinkersIntegration::register);
+        try {
+            EnergyIntegration.register();
+        } catch (final Throwable t) {
+            InGameInfoXML.logger.error("Failed to register energy integration tags.", t);
         }
-        if (loaded("curios")) {
-            CuriosIntegration.register();
-        }
-        if (loaded("sereneseasons")) {
-            SereneSeasonsIntegration.register();
-        }
-        if (loaded("ars_nouveau")) {
-            ArsNouveauIntegration.register();
-        }
-        if (loaded("irons_spellbooks")) {
-            IronsSpellbooksIntegration.register();
-        }
-        if (loaded("toughasnails")) {
-            ToughAsNailsIntegration.register();
-        }
-        if (loaded("vampirism")) {
-            VampirismIntegration.register();
-        }
-        if (loaded("cold_sweat")) {
-            ColdSweatIntegration.register();
-        }
-        if (loaded("thirst")) {
-            ThirstWasTakenIntegration.register();
-        }
-        if (loaded("goety")) {
-            GoetyIntegration.register();
-        }
-        if (loaded("paraglider")) {
-            ParaglidersIntegration.register();
-        }
-        if (loaded("botania")) {
-            BotaniaIntegration.register();
-        }
-        if (loaded("ae2")) {
-            Ae2Integration.register();
-        }
-        if (loaded("mekanism")) {
-            MekanismIntegration.register();
-        }
-        if (loaded("cobblemon")) {
-            CobblemonIntegration.register();
-        }
-        if (loaded("tconstruct")) {
-            TinkersIntegration.register();
-        }
-        EnergyIntegration.register();
 
         InGameInfoXML.logger.info("Registered optional mod integration tags.");
+    }
+
+    /** Registers one integration in isolation, so a failure cannot abort the remaining ones. */
+    private static void register(final String modId, final Runnable registration) {
+        if (!loaded(modId)) {
+            return;
+        }
+        try {
+            registration.run();
+        } catch (final Throwable t) {
+            InGameInfoXML.logger.error("Failed to register {} integration tags.", modId, t);
+        }
     }
 
     private static boolean loaded(final String modId) {

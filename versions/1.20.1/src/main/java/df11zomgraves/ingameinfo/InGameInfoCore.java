@@ -28,6 +28,7 @@ import net.minecraft.server.packs.resources.Resource;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,9 +51,11 @@ public class InGameInfoCore {
 	private final Minecraft minecraft = Minecraft.getInstance();
 	private File configDirectory = null;
 	private File configFile = null;
+	private boolean usingBundledDefault = false;
 	private final Map<Alignment, List<List<Value>>> format = new HashMap<Alignment, List<List<Value>>>();
 	private final List<Info> info = new ArrayList<Info>();
 	private final List<Info> infoItemQueue = new ArrayList<Info>();
+	private volatile boolean reloadRequested = false;
 
 	private InGameInfoCore() {
 		Tag.setInfo(this.infoItemQueue);
@@ -69,27 +72,77 @@ public class InGameInfoCore {
 	}
 
 	public boolean setConfigFile(final String filename) {
-		final File file = new File(this.configDirectory, filename);
-		if (file.exists()) {
-			if (filename.endsWith(Names.Files.EXT_XML)) {
+		if (filename == null) {
+			InGameInfoXML.logger.warn("No config file name given");
+			return false;
+		}
+
+		if (filename.equalsIgnoreCase("default")) {
+			this.configFile = null;
+			this.parser = new XmlParser();
+			this.usingBundledDefault = true;
+			return true;
+		}
+
+		final File file = resolveConfigFile(filename);
+		if (file != null && file.exists()) {
+			final String lowerName = filename.toLowerCase(Locale.ENGLISH);
+			if (lowerName.endsWith(Names.Files.EXT_XML)) {
 				this.configFile = file;
 				this.parser = new XmlParser();
-				return true;
-			} else if (filename.endsWith(Names.Files.EXT_JSON)) {
+			} else if (lowerName.endsWith(Names.Files.EXT_JSON)) {
 				this.configFile = file;
 				this.parser = new JsonParser();
-				return true;
-			} else if (filename.endsWith(Names.Files.EXT_TXT)) {
+			} else if (lowerName.endsWith(Names.Files.EXT_TXT)) {
 				this.configFile = file;
 				this.parser = new TextParser();
-				return true;
 			}
+			this.usingBundledDefault = false;
+			return true;
+		}
+
+		if (file != null && filename.equals(ConfigurationHandler.configName)) {
+			// The configured file has not been created yet (e.g. first run): use the bundled default.
+			this.configFile = null;
+			this.parser = new XmlParser();
+			this.usingBundledDefault = true;
+			return true;
 		}
 
 		InGameInfoXML.logger.warn("The config '{}' does not exist", filename);
-		this.configFile = null;
-		this.parser = new XmlParser();
-		return filename.equalsIgnoreCase("default");
+		return false;
+	}
+
+	/**
+	 * Resolves a HUD file name inside the config directory. Names that escape the
+	 * directory or lack a supported extension are rejected.
+	 *
+	 * @return the resolved file, or null when the name is not usable
+	 */
+	private File resolveConfigFile(final String filename) {
+		if (this.configDirectory == null || filename == null) {
+			return null;
+		}
+
+		final String lowerName = filename.toLowerCase(Locale.ENGLISH);
+		if (!lowerName.endsWith(Names.Files.EXT_XML) && !lowerName.endsWith(Names.Files.EXT_JSON)
+				&& !lowerName.endsWith(Names.Files.EXT_TXT)) {
+			InGameInfoXML.logger.warn("'{}' is an invalid file name", filename);
+			return null;
+		}
+
+		try {
+			final File root = this.configDirectory.getCanonicalFile();
+			final File file = new File(root, filename).getCanonicalFile();
+			if (!file.getPath().startsWith(root.getPath() + File.separator)) {
+				InGameInfoXML.logger.warn("The config '{}' is outside the config directory", filename);
+				return null;
+			}
+			return file;
+		} catch (final IOException e) {
+			InGameInfoXML.logger.error("Failed to resolve the config '{}'", filename, e);
+			return null;
+		}
 	}
 
 	public void onTickClient() {
@@ -174,56 +227,94 @@ public class InGameInfoCore {
 		guiGraphics.pose().popPose();
 	}
 
+	/**
+	 * Requests a reload that is performed on the render thread. Mod config reloads
+	 * are fired from the config file watcher thread, so clearing the HUD lists
+	 * there would race with {@link #onTickRender(GuiGraphics)}.
+	 */
+	public void requestReload() {
+		this.reloadRequested = true;
+	}
+
+	public void processPendingReload() {
+		if (this.reloadRequested) {
+			this.reloadRequested = false;
+			this.reloadConfig();
+		}
+	}
+
 	public boolean loadConfig(final String filename) {
 		return setConfigFile(filename) && reloadConfig();
 	}
 
 	public boolean reloadConfig() {
-		this.info.clear();
-		this.infoItemQueue.clear();
-		this.format.clear();
-		InGameInfoXML.existMSPT = false;
 		if (this.parser == null) {
 			return false;
 		}
 
 		final InputStream inputStream = getInputStream();
 		if (inputStream == null) {
+			InGameInfoXML.logger.error("Failed to reload the config: no input stream available");
 			return false;
 		}
 
+		// Parse into a fresh format first, so a broken file keeps the HUD currently shown.
+		final Map<Alignment, List<List<Value>>> newFormat = new HashMap<Alignment, List<List<Value>>>();
 		try {
-			if (this.parser.load(inputStream) && this.parser.parse(this.format))
+			if (this.parser.load(inputStream) && this.parser.parse(newFormat)) {
+				this.format.clear();
+				this.format.putAll(newFormat);
+				this.info.clear();
+				this.infoItemQueue.clear();
+				InGameInfoXML.existMSPT = false;
 				return true;
+			}
 		} catch (final Exception e) {
+			InGameInfoXML.logger.error("Failed to reload the config", e);
 			minecraft.gui.getChat().addMessage(Component.translatable(e.getMessage()));
-            return false;
-        }
+			return false;
+		}
 
-		this.format.clear();
+		InGameInfoXML.logger.error("Failed to reload the config: the file could not be parsed");
 		return false;
 	}
 
 	public boolean saveConfig(final String filename) {
-		IPrinter printer = null;
-		final File file = new File(this.configDirectory, filename);
-		if (filename.endsWith(Names.Files.EXT_XML)) {
-			printer = new XmlPrinter();
-		} else if (filename.endsWith(Names.Files.EXT_JSON)) {
-			printer = new JsonPrinter();
-		} else if (filename.endsWith(Names.Files.EXT_TXT)) {
-			printer = new TextPrinter();
-		} else {
-			InGameInfoXML.logger.warn("'{}' is an invalid file name", filename);
+		final File file = resolveConfigFile(filename);
+		if (file == null) {
+			return false;
 		}
 
-		return printer != null && printer.print(file, this.format);
+		IPrinter printer = null;
+		final String lowerName = filename.toLowerCase(Locale.ENGLISH);
+		if (lowerName.endsWith(Names.Files.EXT_XML)) {
+			printer = new XmlPrinter();
+		} else if (lowerName.endsWith(Names.Files.EXT_JSON)) {
+			printer = new JsonPrinter();
+		} else if (lowerName.endsWith(Names.Files.EXT_TXT)) {
+			printer = new TextPrinter();
+		}
+
+		if (printer == null) {
+			return false;
+		}
+
+		final File directory = file.getParentFile();
+		if (directory != null && !directory.exists() && !directory.mkdirs()) {
+			InGameInfoXML.logger.error("Failed to create the directory '{}'", directory);
+			return false;
+		}
+
+		return printer.print(file, this.format);
 	}
 
 	/** @return the file name currently loaded, or the configured default file name */
 	public String getConfigFileName() {
 		if (this.configFile != null) {
 			return this.configFile.getName();
+		}
+		if (this.usingBundledDefault) {
+			return Names.Files.FILE_XML;
 		}
 		return ConfigurationHandler.configName;
 	}
@@ -281,6 +372,10 @@ public class InGameInfoCore {
 				final ResourceLocation resourceLocation = new ResourceLocation("ingameinfo",
 						Names.Files.FILE_XML.toLowerCase(Locale.ENGLISH));
 				final Optional<Resource> resource = this.minecraft.getResourceManager().getResource(resourceLocation);
+				if (resource.isEmpty()) {
+					InGameInfoXML.logger.error("The bundled default config '{}' is missing", resourceLocation);
+					return null;
+				}
 				inputStream = resource.get().open();
 			}
 		} catch (final Exception e) {

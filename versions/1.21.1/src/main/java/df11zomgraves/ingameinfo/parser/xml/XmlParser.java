@@ -1,5 +1,6 @@
 package df11zomgraves.ingameinfo.parser.xml;
 
+import df11zomgraves.ingameinfo.InGameInfoXML;
 import df11zomgraves.ingameinfo.parser.IParser;
 import df11zomgraves.ingameinfo.reference.Alignment;
 import df11zomgraves.ingameinfo.value.Value;
@@ -21,11 +22,23 @@ import java.util.List;
 import java.util.Map;
 
 public class XmlParser implements IParser {
+    private static final int MAX_VALUE_DEPTH = 100;
+
     private Document document;
 
     @Override
     public boolean load(final InputStream inputStream) throws ParserConfigurationException, SAXException, IOException {
 		final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		// The file is user-supplied: never expand DOCTYPE or external entities.
+		try {
+			dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+		} catch (final ParserConfigurationException e) {
+			dbFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+			dbFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+			dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+		}
+		dbFactory.setXIncludeAware(false);
+		dbFactory.setExpandEntityReferences(false);
 		final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		this.document = dBuilder.parse(inputStream);
 		this.document.getDocumentElement().normalize();
@@ -46,6 +59,8 @@ public class XmlParser implements IParser {
                 final Alignment alignment = Alignment.parse(elementLines.getAttribute("at"));
                 if (alignment != null) {
                     format.put(alignment, getLines(elementLines));
+                } else {
+                    InGameInfoXML.logger.error("Skipping <lines> block with unknown alignment at=\"{}\" in xml configuration file.", elementLines.getAttribute("at"));
                 }
             }
         }
@@ -68,7 +83,16 @@ public class XmlParser implements IParser {
     }
 
     private List<Value> getValues(final Element element) {
+        return getValues(element, 0);
+    }
+
+    private List<Value> getValues(final Element element, final int depth) {
         final List<Value> values = new ArrayList<Value>();
+
+        if (depth > MAX_VALUE_DEPTH) {
+            InGameInfoXML.logger.error("Skipping xml values nested deeper than {} levels in xml configuration file.", MAX_VALUE_DEPTH);
+            return values;
+        }
 
         final NodeList nodeListValues = element.getChildNodes();
         for (int i = 0; i < nodeListValues.getLength(); i++) {
@@ -78,13 +102,14 @@ public class XmlParser implements IParser {
                 final Value value = Value.fromString(type);
 
                 if (!value.isValid()) {
+                    InGameInfoXML.logger.error("Skipping unknown xml value type \"{}\" in xml configuration file.", type);
                     continue;
                 }
 
                 if (value.isSimple()) {
                     value.setRawValue(elementValue.getTextContent(), false);
                 } else {
-                    value.values.addAll(getValues(elementValue));
+                    value.values.addAll(getValues(elementValue, depth + 1));
                 }
                 values.add(value);
             }

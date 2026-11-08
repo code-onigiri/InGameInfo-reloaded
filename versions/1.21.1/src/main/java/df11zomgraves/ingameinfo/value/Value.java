@@ -120,6 +120,15 @@ public abstract class Value {
                 return i;
             }
         }
+        if (inString) {
+            // An unterminated quote would otherwise swallow every later
+            // expression on the line; fall back to the first closing braces.
+            for (int i = from; i < str.length() - 1; i++) {
+                if (str.charAt(i) == '}' && str.charAt(i + 1) == '}') {
+                    return i;
+                }
+            }
+        }
         return -1;
     }
 
@@ -145,6 +154,10 @@ public abstract class Value {
         return Integer.parseInt(getValue(index));
     }
 
+    protected long getLongValue(final int index) {
+        return Long.parseLong(getValue(index));
+    }
+
     protected double getDoubleValue() {
         return Double.parseDouble(getReplacedValue());
     }
@@ -154,11 +167,15 @@ public abstract class Value {
     }
 
     protected boolean getBooleanValue() {
-        return Boolean.parseBoolean(getReplacedValue());
+        return parseBoolean(getReplacedValue());
     }
 
     protected boolean getBooleanValue(final int index) {
-        return Boolean.parseBoolean(getValue(index));
+        return parseBoolean(getValue(index));
+    }
+
+    private static boolean parseBoolean(final String value) {
+        return Boolean.parseBoolean(value) || "1".equals(value);
     }
 
     protected String getVariableValue(final String var) {
@@ -169,7 +186,7 @@ public abstract class Value {
             }
         } catch (final Exception e) {
         	InGameInfoXML.logger.debug("Failed to get value!", e);
-            return "null";
+            return "{" + var + "}";
         }
 
         return "{" + var + "}";

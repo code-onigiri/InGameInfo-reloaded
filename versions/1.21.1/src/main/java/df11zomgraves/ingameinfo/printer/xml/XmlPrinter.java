@@ -15,6 +15,9 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -24,6 +27,7 @@ public class XmlPrinter implements IPrinter {
     public boolean print(final File file, final Map<Alignment, List<List<Value>>> format) {
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder dBuilder;
+        File tempFile = null;
         try {
             dBuilder = dbFactory.newDocumentBuilder();
             final Document doc = dBuilder.newDocument();
@@ -37,13 +41,29 @@ public class XmlPrinter implements IPrinter {
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
+            // Write to a temp file first so a failed transform cannot
+            // truncate the player's existing configuration.
+            final File directory = file.getAbsoluteFile().getParentFile();
+            tempFile = File.createTempFile("ingameinfo", ".tmp", directory);
+
             final DOMSource source = new DOMSource(doc);
-            final StreamResult streamResult = new StreamResult(file);
+            final StreamResult streamResult = new StreamResult(tempFile);
             transformer.transform(source, streamResult);
+
+            try {
+                Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (final AtomicMoveNotSupportedException e) {
+                Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            tempFile = null;
 
             return true;
         } catch (final Exception e) {
             InGameInfoXML.logger.fatal("Could not save xml configuration file!", e);
+        } finally {
+            if (tempFile != null) {
+                tempFile.delete();
+            }
         }
 
         return false;
@@ -58,9 +78,7 @@ public class XmlPrinter implements IPrinter {
 
                 appendLine(doc, elementLines, lists);
 
-                if (elementLines.hasChildNodes()) {
-                    config.appendChild(elementLines);
-                }
+                config.appendChild(elementLines);
             }
         }
     }
@@ -71,9 +89,7 @@ public class XmlPrinter implements IPrinter {
 
             appendValues(doc, elementLine, line);
 
-            if (elementLine.hasChildNodes()) {
-                elementLines.appendChild(elementLine);
-            }
+            elementLines.appendChild(elementLine);
         }
     }
 

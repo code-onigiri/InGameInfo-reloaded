@@ -21,8 +21,30 @@ public final class MekanismIntegration {
         return Minecraft.getInstance().player;
     }
 
+    // The manager, attachment/capability handles and the client radiation class
+    // are fixed once Mekanism is loaded, so resolve them once instead of on
+    // every tag evaluation; the values read through them stay live.
+    private static Object cachedManager;
+    private static boolean managerResolved;
+    private static Object cachedAttachment;
+    private static boolean attachmentResolved;
+    private static Object cachedCapability;
+    private static boolean capabilityResolved;
+    private static Boolean clientRadiation;
+
     private static Object manager() {
-        return Reflect.staticField(MANAGER, "INSTANCE");
+        if (!managerResolved) {
+            cachedManager = Reflect.staticField(MANAGER, "INSTANCE");
+            managerResolved = true;
+        }
+        return cachedManager;
+    }
+
+    private static boolean hasClientRadiation() {
+        if (clientRadiation == null) {
+            clientRadiation = Reflect.cls(CLIENT_RADIATION) != null;
+        }
+        return clientRadiation;
     }
 
     private static double number(final Object value) {
@@ -35,15 +57,22 @@ public final class MekanismIntegration {
             return 0.0D;
         }
 
-        final Object attachment = Reflect.staticField(ATTACHMENTS, "RADIATION");
-        if (attachment != null) {
-            final Object value = Reflect.call(player, "getData", attachment);
+        if (!attachmentResolved) {
+            cachedAttachment = Reflect.staticField(ATTACHMENTS, "RADIATION");
+            attachmentResolved = true;
+        }
+        if (cachedAttachment != null) {
+            final Object value = Reflect.call(player, "getData", cachedAttachment);
             if (value instanceof Number) {
                 return ((Number) value).doubleValue();
             }
         }
 
-        final Object capability = Reflect.staticField(CAPABILITIES, "RADIATION_ENTITY");
+        if (!capabilityResolved) {
+            cachedCapability = Reflect.staticField(CAPABILITIES, "RADIATION_ENTITY");
+            capabilityResolved = true;
+        }
+        final Object capability = cachedCapability;
         if (capability == null) {
             return 0.0D;
         }
@@ -56,14 +85,14 @@ public final class MekanismIntegration {
     }
 
     private static double environmental() {
-        if (Reflect.cls(CLIENT_RADIATION) != null) {
+        if (hasClientRadiation()) {
             return number(Reflect.callStatic(CLIENT_RADIATION, "getClientEnvironmentalRadiation"));
         }
         return number(Reflect.call(Reflect.callStatic(RADIATION_MANAGER, "get"), "getClientEnvironmentalRadiation"));
     }
 
     private static double maximum() {
-        if (Reflect.cls(CLIENT_RADIATION) != null) {
+        if (hasClientRadiation()) {
             return number(Reflect.callStatic(CLIENT_RADIATION, "getClientMaxMagnitude"));
         }
         return number(Reflect.call(Reflect.callStatic(RADIATION_MANAGER, "get"), "getClientMaxMagnitude"));
@@ -71,7 +100,7 @@ public final class MekanismIntegration {
 
     private static String severity() {
         final Object scale;
-        if (Reflect.cls(CLIENT_RADIATION) != null) {
+        if (hasClientRadiation()) {
             scale = Reflect.callStatic(CLIENT_RADIATION, "getClientScale");
         } else {
             scale = Reflect.call(Reflect.callStatic(RADIATION_MANAGER, "get"), "getClientScale");
@@ -85,11 +114,8 @@ public final class MekanismIntegration {
     }
 
     private static String dose(final double value) {
-        if (!Double.isFinite(value) || value == 0.0D) {
+        if (!Double.isFinite(value) || value <= 0.0D) {
             return "0.000";
-        }
-        if (Math.abs(value) < 0.01D) {
-            return String.format(Locale.ENGLISH, "%.2E", value);
         }
         return String.format(Locale.ENGLISH, "%.3f", value);
     }
@@ -101,7 +127,7 @@ public final class MekanismIntegration {
 
         @Override
         protected String value() {
-            return dose(personal());
+            return dose(enabled() ? personal() : 0.0D);
         }
     }
 
@@ -112,7 +138,7 @@ public final class MekanismIntegration {
 
         @Override
         protected String value() {
-            return dose(environmental());
+            return dose(enabled() ? environmental() : 0.0D);
         }
     }
 
@@ -123,7 +149,7 @@ public final class MekanismIntegration {
 
         @Override
         protected String value() {
-            return dose(maximum());
+            return dose(enabled() ? maximum() : 0.0D);
         }
     }
 
@@ -134,7 +160,7 @@ public final class MekanismIntegration {
 
         @Override
         protected String value() {
-            return severity();
+            return enabled() ? severity() : "none";
         }
     }
 
@@ -156,6 +182,9 @@ public final class MekanismIntegration {
 
         @Override
         protected String value() {
+            if (!enabled()) {
+                return "0.0";
+            }
             final double maximum = maximum();
             return String.format(Locale.ENGLISH, "%.1f",
                     maximum <= 0.0D ? 0.0D : environmental() * 100.0D / maximum);

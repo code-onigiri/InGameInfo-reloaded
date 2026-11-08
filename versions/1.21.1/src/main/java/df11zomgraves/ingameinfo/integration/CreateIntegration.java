@@ -39,7 +39,25 @@ public final class CreateIntegration {
         return Reflect.isInstance(vehicle, CONTRAPTION_ENTITY) ? vehicle : null;
     }
 
+    private static Object cachedContraption;
+    private static Object cachedContraptionBlockEntity;
+    private static boolean contraptionCacheValid;
+
     private static Object contraptionBlockEntity(final Object contraptionEntity) {
+        // Walking every block of the contraption is expensive and every kinetic
+        // tag needs the result, so resolve it once per ridden contraption; the
+        // values read from the block entity itself stay live.
+        if (contraptionCacheValid && contraptionEntity == cachedContraption) {
+            return cachedContraptionBlockEntity;
+        }
+        final Object result = findContraptionBlockEntity(contraptionEntity);
+        cachedContraption = contraptionEntity;
+        cachedContraptionBlockEntity = result;
+        contraptionCacheValid = true;
+        return result;
+    }
+
+    private static Object findContraptionBlockEntity(final Object contraptionEntity) {
         final Object contraption = Reflect.call(contraptionEntity, "getContraption");
         final Object blocks = Reflect.call(contraption, "getBlocks");
         if (!(blocks instanceof Map<?, ?>)) {
@@ -67,7 +85,7 @@ public final class CreateIntegration {
 
     private static float speed(final Object kinetic) {
         final Object value = Reflect.call(kinetic, "getSpeed");
-        return value instanceof Number ? Math.abs(((Number) value).floatValue()) : 0.0F;
+        return value instanceof Number ? ((Number) value).floatValue() : 0.0F;
     }
 
     private static boolean isStressGauge(final Object blockEntity) {

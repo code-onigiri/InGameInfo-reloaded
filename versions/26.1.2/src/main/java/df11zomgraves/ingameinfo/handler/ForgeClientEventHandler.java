@@ -1,7 +1,6 @@
 package df11zomgraves.ingameinfo.handler;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import javax.annotation.Nonnull;
 
@@ -29,9 +28,8 @@ public class ForgeClientEventHandler {
 			InGameInfoCore core = InGameInfoCore.INSTANCE;
 
 			Path configPath = FMLPaths.CONFIGDIR.get();
-			Path modConfigPath = Paths.get(configPath.toAbsolutePath().toString());
 
-			core.setConfigDirectory(modConfigPath.toFile());
+			core.setConfigDirectory(configPath.toFile());
 			core.setConfigFile(ConfigurationHandler.configName);
 			boolean b = core.reloadConfig();
 			if (b)

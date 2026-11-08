@@ -1,5 +1,6 @@
 package df11zomgraves.ingameinfo.network;
 
+import df11zomgraves.ingameinfo.handler.ConfigurationHandler;
 import df11zomgraves.ingameinfo.reference.Names;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -22,6 +23,8 @@ public record RequestSeedPacket() implements CustomPacketPayload {
 
 	public static void handle(final RequestSeedPacket packet, final IPayloadContext context) {
 		context.enqueueWork(() -> {
+			if (!ConfigurationHandler.shareSeedWithClients)
+				return;
 			if (context.player() instanceof ServerPlayer player) {
 				final long seed = player.level().getSeed();
 				PacketDistributor.sendToPlayer(player, new ResponseSeedPacket(seed));

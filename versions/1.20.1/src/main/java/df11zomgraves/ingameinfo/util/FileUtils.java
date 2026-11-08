@@ -28,7 +28,7 @@ public class FileUtils {
         try {
             return file.getCanonicalPath().startsWith(root.getCanonicalPath() + File.separator);
         } catch (final IOException e) {
-        	InGameInfoXML.logger.error("", e);
+            InGameInfoXML.logger.error("Failed to check whether {} is inside {}", file, root, e);
         }
 
         return false;

@@ -259,8 +259,16 @@ public class GuiConfigScreen extends Screen {
 			if (this.box == null) {
 				return;
 			}
-			if (!this.box.getValue().isBlank()) {
-				this.setter.accept(this.box.getValue().trim());
+			final String value = this.box.getValue().trim();
+			if (value.isBlank()) {
+				return;
+			}
+			final String lowerCase = value.toLowerCase(java.util.Locale.ENGLISH);
+			if (lowerCase.endsWith(".xml") || lowerCase.endsWith(".json") || lowerCase.endsWith(".txt")) {
+				this.setter.accept(value);
+			} else {
+				// 対応していない拡張子は保存せず、入力欄へ現在の値を戻して知らせる。
+				this.box.setValue(this.getter.get());
 			}
 		}
 	}
@@ -285,6 +293,8 @@ public class GuiConfigScreen extends Screen {
 			this.yBox.setValue(Integer.toString(this.alignment.y));
 			this.xBox.setFilter(value -> value.matches("-?\\d*"));
 			this.yBox.setFilter(value -> value.matches("-?\\d*"));
+			this.xBox.setMaxLength(7);
+			this.yBox.setMaxLength(7);
 		}
 
 		@Override
@@ -293,10 +303,14 @@ public class GuiConfigScreen extends Screen {
 				return;
 			}
 			try {
-				this.alignment.x = Integer.parseInt(this.xBox.getValue());
-				this.alignment.y = Integer.parseInt(this.yBox.getValue());
+				this.alignment.x = clampOffset(Integer.parseInt(this.xBox.getValue()));
+				this.alignment.y = clampOffset(Integer.parseInt(this.yBox.getValue()));
 			} catch (NumberFormatException ignored) {
 			}
+		}
+
+		private static int clampOffset(int value) {
+			return Math.max(-10000, Math.min(10000, value));
 		}
 	}
 }

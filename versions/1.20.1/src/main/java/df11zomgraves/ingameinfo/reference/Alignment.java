@@ -2,6 +2,7 @@ package df11zomgraves.ingameinfo.reference;
 
 import java.util.Locale;
 
+import df11zomgraves.ingameinfo.InGameInfoXML;
 import df11zomgraves.ingameinfo.handler.ConfigurationHandler;
 
 public enum Alignment {
@@ -29,6 +30,8 @@ public enum Alignment {
 	private int alignment;
 	public final int defaultX;
 	public final int defaultY;
+	/** this constant's name in lower case, cached so the render path does not rebuild it per call */
+	public final String lowerCaseName;
 	public int x;
 	public int y;
 
@@ -38,35 +41,73 @@ public enum Alignment {
 		this.x = x;
 		this.y = y;
 		this.alignment = 0;
+		this.lowerCaseName = name().toLowerCase(Locale.ENGLISH);
 	}
 
-	public static Alignment parse(String str) {
-		String value = "";
-		str = str.toLowerCase(Locale.ENGLISH);
+	public static Alignment parse(final String str) {
+		if (str == null) {
+			return null;
+		}
 
-		if (str.startsWith("top"))
-			value = "TOP";
-		else if (str.startsWith("mid"))
-			value = "MIDDLE";
-		else if (str.startsWith("bot"))
-			value = "BOTTOM";
+		String rest = str.toLowerCase(Locale.ENGLISH);
+		String vertical = "MIDDLE";
+		boolean matched = false;
+		if (rest.startsWith("top")) {
+			vertical = "TOP";
+			rest = rest.substring("top".length());
+			matched = true;
+		} else if (rest.startsWith("middle")) {
+			vertical = "MIDDLE";
+			rest = rest.substring("middle".length());
+			matched = true;
+		} else if (rest.startsWith("mid")) {
+			vertical = "MIDDLE";
+			rest = rest.substring("mid".length());
+			matched = true;
+		} else if (rest.startsWith("bottom")) {
+			vertical = "BOTTOM";
+			rest = rest.substring("bottom".length());
+			matched = true;
+		} else if (rest.startsWith("bot")) {
+			vertical = "BOTTOM";
+			rest = rest.substring("bot".length());
+			matched = true;
+		}
 
-		if (str.endsWith("left"))
-			value += "LEFT";
-		else if (str.endsWith("center"))
-			value += "CENTER";
-		else if (str.endsWith("right"))
-			value += "RIGHT";
+		final String horizontal;
+		switch (rest) {
+		case "left":
+			horizontal = "LEFT";
+			matched = true;
+			break;
+		case "center":
+			horizontal = "CENTER";
+			matched = true;
+			break;
+		case "right":
+			horizontal = "RIGHT";
+			matched = true;
+			break;
+		case "":
+			horizontal = "CENTER";
+			break;
+		default:
+			return null;
+		}
+
+		if (!matched) {
+			return null;
+		}
 
 		try {
-			return valueOf(value);
+			return valueOf(vertical + horizontal);
 		} catch (final Exception e) {
 			return null;
 		}
 	}
 
 	public int getX(final int screenwidth, final int textwidth) {
-		String alignmentMiddleCenter = ConfigurationHandler.alignmentMiddleCenter.toString().toLowerCase();
+		String alignmentMiddleCenter = ConfigurationHandler.alignmentMiddleCenter.lowerCaseName;
 		switch (this.alignment & MASK_X) {
 		case LEFT:
 			return this.x;
@@ -86,7 +127,7 @@ public enum Alignment {
 	}
 
 	public int getY(final int screenheight, final int textheight) {
-		String alignmentMiddleCenter = ConfigurationHandler.alignmentMiddleCenter.toString().toLowerCase();
+		String alignmentMiddleCenter = ConfigurationHandler.alignmentMiddleCenter.lowerCaseName;
 		switch (this.alignment & MASK_Y) {
 		case TOP:
 			return this.y;
@@ -121,9 +162,11 @@ public enum Alignment {
 				final int y = Integer.parseInt(parts[1]);
 				this.x = x;
 				this.y = y;
+				return;
 			}
 		} catch (final Exception e) {
 		}
+		InGameInfoXML.logger.warn("Ignoring the malformed alignment offset '{}' for {}", str, this.name());
 	}
 
 	static {

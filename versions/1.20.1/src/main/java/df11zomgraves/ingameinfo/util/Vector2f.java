@@ -140,7 +140,12 @@ public class Vector2f {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Vector2f && equals((Vector2f) obj);
+        return obj != null && obj.getClass() == getClass() && equals((Vector2f) obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * Float.hashCode(this.x) + Float.hashCode(this.y);
     }
 
     public boolean equals(final Vector2f vec) {

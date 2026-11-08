@@ -3,6 +3,7 @@ package df11zomgraves.ingameinfo.integration;
 import df11zomgraves.ingameinfo.tag.TagRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.InteractionHand;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
@@ -15,13 +16,29 @@ public final class EnergyIntegration {
     private EnergyIntegration() {
     }
 
+    private static Player cachedPlayer;
+    private static ItemStack cachedStack;
+    private static EnergyHandler cachedStorage;
+
     private static EnergyHandler energy() {
         final Player player = Minecraft.getInstance().player;
         if (player == null) {
+            cachedPlayer = null;
+            cachedStack = null;
+            cachedStorage = null;
             return null;
         }
-        return player.getMainHandItem().getCapability(Capabilities.Energy.ITEM,
-                ItemAccess.forPlayerInteraction(player, InteractionHand.MAIN_HAND));
+        // The three energy tags are evaluated one after another for the same
+        // held stack, so only resolve the capability again when it changes.
+        // The player is part of the key because the access is built from it.
+        final ItemStack stack = player.getMainHandItem();
+        if (player != cachedPlayer || stack != cachedStack) {
+            cachedPlayer = player;
+            cachedStack = stack;
+            cachedStorage = stack.getCapability(Capabilities.Energy.ITEM,
+                    ItemAccess.forPlayerInteraction(player, InteractionHand.MAIN_HAND));
+        }
+        return cachedStorage;
     }
 
     public static class Energy extends IntegrationTag {
@@ -56,10 +73,14 @@ public final class EnergyIntegration {
         @Override
         protected String value() {
             final EnergyHandler storage = energy();
-            if (storage == null || storage.getCapacityAsInt() <= 0) {
+            if (storage == null) {
                 return "0.0";
             }
-            return String.format(Locale.ENGLISH, "%.1f", storage.getAmountAsInt() * 100.0D / storage.getCapacityAsInt());
+            final int max = storage.getCapacityAsInt();
+            if (max <= 0) {
+                return "0.0";
+            }
+            return String.format(Locale.ENGLISH, "%.1f", storage.getAmountAsInt() * 100.0D / max);
         }
     }
 

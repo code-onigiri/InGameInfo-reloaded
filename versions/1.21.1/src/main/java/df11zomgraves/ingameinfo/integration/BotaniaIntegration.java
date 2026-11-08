@@ -31,12 +31,33 @@ public final class BotaniaIntegration {
         return Minecraft.getInstance().player;
     }
 
+    private static final String[] MANA_METHODS = { "getManaItems", "getManaAccesories" };
+
+    private static long cachedManaTick = Long.MIN_VALUE;
+    private static double[] cachedMana;
+
     private static Object handler() {
         Object value = Reflect.callStatic(MANA_HANDLER, "instance");
         return value != null ? value : Reflect.staticField(MANA_HANDLER, "INSTANCE");
     }
 
     private static double[] mana() {
+        // The inventory scan is shared by the mana/maxmana/percent tags; the
+        // scanned values only change on tick boundaries, so scan once per tick.
+        final Player player = player();
+        final long tick = player != null && player.level() != null ? player.level().getGameTime() : Long.MIN_VALUE;
+        if (cachedMana != null && tick != Long.MIN_VALUE && tick == cachedManaTick) {
+            return cachedMana;
+        }
+        final double[] result = scanMana();
+        if (tick != Long.MIN_VALUE) {
+            cachedMana = result;
+            cachedManaTick = tick;
+        }
+        return result;
+    }
+
+    private static double[] scanMana() {
         double current = 0.0D;
         double maximum = 0.0D;
         final Object handler = handler();
@@ -45,7 +66,7 @@ public final class BotaniaIntegration {
             return new double[] { current, maximum };
         }
         final Set<ItemStack> seen = Collections.newSetFromMap(new IdentityHashMap<ItemStack, Boolean>());
-        for (final String method : new String[] { "getManaItems", "getManaAccesories" }) {
+        for (final String method : MANA_METHODS) {
             final Object value = Reflect.call(handler, method, player());
             if (!(value instanceof Iterable<?>)) {
                 continue;

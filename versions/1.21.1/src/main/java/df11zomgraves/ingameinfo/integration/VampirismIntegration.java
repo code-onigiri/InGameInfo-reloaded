@@ -20,8 +20,20 @@ public final class VampirismIntegration {
     private static Object vampire() {
         Object value = Reflect.callStatic(API, "vampirePlayer", player());
         if (value == null) {
-            value = Reflect.callStatic(API, "getVampirePlayer", player());
-            value = Reflect.call(value, "orElse", (Object) null);
+            value = unwrap(Reflect.callStatic(API, "getVampirePlayer", player()));
+        }
+        return value;
+    }
+
+    private static Object unwrap(final Object value) {
+        if (value == null) {
+            return null;
+        }
+        // Older API generations wrap the result in a LazyOptional, newer ones
+        // return the vampire player directly; only unwrap actual holders or
+        // the direct result would be discarded by the missing orElse call.
+        if (Reflect.call(value, "isPresent") instanceof Boolean) {
+            return Reflect.call(value, "orElse", (Object) null);
         }
         return value;
     }
@@ -30,16 +42,16 @@ public final class VampirismIntegration {
         return Reflect.call(vampire(), "getBloodStats");
     }
 
-    private static double number(final Object value) {
-        return value instanceof Number ? ((Number) value).doubleValue() : 0.0D;
+    private static int integer(final Object value) {
+        return value instanceof Number ? ((Number) value).intValue() : 0;
     }
 
-    private static double blood() {
-        return number(Reflect.call(bloodStats(), "getBloodLevel"));
+    private static int blood() {
+        return integer(Reflect.call(bloodStats(), "getBloodLevel"));
     }
 
-    private static double maxBlood() {
-        return number(Reflect.call(bloodStats(), "getMaxBlood"));
+    private static int maxBlood() {
+        return integer(Reflect.call(bloodStats(), "getMaxBlood"));
     }
 
     public static class Blood extends IntegrationTag {
@@ -49,7 +61,7 @@ public final class VampirismIntegration {
 
         @Override
         protected String value() {
-            return String.format(Locale.ENGLISH, "%.0f", blood());
+            return Integer.toString(blood());
         }
     }
 
@@ -60,7 +72,7 @@ public final class VampirismIntegration {
 
         @Override
         protected String value() {
-            return String.format(Locale.ENGLISH, "%.0f", maxBlood());
+            return Integer.toString(maxBlood());
         }
     }
 
@@ -71,8 +83,8 @@ public final class VampirismIntegration {
 
         @Override
         protected String value() {
-            final double max = maxBlood();
-            return String.format(Locale.ENGLISH, "%.1f", max <= 0.0D ? 0.0D : blood() * 100.0D / max);
+            final int max = maxBlood();
+            return String.format(Locale.ENGLISH, "%.1f", max <= 0 ? 0.0D : blood() * 100.0D / max);
         }
     }
 
@@ -83,7 +95,7 @@ public final class VampirismIntegration {
 
         @Override
         protected String value() {
-            return String.format(Locale.ENGLISH, "%.0f", number(Reflect.call(vampire(), "getLevel")));
+            return Integer.toString(integer(Reflect.call(vampire(), "getLevel")));
         }
     }
 

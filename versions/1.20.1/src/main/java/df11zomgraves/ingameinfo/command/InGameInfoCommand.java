@@ -123,22 +123,22 @@ public class InGameInfoCommand {
 		
 		// igi config healthDigit 2
 		igiCommand.then(Commands.literal("config").then(Commands.literal(Names.Config.HEALTH_DECIMAL_PLACE)
-				.then(Commands.argument(value, IntegerArgumentType.integer()).executes(
+				.then(Commands.argument(value, IntegerArgumentType.integer(0, 6)).executes(
 						source -> setDecimalPlace(Names.Config.HEALTH_DECIMAL_PLACE, IntegerArgumentType.getInteger(source, value))))));
 		
 		// igi config hungerDigit 2
 		igiCommand.then(Commands.literal("config").then(Commands.literal(Names.Config.HUNGER_DECIMAL_PLACE)
-				.then(Commands.argument(value, IntegerArgumentType.integer()).executes(
+				.then(Commands.argument(value, IntegerArgumentType.integer(0, 6)).executes(
 						source -> setDecimalPlace(Names.Config.HUNGER_DECIMAL_PLACE, IntegerArgumentType.getInteger(source, value))))));
 		
 		// igi config msptDigit 0
 		igiCommand.then(Commands.literal("config").then(Commands.literal(Names.Config.MSPT_DECIMAL_PLACE)
-				.then(Commands.argument(value, IntegerArgumentType.integer()).executes(
+				.then(Commands.argument(value, IntegerArgumentType.integer(0, 6)).executes(
 						source -> setDecimalPlace(Names.Config.MSPT_DECIMAL_PLACE, IntegerArgumentType.getInteger(source, value))))));
 		
 		// igi config tpsDigit 0
 		igiCommand.then(Commands.literal("config").then(Commands.literal(Names.Config.TPS_DECIMAL_PLACE)
-				.then(Commands.argument(value, IntegerArgumentType.integer()).executes(
+				.then(Commands.argument(value, IntegerArgumentType.integer(0, 6)).executes(
 						source -> setDecimalPlace(Names.Config.TPS_DECIMAL_PLACE, IntegerArgumentType.getInteger(source, value))))));
 		dispatcher.register(igiCommand);
 	}
@@ -242,6 +242,7 @@ public class InGameInfoCommand {
 			ConfigurationHandler.seed = seed;
 			ConfigurationHandler.applyConfiguration();
 			InGameInfoXML.seed = seed;
+			InGameInfoXML.seedSetLocally = true;
 			mc.gui.getChat().addMessage(Component.translatable(Names.Command.Message.SED_SEET_SUCCESS, seed));
 		} catch (final Exception e) {
 			mc.gui.getChat().addMessage(Component.translatable(Names.Command.Message.SED_SEET_FAILURE));
@@ -298,10 +299,8 @@ public class InGameInfoCommand {
 	
 	public static int setDecimalPlace(String config, int value) {
 		Minecraft mc = Minecraft.getInstance();
-		if (value < 0)
-			value = 0;
-		else if (value > 6)
-			value = 6;
+		// The Brigadier argument is bounded to 0..6, so out-of-range input is
+		// rejected by the parser instead of being silently clamped here.
 		if (config.equals(Names.Config.HEALTH_DECIMAL_PLACE))
 			ConfigurationHandler.healthDecimalPlace = value;
 		else if (config.equals(Names.Config.HUNGER_DECIMAL_PLACE))

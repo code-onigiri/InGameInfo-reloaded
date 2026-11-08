@@ -51,20 +51,20 @@ public class Vector2i {
         return Math.sqrt(lengthSquared());
     }
 
-    public int lengthSquared() {
-        return this.x * this.x + this.y * this.y;
+    public long lengthSquared() {
+        return (long) this.x * this.x + (long) this.y * this.y;
     }
 
     public final double lengthTo(final Vector2i vec) {
         return Math.sqrt(lengthSquaredTo(vec));
     }
 
-    public int lengthSquaredTo(final Vector2i vec) {
+    public long lengthSquaredTo(final Vector2i vec) {
         return pow2(this.x - vec.x) + pow2(this.y - vec.y);
     }
 
-    protected final int pow2(final int num) {
-        return num * num;
+    protected final long pow2(final int num) {
+        return (long) num * num;
     }
 
     public final Vector2i normalize() {
@@ -83,12 +83,12 @@ public class Vector2i {
     }
 
     public double dot(final Vector2i vec) {
-        return this.x * vec.x + this.y * vec.y;
+        return (double) this.x * vec.x + (double) this.y * vec.y;
     }
 
     public Vector2i scale(final double scale) {
-        this.x *= scale;
-        this.y *= scale;
+        this.x = (int) Math.round(this.x * scale);
+        this.y = (int) Math.round(this.y * scale);
         return this;
     }
 
@@ -139,7 +139,12 @@ public class Vector2i {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Vector2i && equals((Vector2i) obj);
+        return obj != null && obj.getClass() == getClass() && equals((Vector2i) obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * this.x + this.y;
     }
 
     public boolean equals(final Vector2i vec) {

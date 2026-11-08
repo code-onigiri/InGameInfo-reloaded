@@ -1,7 +1,7 @@
 package df11zomgraves.ingameinfo.util;
 
 public class Vector2d {
-    public static final double DOUBLE_EPSILON = 10e-6f;
+    public static final double DOUBLE_EPSILON = 1e-6;
     public double x;
     public double y;
 
@@ -126,11 +126,11 @@ public class Vector2d {
     }
 
     public Vector2f toVector2f() {
-        return new Vector2f((float) Math.floor(this.x), (float) Math.floor(this.y));
+        return new Vector2f((float) this.x, (float) this.y);
     }
 
     public Vector2f toVector2f(final Vector2f vec) {
-        return vec.set((float) Math.floor(this.x), (float) Math.floor(this.y));
+        return vec.set((float) this.x, (float) this.y);
     }
 
     @Override
@@ -140,7 +140,12 @@ public class Vector2d {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Vector2d && equals((Vector2d) obj);
+        return obj != null && obj.getClass() == getClass() && equals((Vector2d) obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * Double.hashCode(this.x) + Double.hashCode(this.y);
     }
 
     public boolean equals(final Vector2d vec) {

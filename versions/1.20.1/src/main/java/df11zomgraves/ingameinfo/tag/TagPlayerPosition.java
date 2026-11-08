@@ -129,7 +129,7 @@ public abstract class TagPlayerPosition extends Tag {
     public static class SpeedY extends TagPlayerPosition {
         @Override
         public String getValue() {
-            return String.format(Locale.ENGLISH, "%.3f", TICKS * Math.abs(playerMotion.y));
+            return String.format(Locale.ENGLISH, "%.3f", TICKS * playerMotion.y);
         }
     }
 
@@ -150,7 +150,7 @@ public abstract class TagPlayerPosition extends Tag {
     public static class Pitch extends TagPlayerPosition {
         @Override
         public String getValue() {
-            return String.format(Locale.ENGLISH, "%.2f", player.getYRot());
+            return String.format(Locale.ENGLISH, "%.2f", player.getXRot());
         }
     }
 

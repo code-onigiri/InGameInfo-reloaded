@@ -24,13 +24,22 @@ public final class IronsSpellbooksIntegration {
         return value instanceof Number ? ((Number) value).doubleValue() : 0.0D;
     }
 
+    private static Object cachedAttribute;
+    private static boolean attributeResolved;
+
     private static double maximum() {
         final Player player = player();
         if (player == null) {
             return 0.0D;
         }
-        final Object registryObject = Reflect.staticField(ATTRIBUTE_REGISTRY, "MAX_MANA");
-        final Object attribute = Reflect.call(registryObject, "get");
+        // The MAX_MANA registry object never changes once the mod is loaded,
+        // so resolve it once instead of on every evaluation.
+        if (!attributeResolved) {
+            final Object registryObject = Reflect.staticField(ATTRIBUTE_REGISTRY, "MAX_MANA");
+            cachedAttribute = Reflect.call(registryObject, "get");
+            attributeResolved = true;
+        }
+        final Object attribute = cachedAttribute;
         return attribute instanceof Attribute ? player.getAttributeValue((Attribute) attribute) : 0.0D;
     }
 

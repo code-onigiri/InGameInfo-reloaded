@@ -1,5 +1,6 @@
 package df11zomgraves.ingameinfo.tag;
 
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.world.entity.player.Player;
@@ -32,6 +33,8 @@ public abstract class TagNearbyPlayer extends Tag {
 		return 0;
 	};
 	protected static Player[] nearbyPlayers = null;
+	private static ClientLevel nearbyPlayersWorld = null;
+	private static long lastNearbyPlayersUpdate = 0L;
 	protected final int index;
 
 	public TagNearbyPlayer(final int index) {
@@ -69,18 +72,29 @@ public abstract class TagNearbyPlayer extends Tag {
 	}
 
 	protected static void updateNearbyPlayers() {
-		if (nearbyPlayers == null) {
-			final List<Player> playerList = new ArrayList<Player>();
-			for (final Player player : world.players()) {
-				if (player == Tag.player)
-					continue;
-				if (!player.isInvisible() || ConfigurationHandler.displayInvisiblePlayer)
-					playerList.add(player);
-			}
-
-			Collections.sort(playerList, PLAYER_DISTANCE_COMPARATOR);
-			nearbyPlayers = playerList.toArray(new Player[playerList.size()]);
+		if (world == null) {
+			nearbyPlayers = new Player[0];
+			nearbyPlayersWorld = null;
+			return;
 		}
+
+		final long now = System.currentTimeMillis();
+		if (nearbyPlayers != null && world == nearbyPlayersWorld && now - lastNearbyPlayersUpdate < 1000L) {
+			return;
+		}
+
+		final List<Player> playerList = new ArrayList<Player>();
+		for (final Player player : world.players()) {
+			if (player == Tag.player)
+				continue;
+			if (!player.isInvisible() || ConfigurationHandler.displayInvisiblePlayer)
+				playerList.add(player);
+		}
+
+		Collections.sort(playerList, PLAYER_DISTANCE_COMPARATOR);
+		nearbyPlayers = playerList.toArray(new Player[playerList.size()]);
+		nearbyPlayersWorld = world;
+		lastNearbyPlayersUpdate = now;
 	}
 
 	public static class Name extends TagNearbyPlayer {
@@ -106,7 +120,7 @@ public abstract class TagNearbyPlayer extends Tag {
 		@Override
 		public String getValue() {
 			updateNearbyPlayers();
-			if (nearbyPlayers.length > this.index) {
+			if (nearbyPlayers.length > this.index && player != null) {
 				return String.format(Locale.ENGLISH, "%.2f", nearbyPlayers[this.index].distanceTo(player));
 			}
 			return "-1";
@@ -128,6 +142,9 @@ public abstract class TagNearbyPlayer extends Tag {
 				}
 
 				final PlayerInfo playerInfo = connection.getPlayerInfo(nearbyPlayers[this.index].getUUID());
+				if (playerInfo == null) {
+					return "";
+				}
 
 				final InfoIcon icon = new InfoIcon(playerInfo.getSkin().texture());
 				icon.setTextureData(8, 8, 8, 8, 64, 64);

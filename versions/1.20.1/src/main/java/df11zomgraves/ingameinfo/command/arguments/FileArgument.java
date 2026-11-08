@@ -39,19 +39,24 @@ public class FileArgument implements ArgumentType<String> {
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext,
 			SuggestionsBuilder suggestionsBuilder) {
-		final File[] files = this.core.getConfigDirectory().listFiles((File dir, String name) -> {
-			return name.toLowerCase().startsWith(Names.Files.NAME.toLowerCase()) && (name.endsWith(Names.Files.EXT_XML)
-					|| name.endsWith(Names.Files.EXT_JSON) || name.endsWith(Names.Files.EXT_TXT));
-		});
-
 		final List<String> filenames = new ArrayList<String>();
-		
+
 		filenames.add("default");
-		for (final File file : files)
-			filenames.add(file.getName());
+		final File directory = this.core.getConfigDirectory();
+		if (directory != null) {
+			final File[] files = directory.listFiles((File dir, String name) -> {
+				final String lowerName = name.toLowerCase();
+				return lowerName.endsWith(Names.Files.EXT_XML) || lowerName.endsWith(Names.Files.EXT_JSON)
+						|| lowerName.endsWith(Names.Files.EXT_TXT);
+			});
+			if (files != null) {
+				for (final File file : files)
+					filenames.add(file.getName());
+			}
+		}
 		String[] filenames1 = new String[filenames.size()];
 		filenames1 = filenames.toArray(filenames1);
-		
+
 		return SharedSuggestionProvider.suggest(filenames1, suggestionsBuilder);
 	}
 

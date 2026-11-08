@@ -11,7 +11,12 @@ import df11zomgraves.ingameinfo.value.Value;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -19,22 +24,33 @@ import java.util.Map;
 public class JsonPrinter implements IPrinter {
     @Override
     public boolean print(final File file, final Map<Alignment, List<List<Value>>> format) {
+        File tempFile = null;
         try {
-            final FileWriter fileWriter = new FileWriter(file);
-            final BufferedWriter writer = new BufferedWriter(fileWriter);
+            final File directory = file.getAbsoluteFile().getParentFile();
+            tempFile = File.createTempFile("ingameinfo", ".tmp", directory);
 
             final JsonObject jsonConfig = new JsonObject();
 
             appendLines(jsonConfig, format);
 
             final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            writer.write(gson.toJson(jsonConfig));
+            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tempFile), StandardCharsets.UTF_8))) {
+                writer.write(gson.toJson(jsonConfig));
+            }
 
-            writer.close();
-            fileWriter.close();
+            try {
+                Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (final AtomicMoveNotSupportedException e) {
+                Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            tempFile = null;
             return true;
         } catch (final Exception e) {
             InGameInfoXML.logger.fatal("Could not save json configuration file!", e);
+        } finally {
+            if (tempFile != null) {
+                tempFile.delete();
+            }
         }
 
         return false;
@@ -48,9 +64,7 @@ public class JsonPrinter implements IPrinter {
 
                 appendLine(arrayLines, lists);
 
-                if (arrayLines.size() > 0) {
-                    jsonConfig.add(alignment.toString().toLowerCase(Locale.ENGLISH), arrayLines);
-                }
+                jsonConfig.add(alignment.toString().toLowerCase(Locale.ENGLISH), arrayLines);
             }
         }
     }
@@ -61,9 +75,7 @@ public class JsonPrinter implements IPrinter {
 
             appendValues(arrayLine, line);
 
-            if (arrayLine.size() > 0) {
-                jsonLines.add(arrayLine);
-            }
+            jsonLines.add(arrayLine);
         }
     }
 
@@ -77,14 +89,10 @@ public class JsonPrinter implements IPrinter {
                 appendValues(array, value.values);
                 obj.add(type, array);
             } else {
-                final String val = value.getRawValue(false);
-                if (val.matches("^-?\\d+$")) {
-                    obj.addProperty(type, Integer.valueOf(val));
-                } else if (val.matches("^-?\\d+(\\.\\d+)?$")) {
-                    obj.addProperty(type, Double.valueOf(val));
-                } else {
-                    obj.addProperty(type, val);
-                }
+                // Always write strings as strings: the parser reads them back
+                // with getAsString(), so a numeric-looking value such as
+                // "0012" must not be re-typed into a JSON number.
+                obj.addProperty(type, value.getRawValue(false));
             }
 
             jsonValues.add(obj);

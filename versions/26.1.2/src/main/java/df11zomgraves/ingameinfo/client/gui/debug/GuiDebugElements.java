@@ -126,10 +126,12 @@ public class GuiDebugElements extends Screen {
 	private void refreshValues() {
 		Tag.setWorld(this.minecraft.level);
 		Tag.setPlayer(this.minecraft.player);
-		this.values.clear();
-		for (final List<Tag> list : this.categories.values()) {
-			for (final Tag tag : list) {
-				this.values.put(displayName(tag), Tag.getValueForDebug(tag));
+		// 画面に見えている行だけを評価する。画面外の行は前回の値のままにする。
+		final int end = Math.min(this.rows.size(), this.scroll + this.visibleRows());
+		for (int i = Math.max(0, this.scroll); i < end; i++) {
+			final Row row = this.rows.get(i);
+			if (!row.header) {
+				this.values.put(row.label, Tag.getValueForDebug(row.tag));
 			}
 		}
 	}
@@ -280,20 +282,22 @@ public class GuiDebugElements extends Screen {
 		private final boolean header;
 		private final String label;
 		private final String insert;
+		private final Tag tag;
 
-		private Row(final boolean header, final String label, final String insert) {
+		private Row(final boolean header, final String label, final String insert, final Tag tag) {
 			this.header = header;
 			this.label = label;
 			this.insert = insert;
+			this.tag = tag;
 		}
 
 		private static Row header(final String label) {
-			return new Row(true, label, "");
+			return new Row(true, label, "", null);
 		}
 
 		private static Row tag(final Tag tag) {
 			final String name = displayName(tag);
-			return new Row(false, name, tag.isIndexed() ? name : tag.getRawName());
+			return new Row(false, name, tag.isIndexed() ? name : tag.getRawName(), tag);
 		}
 	}
 }

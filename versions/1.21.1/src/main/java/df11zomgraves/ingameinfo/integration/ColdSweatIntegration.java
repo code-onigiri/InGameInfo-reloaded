@@ -18,8 +18,28 @@ public final class ColdSweatIntegration {
         return Minecraft.getInstance().player;
     }
 
+    private static Object bodyTrait;
+    private static Object worldTrait;
+    private static boolean traitsResolved;
+
+    private static Object trait(final String traitName) {
+        // The Trait constants are fixed, so resolve them once; the temperature
+        // values read with them are still fetched on every evaluation.
+        if (!traitsResolved) {
+            bodyTrait = Reflect.staticField(TRAIT, "BODY");
+            worldTrait = Reflect.staticField(TRAIT, "WORLD");
+            traitsResolved = true;
+        }
+        return "BODY".equals(traitName) ? bodyTrait : worldTrait;
+    }
+
     private static double temperature(final String traitName) {
-        final Object trait = Reflect.staticField(TRAIT, traitName);
+        final Object trait = trait(traitName);
+        if (trait == null) {
+            // Without a valid trait the reflective call could match an
+            // unrelated overload; report no temperature instead.
+            return 0.0D;
+        }
         final Object value = Reflect.callStatic(TEMPERATURE, "get", player(), trait);
         return value instanceof Number ? ((Number) value).doubleValue() : 0.0D;
     }

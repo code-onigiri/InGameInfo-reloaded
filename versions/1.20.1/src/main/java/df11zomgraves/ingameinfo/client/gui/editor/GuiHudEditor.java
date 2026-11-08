@@ -245,7 +245,7 @@ public class GuiHudEditor extends Screen {
 			return;
 		}
 		try {
-			final int value = Integer.parseInt(box.getValue());
+			final int value = Math.max(-10000, Math.min(10000, Integer.parseInt(box.getValue())));
 			if (x) {
 				this.selectedAlignment.x = value;
 			} else {
@@ -464,7 +464,8 @@ public class GuiHudEditor extends Screen {
 
 	@Override
 	public void onClose() {
-		this.applyLines();
+		// ESC などで閉じても編集内容を黙って捨てないよう、Done と同じ保存を行う。
+		this.save();
 		this.minecraft.setScreen(null);
 	}
 

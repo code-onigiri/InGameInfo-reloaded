@@ -109,11 +109,11 @@ public class Vector3d extends Vector2d {
     }
 
     public Vector3f toVector3f() {
-        return new Vector3f((float) Math.floor(this.x), (float) Math.floor(this.y), (float) Math.floor(this.z));
+        return new Vector3f((float) this.x, (float) this.y, (float) this.z);
     }
 
     public Vector3f toVector3f(final Vector3f vec) {
-        return vec.set((float) Math.floor(this.x), (float) Math.floor(this.y), (float) Math.floor(this.z));
+        return vec.set((float) this.x, (float) this.y, (float) this.z);
     }
 
     @Override
@@ -123,7 +123,12 @@ public class Vector3d extends Vector2d {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Vector3d && equals((Vector3d) obj);
+        return obj != null && obj.getClass() == getClass() && equals((Vector3d) obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + Double.hashCode(this.z);
     }
 
     public boolean equals(final Vector3d vec) {

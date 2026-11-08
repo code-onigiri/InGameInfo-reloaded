@@ -31,6 +31,17 @@ public abstract class TagWorld extends Tag {
 		return "world";
 	}
 
+	/** Set once a world seed has actually been received from the server. */
+	public static volatile boolean seedReceived;
+
+	public static void setSeedReceived(final boolean received) {
+		seedReceived = received;
+	}
+
+	private static boolean seedKnown() {
+		return seedReceived || InGameInfoXML.seed != 0 || ConfigurationHandler.seed != 0;
+	}
+
 	/**
 	 * The 1.12.2 implementation read the world name from WorldInfo. In 1.20.1 the
 	 * client does not keep a world name for remote servers, so fall back to the
@@ -55,29 +66,35 @@ public abstract class TagWorld extends Tag {
 	 */
 	private static long cachedSize = -1L;
 	private static long cachedSizeAt = 0L;
+	private static Path cachedSizeRoot;
 
 	private static long getWorldSize() {
+		final MinecraftServer server = minecraft.getSingleplayerServer();
+		if (server == null) {
+			return 0L;
+		}
+		final Path root = server.getWorldPath(LevelResource.ROOT);
 		final long now = System.currentTimeMillis();
-		if (cachedSize >= 0L && now - cachedSizeAt < 5000L) {
+		// The cache is keyed on the save directory, so switching worlds never serves a stale size.
+		if (cachedSize >= 0L && root.equals(cachedSizeRoot) && now - cachedSizeAt < 5000L) {
 			return cachedSize;
 		}
 		long size = 0L;
-		final MinecraftServer server = minecraft.getSingleplayerServer();
-		if (server != null) {
-			final Path root = server.getWorldPath(LevelResource.ROOT);
-			try (final var stream = Files.walk(root)) {
-				size = stream.filter(Files::isRegularFile).mapToLong(path -> {
-					try {
-						return Files.size(path);
-					} catch (final IOException ignored) {
-						return 0L;
-					}
-				}).sum();
-			} catch (final IOException ignored) {
-			}
+		try (final var stream = Files.walk(root)) {
+			size = stream.filter(Files::isRegularFile).mapToLong(path -> {
+				try {
+					return Files.size(path);
+				} catch (final IOException ignored) {
+					return 0L;
+				}
+			}).sum();
+		} catch (final IOException ignored) {
+			// A failed walk is reported as 0 for this call but never cached as a real size.
+			return 0L;
 		}
 		cachedSize = size;
 		cachedSizeAt = now;
+		cachedSizeRoot = root;
 		return size;
 	}
 
@@ -91,7 +108,14 @@ public abstract class TagWorld extends Tag {
 	public static class SizeMB extends TagWorld {
 		@Override
 		public String getValue() {
-			return String.format(Locale.ENGLISH, "%.1f", getWorldSize() / 1048576.0);
+			final long size = getWorldSize();
+			if (size >= 1048576L) {
+				return String.format(Locale.ENGLISH, "%.1f", size / 1048576.0);
+			}
+			if (size >= 1024L) {
+				return String.format(Locale.ENGLISH, "%.1f KB", size / 1024.0);
+			}
+			return String.format(Locale.ENGLISH, "%d B", size);
 		}
 	}
 
@@ -119,8 +143,7 @@ public abstract class TagWorld extends Tag {
 	public static class LocalDifficulty extends TagWorld {
 		@Override
 		public String getValue() {
-			final long time = world.getOverworldClockTime();
-			final DifficultyInstance diff = new DifficultyInstance(world.getDifficulty(), time, time, 0.0F);
+			final DifficultyInstance diff = world.getCurrentDifficultyAt(playerPosition);
 			return String.format(Locale.ENGLISH, "%.2f", diff.getEffectiveDifficulty());
 		}
 	}
@@ -135,7 +158,7 @@ public abstract class TagWorld extends Tag {
 			if (dim.equals(Level.END)) {
 				return "the_end";
 			}
-			return dim.identifier().getPath();
+			return dim.identifier().toString();
 		}
 	}
 
@@ -175,7 +198,9 @@ public abstract class TagWorld extends Tag {
 	public static class Daytime extends TagWorld {
 		@Override
 		public String getValue() {
-			return String.valueOf(world.getSkyDarken() < 4);
+			// Daytime is a property of the world clock; sky brightness also drops for rain and thunder.
+			final long dayTime = Math.floorMod(world.getOverworldClockTime(), 24000L);
+			return String.valueOf(dayTime < 12000L);
 		}
 	}
 
@@ -239,36 +264,37 @@ public abstract class TagWorld extends Tag {
 			final boolean slimeChunk = ChunkHelper.isSlimeChunk(InGameInfoXML.seed, playerPosition);
 			final int playerPos = playerPosition.y;
 			final boolean isSwamp = world.getBiome(playerPosition).is(Biomes.SWAMP);
-			return String.valueOf(InGameInfoXML.seed != 0 && slimeChunk || isSwamp && playerPos > 50 && playerPos < 70);
+			return String.valueOf(seedKnown() && slimeChunk || isSwamp && playerPos > 50 && playerPos < 70);
 		}
 	}
 
 	public static class SlimeChunk extends TagWorld {
 		@Override
 		public String getValue() {
-			return String.valueOf(InGameInfoXML.seed != 0 && ChunkHelper.isSlimeChunk(InGameInfoXML.seed, playerPosition));
+			return String.valueOf(seedKnown() && ChunkHelper.isSlimeChunk(InGameInfoXML.seed, playerPosition));
 		}
 	}
 
 	public static class Hardcore extends TagWorld {
 		@Override
 		public String getValue() {
-			return String.valueOf(player.level().getLevelData().isHardcore());
+			return String.valueOf(world.getLevelData().isHardcore());
 		}
 	}
 
 	public static class Temperature extends TagWorld {
 		@Override
 		public String getValue() {
-			return String.format(Locale.ENGLISH, "%.0f", world.getBiome(playerPosition).value().getBaseTemperature() * 100);
+			return String.format(Locale.ENGLISH, "%.0f", world.getBiome(playerPosition).value().getModifiedClimateSettings().temperature() * 100);
 		}
 	}
 
 	public static class LocalTemperature extends TagWorld {
 		@Override
 		public String getValue() {
+			// Position-aware: the biome temperature adjusted for this position (e.g. altitude).
 			return String.format(Locale.ENGLISH, "%.2f",
-					world.getBiome(playerPosition).value().getBaseTemperature() * 100);
+					world.getBiome(playerPosition).value().getTemperature(playerPosition, world.getSeaLevel()) * 100);
 		}
 	}
 
@@ -283,7 +309,13 @@ public abstract class TagWorld extends Tag {
 	public static class TPS extends TagWorld {
 		@Override
 		public String getValue() {
-			InGameInfoXML.existMSPT = true;
+			// Merely previewing this tag in the debug inspector must not enable the network feature.
+			if (!evaluatingDebug) {
+				InGameInfoXML.existMSPT = true;
+			}
+			if (InGameInfoXML.tps < 0) {
+				return "";
+			}
 			return StringConvertUtils.getFloatDisplayFormat(InGameInfoXML.tps, ConfigurationHandler.tpsDecimalPlace);
 		}
 	}
@@ -291,7 +323,13 @@ public abstract class TagWorld extends Tag {
 	public static class MSPT extends TagWorld {
 		@Override
 		public String getValue() {
-			InGameInfoXML.existMSPT = true;
+			// Merely previewing this tag in the debug inspector must not enable the network feature.
+			if (!evaluatingDebug) {
+				InGameInfoXML.existMSPT = true;
+			}
+			if (InGameInfoXML.mspt < 0) {
+				return "";
+			}
 			return StringConvertUtils.getFloatDisplayFormat(InGameInfoXML.mspt, ConfigurationHandler.msptDecimalPlace);
 		}
 	}

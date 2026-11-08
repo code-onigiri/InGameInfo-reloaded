@@ -42,6 +42,7 @@ public abstract class ValueComplex extends Value {
 				final Operation operation = Operation.fromString(getValue(0));
 				return operation.getValue(this);
 			} catch (final Exception e) {
+				InGameInfoXML.logger.debug("Failed to evaluate operation!", e);
 				return "";
 			}
 		}
@@ -55,11 +56,11 @@ public abstract class ValueComplex extends Value {
 
 		@Override
 		public String getValue() {
-			String str = "";
+			final StringBuilder builder = new StringBuilder();
 			for (final Value val : this.values) {
-				str += replaceVariables(val.getValue());
+				builder.append(replaceVariables(val.getValue()));
 			}
-			return str;
+			return builder.toString();
 		}
 	}
 
@@ -142,6 +143,9 @@ public abstract class ValueComplex extends Value {
 	}
 
 	public static class ValueFormattedTime extends ValueComplex {
+		private String cachedFormat;
+		private SimpleDateFormat formatter;
+
 		@Override
 		public boolean isValidSize() {
 			return this.values.size() == 1;
@@ -151,7 +155,11 @@ public abstract class ValueComplex extends Value {
 		public String getValue() {
 			try {
 				final String format = getValue(0);
-				return new SimpleDateFormat(format).format(new Date());
+				if (!format.equals(this.cachedFormat)) {
+					this.formatter = new SimpleDateFormat(format);
+					this.cachedFormat = format;
+				}
+				return this.formatter.format(new Date());
 			} catch (final Exception e) {
 				return "?";
 			}
@@ -159,6 +167,9 @@ public abstract class ValueComplex extends Value {
 	}
 
 	public static class ValueFormattedNumber extends ValueComplex {
+		private String cachedFormat;
+		private DecimalFormat formatter;
+
 		@Override
 		public boolean isValidSize() {
 			return this.values.size() == 2;
@@ -168,7 +179,11 @@ public abstract class ValueComplex extends Value {
 		public String getValue() {
 			try {
 				final String format = getValue(0);
-				return new DecimalFormat(format).format(getDoubleValue(1));
+				if (!format.equals(this.cachedFormat)) {
+					this.formatter = new DecimalFormat(format);
+					this.cachedFormat = format;
+				}
+				return this.formatter.format(getDoubleValue(1));
 			} catch (final Exception e) {
 				return "?";
 			}
@@ -216,6 +231,10 @@ public abstract class ValueComplex extends Value {
 				final String line = reader.readLine();
 
 				reader.close();
+
+				if (line == null) {
+					return "";
+				}
 
 				if (line.startsWith("\uFEFF")) {
 					return line.substring(1);

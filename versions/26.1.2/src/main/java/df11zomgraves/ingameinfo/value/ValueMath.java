@@ -2,6 +2,8 @@ package df11zomgraves.ingameinfo.value;
 
 import java.util.Locale;
 
+import df11zomgraves.ingameinfo.InGameInfoXML;
+
 public abstract class ValueMath extends ValueComplex {
     @Override
     public boolean isValidSize() {
@@ -12,15 +14,16 @@ public abstract class ValueMath extends ValueComplex {
         @Override
         public String getValue() {
             try {
-                final int arg0 = getIntValue(0);
-                final int arg1 = getIntValue(1);
-                return String.valueOf(arg0 + arg1);
+                final long arg0 = getLongValue(0);
+                final long arg1 = getLongValue(1);
+                return String.valueOf(Math.addExact(arg0, arg1));
             } catch (final Exception e1) {
                 try {
                     final double arg0 = getDoubleValue(0);
                     final double arg1 = getDoubleValue(1);
                     return String.valueOf(arg0 + arg1);
                 } catch (final Exception e2) {
+                    InGameInfoXML.logger.debug("Failed to evaluate math value!", e2);
                     return "0";
                 }
             }
@@ -31,15 +34,16 @@ public abstract class ValueMath extends ValueComplex {
         @Override
         public String getValue() {
             try {
-                final int arg0 = getIntValue(0);
-                final int arg1 = getIntValue(1);
-                return String.valueOf(arg0 - arg1);
+                final long arg0 = getLongValue(0);
+                final long arg1 = getLongValue(1);
+                return String.valueOf(Math.subtractExact(arg0, arg1));
             } catch (final Exception e1) {
                 try {
                     final double arg0 = getDoubleValue(0);
                     final double arg1 = getDoubleValue(1);
                     return String.valueOf(arg0 - arg1);
                 } catch (final Exception e2) {
+                    InGameInfoXML.logger.debug("Failed to evaluate math value!", e2);
                     return "0";
                 }
             }
@@ -50,15 +54,16 @@ public abstract class ValueMath extends ValueComplex {
         @Override
         public String getValue() {
             try {
-                final int arg0 = getIntValue(0);
-                final int arg1 = getIntValue(1);
-                return String.valueOf(arg0 * arg1);
+                final long arg0 = getLongValue(0);
+                final long arg1 = getLongValue(1);
+                return String.valueOf(Math.multiplyExact(arg0, arg1));
             } catch (final Exception e1) {
                 try {
                     final double arg0 = getDoubleValue(0);
                     final double arg1 = getDoubleValue(1);
                     return String.valueOf(arg0 * arg1);
                 } catch (final Exception e2) {
+                    InGameInfoXML.logger.debug("Failed to evaluate math value!", e2);
                     return "0";
                 }
             }
@@ -71,8 +76,9 @@ public abstract class ValueMath extends ValueComplex {
             try {
                 final double arg0 = getDoubleValue(0);
                 final double arg1 = getDoubleValue(1);
-                return String.valueOf(arg0 / arg1);
+                return arg1 == 0.0 ? "0" : String.valueOf(arg0 / arg1);
             } catch (final Exception e) {
+                InGameInfoXML.logger.debug("Failed to evaluate math value!", e);
                 return "0";
             }
         }
@@ -84,12 +90,16 @@ public abstract class ValueMath extends ValueComplex {
             try {
                 final double arg0 = getDoubleValue(0);
                 final int arg1 = getIntValue(1);
-                final double dec = Math.pow(10, arg1);
                 if (arg1 > 0) {
                     return String.format(Locale.ENGLISH, "%." + arg1 + "f", arg0);
                 }
-                return String.valueOf((int) (Math.round(arg0 * dec) / dec));
+                if (arg1 == 0) {
+                    return String.valueOf(Math.round(arg0));
+                }
+                final long scale = (long) Math.pow(10, -arg1);
+                return String.valueOf(Math.round(arg0 / scale) * scale);
             } catch (final Exception e2) {
+                InGameInfoXML.logger.debug("Failed to evaluate math value!", e2);
                 return "0";
             }
         }
@@ -101,8 +111,9 @@ public abstract class ValueMath extends ValueComplex {
             try {
                 final double arg0 = getDoubleValue(0);
                 final double arg1 = getDoubleValue(1);
-                return String.valueOf(Math.round((arg0 % arg1) * 10e6) / 10e6);
+                return String.valueOf(Math.round((arg0 % arg1) * 1e6) / 1e6);
             } catch (final Exception e2) {
+                InGameInfoXML.logger.debug("Failed to evaluate math value!", e2);
                 return "0";
             }
         }
@@ -116,6 +127,7 @@ public abstract class ValueMath extends ValueComplex {
                 final int arg1 = getIntValue(1);
                 return String.valueOf(arg0 % arg1);
             } catch (final Exception e2) {
+                InGameInfoXML.logger.debug("Failed to evaluate math value!", e2);
                 return "0";
             }
         }
@@ -127,8 +139,9 @@ public abstract class ValueMath extends ValueComplex {
             try {
                 final double arg0 = getDoubleValue(0);
                 final double arg1 = getDoubleValue(1);
-                return String.valueOf(arg0 / arg1 * 100);
+                return arg1 == 0.0 ? "0" : String.valueOf(arg0 / arg1 * 100);
             } catch (final Exception e) {
+                InGameInfoXML.logger.debug("Failed to evaluate math value!", e);
                 return "0";
             }
         }

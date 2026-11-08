@@ -30,7 +30,6 @@ public class InfoItem extends Info {
 	public InfoItem(final ItemStack itemStack, final boolean large, final int x, final int y,
 			boolean forceRender) {
 		super(x, y);
-		MINECRAFT.getItemRenderer();
 		this.itemStack = itemStack;
 		this.large = large;
 		this.size = large ? 16 : 8;

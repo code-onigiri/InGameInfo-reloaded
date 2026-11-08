@@ -164,9 +164,15 @@ public final class Expression {
             case '*':
                 return a * b;
             case '/':
-                return b == 0.0 ? 0.0 : a / b;
+                if (b == 0.0) {
+                    throw new ExpressionException("Division by zero");
+                }
+                return a / b;
             case '%':
-                return b == 0.0 ? 0.0 : a % b;
+                if (b == 0.0) {
+                    throw new ExpressionException("Modulo by zero");
+                }
+                return a % b;
             default:
                 throw new ExpressionException("Unknown operator: " + operator);
         }

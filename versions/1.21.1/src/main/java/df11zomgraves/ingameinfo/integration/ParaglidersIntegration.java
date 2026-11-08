@@ -22,7 +22,11 @@ public final class ParaglidersIntegration {
     }
 
     private static double stat(final String method) {
-        final Object value = Reflect.call(stamina(), method);
+        return stat(stamina(), method);
+    }
+
+    private static double stat(final Object stamina, final String method) {
+        final Object value = Reflect.call(stamina, method);
         return value instanceof Number ? ((Number) value).doubleValue() : 0.0D;
     }
 
@@ -62,8 +66,9 @@ public final class ParaglidersIntegration {
 
         @Override
         protected String value() {
-            final double max = stat("maxStamina");
-            return String.format(Locale.ENGLISH, "%.1f", max <= 0.0D ? 0.0D : stat("stamina") * 100.0D / max);
+            final Object stamina = stamina();
+            final double max = stat(stamina, "maxStamina");
+            return String.format(Locale.ENGLISH, "%.1f", max <= 0.0D ? 0.0D : stat(stamina, "stamina") * 100.0D / max);
         }
     }
 
@@ -74,18 +79,19 @@ public final class ParaglidersIntegration {
 
         @Override
         protected String value() {
-            final Object depleted = Reflect.call(stamina(), "isDepleted");
+            final Object stamina = stamina();
+            final Object depleted = Reflect.call(stamina, "isDepleted");
             if (depleted instanceof Boolean) {
                 return (Boolean) depleted ? "true" : "false";
             }
-            return stat("stamina") <= 0.0D ? "true" : "false";
+            return stat(stamina, "stamina") <= 0.0D ? "true" : "false";
         }
     }
 
     public static void register() {
         TagRegistry.INSTANCE.register(new Stamina().setName("stamina"));
         TagRegistry.INSTANCE.register(new MaxStamina().setName("maxstamina"));
-        TagRegistry.INSTANCE.register(new StaminaPercent().setName("staminapencent"));
+        TagRegistry.INSTANCE.register(new StaminaPercent().setName("staminapercent").setAliases("staminapencent"));
         TagRegistry.INSTANCE.register(new Depleted().setName("staminadepleted"));
     }
 }

@@ -32,7 +32,11 @@ public record RequestMSPTPacket() implements CustomPacketPayload {
 			final long[] times = server.getTickTime(player.level().dimension());
 			if (times != null) {
 				final double mspt = MathUtils.mean(times) * 1.0E-6D;
-				PacketDistributor.sendToPlayer(player, new ResponseMSPTPacket(mspt));
+				// A mean of 0 means no ticks have been measured yet; sending it
+				// would make the client publish a fake 20 TPS, so stay silent
+				// and let the client keep its "no data" state.
+				if (mspt > 0)
+					PacketDistributor.sendToPlayer(player, new ResponseMSPTPacket(mspt));
 			}
 		});
 	}

@@ -31,6 +31,7 @@ public class ConfigurationHandler {
 	public static final ModConfigSpec.ConfigValue<Boolean> SHOW_OVERLAY_ITEM_ICONS_DEFAULT;
 	public static final ModConfigSpec.ConfigValue<Boolean> NUMERIC_AMPLIFIER_DEFAULT;
 	public static final ModConfigSpec.ConfigValue<Boolean> SEND_SEED_TO_CHAT_DEFAULT;
+	public static final ModConfigSpec.ConfigValue<Boolean> SHARE_SEED_WITH_CLIENTS_DEFAULT;
 	public static final ModConfigSpec.ConfigValue<Boolean> SHOW_SURVIVAL_HUD_DEFAULT;
 	// NightConfig parses TOML integers as Integer, so a ConfigValue<Long> never
 	// matches the value read back from disk. NeoForge then rewrites the file on
@@ -64,6 +65,9 @@ public class ConfigurationHandler {
 	public static boolean showInChat;
 	public static boolean numericAmplifier;
 	public static boolean sendSeedToChat;
+	// Defaults to true so a side where this client config never loads (a dedicated
+	// server) keeps answering seed requests; onLoad overwrites it from the config.
+	public static boolean shareSeedWithClients = true;
 	public static boolean showSurvivalHUD;
 	public static long seed;
 	public static Alignment alignmentMiddleCenter;
@@ -86,6 +90,9 @@ public class ConfigurationHandler {
 				.define(Names.Config.SHOW_OVERLAY_ITEM_ICONS, true);
 		NUMERIC_AMPLIFIER_DEFAULT = BUILDER.comment(Names.Config.NUMERIC_AMPLIFIER_DESC).define(Names.Config.NUMERIC_AMPLIFIER, false);
 		SEND_SEED_TO_CHAT_DEFAULT = BUILDER.comment(Names.Config.SEND_SEED_TO_CHAT_DESC).define(Names.Config.SEND_SEED_TO_CHAT, false);
+		SHARE_SEED_WITH_CLIENTS_DEFAULT = BUILDER
+				.comment("Share the world seed with clients running this mod when they ask for it. Disable to keep the seed secret from clients.")
+				.define("shareSeedWithClients", true);
 		SEED_DEFAULT = BUILDER.comment(Names.Config.DEFAULT_SEED_IN_SERVER_DESC).define(Names.Config.DEFAULT_SEED_IN_SERVER, "0");
 		ALIGNMENT_MIDDLECENTER_DEFAULT = BUILDER.comment(Names.Config.ALIGNMENT_MIDDLECENTER_DESC)
 				.defineEnum(Names.Config.ALIGNMENT_MIDDLECENTER, Alignment.MIDDLECENTER);
@@ -124,15 +131,15 @@ public class ConfigurationHandler {
 		// live alignment there would discard edits made in the HUD editor, so only
 		// take the stored offsets on the initial load.
 		if (!(event instanceof ModConfigEvent.Reloading)) {
-			Alignment.TOPLEFT.setXY(ALIGN_TOP_LEFT.get());
-			Alignment.TOPCENTER.setXY(ALIGN_TOP_CENTER.get());
-			Alignment.TOPRIGHT.setXY(ALIGN_TOP_RIGHT.get());
-			Alignment.MIDDLELEFT.setXY(ALIGN_MIDDLE_LEFT.get());
-			Alignment.MIDDLECENTER.setXY(ALIGN_CENTER.get());
-			Alignment.MIDDLERIGHT.setXY(ALIGN_MIDDLE_RIGHT.get());
-			Alignment.BOTTOMLEFT.setXY(ALIGN_BOTTOM_LEFT.get());
-			Alignment.BOTTOMCENTER.setXY(ALIGN_BOTTOM_CENTER.get());
-			Alignment.BOTTOMRIGHT.setXY(ALIGN_BOTTOM_RIGHT.get());
+			applyAlignmentOffset(Alignment.TOPLEFT, ALIGN_TOP_LEFT);
+			applyAlignmentOffset(Alignment.TOPCENTER, ALIGN_TOP_CENTER);
+			applyAlignmentOffset(Alignment.TOPRIGHT, ALIGN_TOP_RIGHT);
+			applyAlignmentOffset(Alignment.MIDDLELEFT, ALIGN_MIDDLE_LEFT);
+			applyAlignmentOffset(Alignment.MIDDLECENTER, ALIGN_CENTER);
+			applyAlignmentOffset(Alignment.MIDDLERIGHT, ALIGN_MIDDLE_RIGHT);
+			applyAlignmentOffset(Alignment.BOTTOMLEFT, ALIGN_BOTTOM_LEFT);
+			applyAlignmentOffset(Alignment.BOTTOMCENTER, ALIGN_BOTTOM_CENTER);
+			applyAlignmentOffset(Alignment.BOTTOMRIGHT, ALIGN_BOTTOM_RIGHT);
 		}
 		showOverlayItemIcons = SHOW_OVERLAY_ITEM_ICONS_DEFAULT.get();
 		showOverlayPotions = SHOW_OVERLAY_POTIONS_DEFAULT.get();
@@ -144,6 +151,7 @@ public class ConfigurationHandler {
 		showInChat = SHOW_IN_CHAT_DEFAULT.get();
 		numericAmplifier = NUMERIC_AMPLIFIER_DEFAULT.get();
 		sendSeedToChat = SEND_SEED_TO_CHAT_DEFAULT.get();
+		shareSeedWithClients = SHARE_SEED_WITH_CLIENTS_DEFAULT.get();
 		showSurvivalHUD = SHOW_SURVIVAL_HUD_DEFAULT.get();
 		healthDecimalPlace = HEALTH_DECIMAL_PLACE_DEFAULT.get();
 		hungerDecimalPlace = HUNGER_DECIMAL_PLACE_DEFAULT.get();
@@ -161,6 +169,37 @@ public class ConfigurationHandler {
 
 		if (event instanceof ModConfigEvent.Reloading && InGameInfoCore.INSTANCE.getConfigDirectory() != null) {
 			InGameInfoCore.INSTANCE.requestReload();
+		}
+	}
+
+	/**
+	 * Applies one stored alignment offset after validating it, so a malformed
+	 * value in the config file is logged instead of being silently ignored by
+	 * {@link Alignment#setXY(String)} on the render path.
+	 */
+	private static void applyAlignmentOffset(final Alignment alignment, final ModConfigSpec.ConfigValue<String> value) {
+		final String raw = value.get();
+		if (isValidAlignmentOffset(raw)) {
+			alignment.setXY(raw);
+		} else {
+			InGameInfoXML.logger.warn(
+					"Invalid alignment offset '{}', expected '<x> <y>' with integer values; keeping the current offset",
+					raw);
+		}
+	}
+
+	private static boolean isValidAlignmentOffset(final String raw) {
+		if (raw == null)
+			return false;
+		final String[] parts = raw.split(" ");
+		if (parts.length != 2)
+			return false;
+		try {
+			Integer.parseInt(parts[0]);
+			Integer.parseInt(parts[1]);
+			return true;
+		} catch (final NumberFormatException e) {
+			return false;
 		}
 	}
 
@@ -211,6 +250,7 @@ public class ConfigurationHandler {
 		ALIGNMENT_MIDDLECENTER_DEFAULT.set(alignmentMiddleCenter);
 		SEED_DEFAULT.set(Long.toString(seed));
 		SEND_SEED_TO_CHAT_DEFAULT.set(sendSeedToChat);
+		SHARE_SEED_WITH_CLIENTS_DEFAULT.set(shareSeedWithClients);
 		SHOW_SURVIVAL_HUD_DEFAULT.set(showSurvivalHUD);
 		HEALTH_DECIMAL_PLACE_DEFAULT.set(healthDecimalPlace);
 		HUNGER_DECIMAL_PLACE_DEFAULT.set(hungerDecimalPlace);

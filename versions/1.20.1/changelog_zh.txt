@@ -1,3 +1,17 @@
+InGameInfo XML 2.9.2.105，Release，2026/11/08
+通用
+	1.修复 pitch 标签显示 yaw 的问题，并修复 daytime、dimension、localtemperature、speedy 等多个标签的返回值错误。
+	2.修复附近玩家与药水效果标签停留在首次快照的问题，现在会在游戏过程中刷新。
+	3.修复 AE2 集成在一次数据包发送失败后整个会话被禁用的问题，并修复丢失一次 MSPT 响应导致 tps/mspt 标签冻结的问题。
+	4.为可选模组集成使用的反射查找添加缓存，不再每帧重复解析。
+	5.修复 HUD 配置保存/加载时的数据丢失：形似数字的字符串不再被改写为数字，文件统一以 UTF-8 写入，写入失败不再截断现有配置，损坏的配置也不再清空当前显示的 HUD。
+	6.校验 /igi load 与设置界面中的 HUD 文件名（拒绝路径穿越），网络数据包改为可选注册（客户端可以加入未安装本模组的服务器），并新增服务器选项 shareSeedWithClients。
+	7.修复 staminapercent 标签名（拼写错误的 staminapencent 保留为别名），并正确显示 V 级以上的药水效果等级。
+1.20.1
+	1.修复客户端 Ticker 每 tick 运行两次的问题，配置重载改为在渲染线程执行。
+26.1.2
+	1.恢复 localdifficulty 的位置相关计算，以及 wet 标签的气泡柱判定。
+
 InGameInfo XML 2.9.2.104，Release，2026/10/24
 通用
 	1.将模组 ID 改为 ingameinforeloaded，并在首次启动时迁移现有的 ingameinfoxml-client.toml。

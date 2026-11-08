@@ -25,18 +25,34 @@ public final class IronsSpellbooksIntegration {
         return value instanceof Number ? ((Number) value).doubleValue() : 0.0D;
     }
 
+    private static Object cachedAttribute;
+    private static boolean attributeResolved;
+
     private static double maximum() {
         final Player player = player();
         if (player == null) {
             return 0.0D;
         }
-        final Object registryObject = Reflect.staticField(ATTRIBUTE_REGISTRY, "MAX_MANA");
-        final Object attribute = Reflect.call(registryObject, "get");
+        // The MAX_MANA registry object never changes once the mod is loaded,
+        // so resolve it once instead of on every evaluation.
+        if (!attributeResolved) {
+            final Object registryObject = Reflect.staticField(ATTRIBUTE_REGISTRY, "MAX_MANA");
+            cachedAttribute = Reflect.call(registryObject, "get");
+            attributeResolved = true;
+        }
+        final Object attribute = cachedAttribute;
         if (attribute instanceof Holder<?> holder && holder.value() instanceof Attribute)
-            return player.getAttributeValue((Holder<Attribute>) holder);
+            return player.getAttributeValue(asAttributeHolder(holder));
         if (attribute instanceof Attribute value)
             return player.getAttributeValue(Holder.direct(value));
         return 0.0D;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Holder<Attribute> asAttributeHolder(final Holder<?> holder) {
+        // Callers have checked holder.value() instanceof Attribute; the
+        // registry only ever registers Attribute instances under MAX_MANA.
+        return (Holder<Attribute>) holder;
     }
 
     public static class Mana extends IntegrationTag {

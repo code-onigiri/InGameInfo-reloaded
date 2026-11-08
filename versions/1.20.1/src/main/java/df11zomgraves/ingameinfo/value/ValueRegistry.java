@@ -16,17 +16,16 @@ public class ValueRegistry {
     private Map<Class<? extends Value>, String> classStringMap = new HashMap<Class<? extends Value>, String>();
 
     private void register(final String name, final Value value, final boolean isAlias) {
-        if (this.stringValueMap.containsKey(name)) {
-        	InGameInfoXML.logger.error("Duplicate value key '" + name + "'!");
-            return;
-        }
-
         if (name == null) {
         	InGameInfoXML.logger.error("Value name cannot be null!");
             return;
         }
 
         final String nameLowerCase = name.toLowerCase(Locale.ENGLISH);
+        if (this.stringValueMap.containsKey(nameLowerCase)) {
+        	InGameInfoXML.logger.error("Duplicate value key '" + name + "'!");
+            return;
+        }
         this.stringValueMap.put(nameLowerCase, value);
         this.stringClassMap.put(nameLowerCase, value.getClass());
         if (!isAlias) {
@@ -56,11 +55,18 @@ public class ValueRegistry {
     }
 
     public Value forName(String name) {
+        if (name == null) {
+            if (!isQuiet()) {
+                InGameInfoXML.logger.error("Failed to create an instance for null!");
+            }
+            return new ValueSimple.ValueInvalid();
+        }
+
         name = name.toLowerCase(Locale.ENGLISH);
         try {
             final Class<? extends Value> clazz = this.stringClassMap.get(name);
             if (clazz != null) {
-                final Value value = clazz.newInstance();
+                final Value value = clazz.getDeclaredConstructor().newInstance();
                 if (value != null) {
                     return value;
                 }

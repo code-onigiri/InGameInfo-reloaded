@@ -18,7 +18,9 @@ public final class PacketHandler {
 	}
 
 	private static void register(final RegisterPayloadHandlersEvent event) {
-		final PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
+		// Optional: a client must still be able to join a server that does not have
+		// this mod (the seed/MSPT fallback design assumes such servers exist).
+		final PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION).optional();
 		registrar.playToServer(RequestSeedPacket.TYPE, RequestSeedPacket.STREAM_CODEC, RequestSeedPacket::handle);
 		registrar.playToClient(ResponseSeedPacket.TYPE, ResponseSeedPacket.STREAM_CODEC, ResponseSeedPacket::handle);
 		registrar.playToServer(RequestMSPTPacket.TYPE, RequestMSPTPacket.STREAM_CODEC, RequestMSPTPacket::handle);

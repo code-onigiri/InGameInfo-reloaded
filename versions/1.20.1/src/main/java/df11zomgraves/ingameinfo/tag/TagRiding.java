@@ -24,6 +24,9 @@ public abstract class TagRiding extends Tag {
 	public static class IsHorse extends TagRiding {
 		@Override
 		public String getValue() {
+			if (player == null) {
+				return "";
+			}
 			return String.valueOf(player.getVehicle() instanceof AbstractHorse);
 		}
 	}
@@ -31,6 +34,9 @@ public abstract class TagRiding extends Tag {
 	public static class HorseHealth extends TagRiding {
 		@Override
 		public String getValue() {
+			if (player == null) {
+				return "";
+			}
 			final Entity ridingEntity = player.getVehicle();
 			if (ridingEntity instanceof Mob) {
 				float mobHealth = ((Mob) ridingEntity).getHealth();
@@ -43,6 +49,9 @@ public abstract class TagRiding extends Tag {
 	public static class HorseMaxHealth extends TagRiding {
 		@Override
 		public String getValue() {
+			if (player == null) {
+				return "";
+			}
 			final Entity ridingEntity = player.getVehicle();
 			if (ridingEntity instanceof Mob) {
 				float mobHealth = ((Mob) ridingEntity).getMaxHealth();
@@ -55,6 +64,9 @@ public abstract class TagRiding extends Tag {
 	public static class HorseSpeed extends TagRiding {
 		@Override
 		public String getValue() {
+			if (player == null) {
+				return "";
+			}
 			final Entity ridingEntity = player.getVehicle();
 			if (ridingEntity instanceof AbstractHorse) {
 				return String.format(Locale.ENGLISH, "%.3f",
@@ -94,6 +106,9 @@ public abstract class TagRiding extends Tag {
 
 		@Override
 		public String getValue() {
+			if (player == null) {
+				return "";
+			}
 			final Entity ridingEntity = player.getVehicle();
 			if (ridingEntity instanceof AbstractHorse) {
 				return String.format(Locale.ENGLISH, "%.3f", getJumpHeight((AbstractHorse) ridingEntity));

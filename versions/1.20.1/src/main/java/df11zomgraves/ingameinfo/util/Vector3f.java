@@ -123,7 +123,12 @@ public class Vector3f extends Vector2f {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Vector3f && equals((Vector3f) obj);
+        return obj != null && obj.getClass() == getClass() && equals((Vector3f) obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + Float.hashCode(this.z);
     }
 
     public boolean equals(final Vector3f vec) {

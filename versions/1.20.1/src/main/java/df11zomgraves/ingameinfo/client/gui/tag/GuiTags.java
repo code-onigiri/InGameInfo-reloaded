@@ -94,8 +94,7 @@ public class GuiTags extends Screen {
 			for (Map.Entry<String, List<TagEntry>> category : categories.entrySet()) {
 				List<TagEntry> matches = new ArrayList<>();
 				for (TagEntry tag : category.getValue()) {
-					if (tag.name.toLowerCase(Locale.ENGLISH).contains(pattern)
-							|| tag.description.toLowerCase(Locale.ENGLISH).contains(pattern)) {
+					if (tag.nameLower.contains(pattern) || tag.descriptionLower.contains(pattern)) {
 						matches.add(tag);
 					}
 				}
@@ -145,12 +144,16 @@ public class GuiTags extends Screen {
 
 		class TagEntry extends Entry {
 			private final String name;
+			private final String nameLower;
 			private final String description;
+			private final String descriptionLower;
 			private final String insertName;
 
 			TagEntry(String name, String description, String insertName) {
 				this.name = name;
+				this.nameLower = name.toLowerCase(Locale.ENGLISH);
 				this.description = description;
+				this.descriptionLower = description.toLowerCase(Locale.ENGLISH);
 				this.insertName = insertName;
 			}
 
@@ -167,8 +170,10 @@ public class GuiTags extends Screen {
 			@Override
 			public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height,
 					int mouseX, int mouseY, boolean hovering, float partialTick) {
-				guiGraphics.drawString(TagList.this.minecraft.font, this.name, left, top + 7, 0xFFFFFF);
-				guiGraphics.drawString(TagList.this.minecraft.font, this.description, left + 150, top + 7, 0xA0A0A0);
+				final net.minecraft.client.gui.Font font = TagList.this.minecraft.font;
+				guiGraphics.drawString(font, this.name, left, top + 7, 0xFFFFFF);
+				guiGraphics.drawString(font, font.plainSubstrByWidth(this.description, Math.max(0, width - 150)),
+						left + 150, top + 7, 0xA0A0A0);
 			}
 
 			@Override

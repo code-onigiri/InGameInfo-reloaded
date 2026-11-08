@@ -5,8 +5,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /** Tinkers' Construct tool tags for the held tool. */
 public final class TinkersIntegration {
@@ -16,6 +18,10 @@ public final class TinkersIntegration {
     private TinkersIntegration() {
     }
 
+    private static ItemStack cachedStack;
+    private static Object cachedTool;
+    private static final Map<String, Object> STAT_FIELDS = new HashMap<String, Object>();
+
     private static Object tool() {
         final Player player = Minecraft.getInstance().player;
         if (player == null) {
@@ -23,9 +29,25 @@ public final class TinkersIntegration {
         }
         final ItemStack stack = player.getMainHandItem();
         if (stack.isEmpty()) {
+            cachedStack = null;
+            cachedTool = null;
             return null;
         }
-        return Reflect.callStatic(TOOL_STACK, "from", stack);
+        // ToolStack wraps the live stack, so resolving once per held stack is
+        // enough; the values read from it (durability etc.) stay current.
+        if (stack == cachedStack) {
+            return cachedTool;
+        }
+        Object tool = Reflect.callStatic(TOOL_STACK, "from", stack);
+        final Object empty = Reflect.staticField(TOOL_STACK, "EMPTY");
+        if (tool != null && empty != null && tool == empty) {
+            // ToolStack.from returns EMPTY for non-tool items; treat it as no
+            // tool instead of running reflective calls on the placeholder.
+            tool = null;
+        }
+        cachedStack = stack;
+        cachedTool = tool;
+        return tool;
     }
 
     private static Object stat(final String name) {
@@ -34,7 +56,10 @@ public final class TinkersIntegration {
             return null;
         }
         final Object stats = Reflect.call(tool, "getStats");
-        final Object stat = Reflect.staticField(TOOL_STATS, name);
+        if (!STAT_FIELDS.containsKey(name)) {
+            STAT_FIELDS.put(name, Reflect.staticField(TOOL_STATS, name));
+        }
+        final Object stat = STAT_FIELDS.get(name);
         return stat == null ? null : Reflect.call(stats, "get", stat);
     }
 
@@ -56,6 +81,9 @@ public final class TinkersIntegration {
 
     private static int modifiers() {
         final Object modifiers = Reflect.call(tool(), "getModifiers");
+        if (modifiers instanceof List<?>) {
+            return ((List<?>) modifiers).size();
+        }
         final Object list = Reflect.call(modifiers, "getModifiers");
         return list instanceof List<?> ? ((List<?>) list).size() : 0;
     }
